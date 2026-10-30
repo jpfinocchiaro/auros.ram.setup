@@ -1,0 +1,98 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Auros.Ram.App.ViewModels"
+             xmlns:r="using:Auros.Ram.App.Resources"
+             x:Class="Auros.Ram.App.Views.ReportsView"
+             x:DataType="vm:ReportsViewModel">
+  <TabControl Margin="8,4" Padding="0,8,0,0">
+    <!-- RF-16: Ficha resumen de oportunidades de mejora -->
+    <TabItem Header="{x:Static r:Strings.Reports_Summary}">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
+          <Button Content="{x:Static r:Strings.Reports_ExportPdf}" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="PdfSummary" />
+          <Button Content="{x:Static r:Strings.Matrix_ExportXlsx}" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="Xlsx" />
+          <Button Content="{x:Static r:Strings.Reports_ExportCsv}" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="CsvRisks" />
+        </StackPanel>
+        <Border Classes="card" Padding="0">
+          <DockPanel>
+            <Grid DockPanel.Dock="Top" ColumnDefinitions="44,2*,3*,120,120,120" Margin="12,8">
+              <TextBlock Classes="label" Text="N°" />
+              <TextBlock Grid.Column="1" Classes="label" Text="{x:Static r:Strings.Risks_ColRisk}" />
+              <TextBlock Grid.Column="2" Classes="label" Text="{x:Static r:Strings.Risk_Short}" />
+              <TextBlock Grid.Column="3" Classes="label" Text="{x:Static r:Strings.ScaleType_Risk}" />
+              <TextBlock Grid.Column="4" Classes="label" Text="{x:Static r:Strings.ScaleType_Value}" />
+              <TextBlock Grid.Column="5" Classes="label" Text="{x:Static r:Strings.Risks_DifficultyShort}" />
+            </Grid>
+            <ListBox ItemsSource="{Binding Items}" Background="Transparent">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:ReportItem">
+                  <Grid ColumnDefinitions="44,2*,3*,120,120,120" Margin="0,4">
+                    <TextBlock Text="{Binding Number}" FontWeight="SemiBold" />
+                    <TextBlock Grid.Column="1" Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,12,0" />
+                    <TextBlock Grid.Column="2" Text="{Binding ShortDescription}" TextWrapping="Wrap" Margin="0,0,12,0" />
+                    <ContentControl Grid.Column="3" Content="{Binding RiskLevel}" VerticalAlignment="Top" />
+                    <ContentControl Grid.Column="4" Content="{Binding ValueLevel}" VerticalAlignment="Top" />
+                    <ContentControl Grid.Column="5" Content="{Binding DifficultyLevel}" VerticalAlignment="Top" />
+                  </Grid>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </DockPanel>
+        </Border>
+      </DockPanel>
+    </TabItem>
+
+    <!-- RF-17: Ficha detallada por riesgo -->
+    <TabItem Header="{x:Static r:Strings.Reports_Detail}">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
+          <Button Content="{x:Static r:Strings.Reports_ExportDetailPdf}" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="PdfDetail" />
+        </StackPanel>
+        <Grid ColumnDefinitions="300,12,*">
+          <Border Classes="card" Padding="0">
+            <ListBox ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" Background="Transparent">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:ReportItem">
+                  <DockPanel>
+                    <Border DockPanel.Dock="Left" Width="6" Background="{Binding RiskLevel.Background}" CornerRadius="2" Margin="0,0,8,0" />
+                    <TextBlock Text="{Binding Heading}" TextWrapping="Wrap" />
+                  </DockPanel>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </Border>
+          <Border Grid.Column="2" Classes="card">
+            <ScrollViewer>
+              <StackPanel Spacing="12" DataContext="{Binding Selected}" x:DataType="vm:ReportItem">
+                <TextBlock Classes="h1" TextWrapping="Wrap" Text="{Binding Heading}" />
+                <TextBlock Classes="muted">
+                  <Run Text="{x:Static r:Strings.Project_Name}" /><Run Text=": " />
+                  <Run Text="{Binding $parent[UserControl].((vm:ReportsViewModel)DataContext).ProjectName, Mode=OneWay}" />
+                  <Run Text="   " />
+                  <Run Text="{x:Static r:Strings.Project_Client}" /><Run Text=": " />
+                  <Run Text="{Binding $parent[UserControl].((vm:ReportsViewModel)DataContext).ClientName, Mode=OneWay}" />
+                </TextBlock>
+                <ItemsControl ItemsSource="{Binding Dimensions}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:DetailDimension">
+                      <Grid ColumnDefinitions="240,140,*" Margin="0,0,0,8">
+                        <TextBlock Text="{Binding Label}" FontWeight="SemiBold" VerticalAlignment="Top" TextWrapping="Wrap" Margin="0,0,12,0" />
+                        <ContentControl Grid.Column="1" Content="{Binding Level}" VerticalAlignment="Top" />
+                        <TextBlock Grid.Column="2" Text="{Binding Justification}" TextWrapping="Wrap"
+                                   FontStyle="{Binding HasJustification, Converter={x:Static vm:Converters.ItalicUnless}}" />
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock Classes="h2" Text="{x:Static r:Strings.Risk_Short}" />
+                <SelectableTextBlock Text="{Binding ShortDescription}" TextWrapping="Wrap" />
+                <TextBlock Classes="h2" Text="{x:Static r:Strings.Risk_Long}" />
+                <SelectableTextBlock Text="{Binding LongDescription}" TextWrapping="Wrap" />
+              </StackPanel>
+            </ScrollViewer>
+          </Border>
+        </Grid>
+      </DockPanel>
+    </TabItem>
+  </TabControl>
+</UserControl>

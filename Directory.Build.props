@@ -1,0 +1,28 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <Version>0.1.0</Version>
+    <Company>Auros</Company>
+    <Product>auros.ram</Product>
+    <Copyright>© 2026 Auros</Copyright>
+    <NeutralLanguage>es</NeutralLanguage>
+    <SatelliteResourceLanguages>es;en;pt</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <!--
+    Salidas de compilación (bin/obj) en artifacts/. Si el repositorio está dentro de una carpeta
+    sincronizada (Dropbox, OneDrive), se mandan fuera para que el sincronizador no bloquee archivos.
+    Se puede forzar otra ubicación con la variable de entorno AUROS_ARTIFACTS.
+  -->
+  <PropertyGroup>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <ArtifactsPath Condition="'$(AUROS_ARTIFACTS)' != ''">$(AUROS_ARTIFACTS)</ArtifactsPath>
+    <ArtifactsPath Condition="'$(ArtifactsPath)' == '' And '$(LOCALAPPDATA)' != '' And ($(MSBuildThisFileDirectory.Contains('Dropbox')) Or $(MSBuildThisFileDirectory.Contains('OneDrive')))">$(LOCALAPPDATA)/auros.ram-build</ArtifactsPath>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,98 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Auros.Ram.App.ViewModels"
+        xmlns:r="using:Auros.Ram.App.Resources"
+        x:Class="Auros.Ram.App.Views.RiskEditorWindow"
+        x:DataType="vm:RiskEditorViewModel"
+        Title="{Binding WindowTitle}"
+        Width="880" Height="720" MinWidth="700" MinHeight="560"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource SurfaceAltBrush}">
+  <DockPanel Margin="16">
+    <StackPanel DockPanel.Dock="Bottom" Spacing="8" Margin="0,12,0,0">
+      <TextBlock Classes="error" Text="{Binding Error}" IsVisible="{Binding Error, Converter={x:Static ObjectConverters.IsNotNull}}" />
+      <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+        <Button Content="{x:Static r:Strings.Common_Cancel}" IsCancel="True" Click="OnCancel" />
+        <Button Classes="accent" Content="{x:Static r:Strings.Common_Save}" Command="{Binding SaveCommand}" />
+      </StackPanel>
+    </StackPanel>
+
+    <ScrollViewer>
+      <StackPanel Spacing="14" Margin="0,0,12,0">
+        <StackPanel>
+          <DockPanel>
+            <TextBlock DockPanel.Dock="Right" Classes="muted" FontSize="12" Text="{Binding TitleCounter}" />
+            <TextBlock Classes="label" Text="{x:Static r:Strings.Risk_Title}" />
+          </DockPanel>
+          <TextBox x:Name="TitleBox" Text="{Binding Title}" MaxLength="{Binding TitleMax}" />
+        </StackPanel>
+        <StackPanel>
+          <DockPanel>
+            <TextBlock DockPanel.Dock="Right" Classes="muted" FontSize="12" Text="{Binding ShortCounter}" />
+            <TextBlock Classes="label" Text="{x:Static r:Strings.Risk_ShortHint}" />
+          </DockPanel>
+          <TextBox Text="{Binding ShortDescription}" MaxLength="{Binding ShortMax}" AcceptsReturn="True" TextWrapping="Wrap" Height="64" />
+        </StackPanel>
+        <StackPanel>
+          <TextBlock Classes="label" Text="{x:Static r:Strings.Risk_LongHint}" />
+          <TextBox Text="{Binding LongDescription}" AcceptsReturn="True" TextWrapping="Wrap" Height="130" />
+        </StackPanel>
+
+        <!-- RF-10: cada nivel se elige con botones de color, con su justificación debajo -->
+        <ItemsControl ItemsSource="{Binding Dimensions}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:DimensionEditor">
+              <Border Classes="card" Margin="0,0,0,10" Padding="12">
+                <StackPanel Spacing="8">
+                  <TextBlock>
+                    <Run Text="{Binding Label, Mode=OneWay}" FontWeight="SemiBold" />
+                    <Run Text="{Binding ScaleName, StringFormat=' ({0})', Mode=OneWay}" Foreground="{DynamicResource MutedTextBrush}" />
+                    <Run Text=" — " Foreground="{DynamicResource MutedTextBrush}" />
+                    <Run Text="{Binding SelectedText, Mode=OneWay}" FontWeight="SemiBold" />
+                  </TextBlock>
+                  <ItemsControl ItemsSource="{Binding Options}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:LevelOption">
+                        <ToggleButton IsChecked="{Binding IsSelected, Mode=OneWay}" Command="{Binding SelectCommand}"
+                                      Background="{Binding Chip.Background}" Margin="0,0,8,6" Padding="12,6" MinWidth="96"
+                                      BorderThickness="3" Classes="levelOption">
+                          <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="✓" FontWeight="Bold" Foreground="{Binding Chip.Foreground}" IsVisible="{Binding IsSelected}" />
+                            <TextBlock Text="{Binding Chip.Name}" FontWeight="SemiBold" Foreground="{Binding Chip.Foreground}" />
+                          </StackPanel>
+                        </ToggleButton>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                  <TextBox Text="{Binding Justification}" AcceptsReturn="True" TextWrapping="Wrap" Height="56"
+                           Watermark="{x:Static r:Strings.Risk_JustificationHint}" />
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </ScrollViewer>
+  </DockPanel>
+
+  <Window.Styles>
+    <!-- El nivel elegido se marca con borde grueso y ✓, no solo con color (RNF-46). -->
+    <Style Selector="ToggleButton.levelOption">
+      <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+    <Style Selector="ToggleButton.levelOption:checked /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+      <Setter Property="Background" Value="{Binding $parent[ToggleButton].Background}" />
+    </Style>
+    <Style Selector="ToggleButton.levelOption:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{Binding $parent[ToggleButton].Background}" />
+      <Setter Property="Opacity" Value="0.85" />
+    </Style>
+    <Style Selector="ToggleButton.levelOption:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+    </Style>
+  </Window.Styles>
+</Window>

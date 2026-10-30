@@ -1,0 +1,12 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Auros.Ram.App.Views.MessageWindow"
+        Width="480" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource SurfaceAltBrush}">
+  <StackPanel Margin="20" Spacing="16">
+    <TextBlock x:Name="Heading" Classes="h2" TextWrapping="Wrap" />
+    <SelectableTextBlock x:Name="Body" TextWrapping="Wrap" />
+    <StackPanel x:Name="Buttons" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" />
+  </StackPanel>
+</Window>

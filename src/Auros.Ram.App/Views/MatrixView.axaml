@@ -1,0 +1,122 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Auros.Ram.App.ViewModels"
+             xmlns:r="using:Auros.Ram.App.Resources"
+             x:Class="Auros.Ram.App.Views.MatrixView"
+             x:DataType="vm:MatrixViewModel">
+  <ScrollViewer HorizontalScrollBarVisibility="Auto">
+    <DockPanel Margin="8,12" MinWidth="760">
+      <!-- Encabezado con logos de consultora y cliente (RF-15) -->
+      <Border DockPanel.Dock="Top" Classes="card" Margin="0,0,0,12" Padding="12">
+        <Grid ColumnDefinitions="160,*,160">
+          <Image Source="{Binding ConsultancyLogo}" Height="56" HorizontalAlignment="Left" Stretch="Uniform" />
+          <StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="2">
+            <TextBlock Classes="h2" HorizontalAlignment="Center" Text="{x:Static r:Strings.Section_Matrix}" />
+            <TextBlock Classes="muted" HorizontalAlignment="Center" Text="{Binding Subtitle}" />
+          </StackPanel>
+          <Image Grid.Column="2" Source="{Binding ClientLogo}" Height="56" HorizontalAlignment="Right" Stretch="Uniform" />
+        </Grid>
+      </Border>
+
+      <DockPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8">
+          <Button Content="{x:Static r:Strings.Matrix_ExportPdf}" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="PdfMatrix" />
+          <Button Content="{x:Static r:Strings.Matrix_ExportXlsx}" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="Xlsx" />
+          <Button Content="{x:Static r:Strings.Menu_Print}" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="Print" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <TextBlock Classes="muted" VerticalAlignment="Center" Text="{x:Static r:Strings.Matrix_Legend}" />
+          <ItemsControl ItemsSource="{Binding Legend}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="6" /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:LevelChip">
+                <Border Classes="chip" Background="{Binding Background}">
+                  <TextBlock Foreground="{Binding Foreground}" FontWeight="SemiBold">
+                    <Run Text="{Binding Abbrev, StringFormat='[{0}]', Mode=OneWay}" />
+                    <Run Text="{Binding Name, Mode=OneWay}" />
+                  </TextBlock>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </DockPanel>
+
+      <Grid ColumnDefinitions="32,*" RowDefinitions="*,Auto">
+        <!-- Eje Y: Dificultad (la más fácil abajo) -->
+        <LayoutTransformControl VerticalAlignment="Center">
+          <LayoutTransformControl.LayoutTransform>
+            <RotateTransform Angle="-90" />
+          </LayoutTransformControl.LayoutTransform>
+          <TextBlock Classes="label" Text="{x:Static r:Strings.Matrix_AxisDifficulty}" />
+        </LayoutTransformControl>
+
+        <StackPanel Grid.Column="1" Spacing="0">
+          <DockPanel Margin="0,0,0,6">
+            <Border DockPanel.Dock="Left" Width="150" />
+            <ItemsControl ItemsSource="{Binding Columns}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><UniformGrid Rows="1" /></ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:LevelChip">
+                  <Border Background="{Binding Background}" CornerRadius="4" Margin="3,0" Padding="6,4">
+                    <TextBlock Text="{Binding Name}" Foreground="{Binding Foreground}" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </DockPanel>
+
+          <ItemsControl ItemsSource="{Binding Rows}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:MatrixRow">
+                <DockPanel Margin="0,0,0,6">
+                  <Border DockPanel.Dock="Left" Width="150" Background="{Binding Level.Background}" CornerRadius="4" Margin="0,0,3,0"
+                          MinHeight="{Binding MinHeight}" Padding="8">
+                    <TextBlock Text="{Binding Level.Name}" Foreground="{Binding Level.Foreground}" FontWeight="SemiBold"
+                               VerticalAlignment="Center" TextWrapping="Wrap" />
+                  </Border>
+                  <ItemsControl ItemsSource="{Binding Cells}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate><UniformGrid Rows="1" /></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:MatrixCell">
+                        <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1"
+                                CornerRadius="4" Margin="3,0" Padding="4" MinHeight="{Binding MinHeight}">
+                          <ItemsControl ItemsSource="{Binding Items}">
+                            <ItemsControl.ItemTemplate>
+                              <DataTemplate x:DataType="vm:MatrixItem">
+                                <Button Height="26" Margin="0,0,0,4" Padding="4,0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                                        Background="{Binding RiskLevel.Background, FallbackValue=Gray}" ToolTip.Tip="{Binding Tooltip}"
+                                        Command="{Binding $parent[UserControl].((vm:MatrixViewModel)DataContext).OpenCommand}" CommandParameter="{Binding}">
+                                  <DockPanel>
+                                    <TextBlock DockPanel.Dock="Left" Margin="0,0,6,0" FontWeight="Bold" VerticalAlignment="Center"
+                                               Foreground="{Binding RiskLevel.Foreground, FallbackValue=White}"
+                                               Text="{Binding RiskLevel.Abbrev, StringFormat='[{0}]', FallbackValue=''}" />
+                                    <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
+                                               Foreground="{Binding RiskLevel.Foreground, FallbackValue=White}" />
+                                  </DockPanel>
+                                </Button>
+                              </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                          </ItemsControl>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </DockPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+
+        <!-- Eje X: Valor agregado (de menor a mayor hacia la derecha) -->
+        <TextBlock Grid.Row="1" Grid.Column="1" Classes="label" Margin="150,6,0,0" HorizontalAlignment="Center" Text="{x:Static r:Strings.Matrix_AxisValue}" />
+      </Grid>
+    </DockPanel>
+  </ScrollViewer>
+</UserControl>

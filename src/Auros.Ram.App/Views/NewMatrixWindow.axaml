@@ -1,0 +1,39 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Auros.Ram.App.ViewModels"
+        xmlns:r="using:Auros.Ram.App.Resources"
+        x:Class="Auros.Ram.App.Views.NewMatrixWindow"
+        x:DataType="vm:NewMatrixViewModel"
+        Title="{x:Static r:Strings.New_Title}"
+        Width="520" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource SurfaceAltBrush}">
+  <StackPanel Margin="20" Spacing="12">
+    <TextBlock Classes="h2" Text="{x:Static r:Strings.New_Title}" />
+    <TextBlock Classes="muted" TextWrapping="Wrap" Text="{x:Static r:Strings.New_Intro}" />
+    <StackPanel>
+      <TextBlock Classes="label" Text="{x:Static r:Strings.Project_Name}" />
+      <TextBox x:Name="NameBox" Text="{Binding Name}" MaxLength="200" />
+    </StackPanel>
+    <Grid ColumnDefinitions="*,12,*">
+      <StackPanel>
+        <TextBlock Classes="label" Text="{x:Static r:Strings.Project_Client}" />
+        <TextBox Text="{Binding Client}" MaxLength="200" />
+      </StackPanel>
+      <StackPanel Grid.Column="2">
+        <TextBlock Classes="label" Text="{x:Static r:Strings.Project_Consultancy}" />
+        <TextBox Text="{Binding Consultancy}" MaxLength="200" />
+      </StackPanel>
+    </Grid>
+    <StackPanel Spacing="4">
+      <TextBlock Classes="label" Text="{x:Static r:Strings.New_Scales}" />
+      <RadioButton GroupName="scales" IsChecked="{Binding UseStandardScales}" Content="{x:Static r:Strings.New_StandardScales}" />
+      <RadioButton GroupName="scales" IsChecked="{Binding !UseStandardScales}" Content="{x:Static r:Strings.New_TemplateScales}" />
+    </StackPanel>
+    <TextBlock Classes="error" Text="{Binding Error}" IsVisible="{Binding Error, Converter={x:Static ObjectConverters.IsNotNull}}" />
+    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+      <Button Content="{x:Static r:Strings.Common_Cancel}" IsCancel="True" Click="OnCancel" />
+      <Button Classes="accent" Content="{x:Static r:Strings.Common_Continue}" IsDefault="True" Click="OnAccept" />
+    </StackPanel>
+  </StackPanel>
+</Window>

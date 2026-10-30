@@ -1,0 +1,26 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:r="using:Auros.Ram.App.Resources"
+        x:Class="Auros.Ram.App.Views.AboutWindow"
+        Title="{x:Static r:Strings.Menu_About}"
+        Width="680" Height="560" MinWidth="520" MinHeight="400"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource SurfaceAltBrush}">
+  <DockPanel Margin="20">
+    <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,12">
+      <TextBlock Text="auros.ram" FontSize="26" FontWeight="Bold" />
+      <TextBlock x:Name="VersionText" Classes="muted" />
+      <TextBlock Classes="muted" TextWrapping="Wrap" Text="{x:Static r:Strings.About_Description}" />
+    </StackPanel>
+    <Button DockPanel.Dock="Bottom" HorizontalAlignment="Right" Margin="0,12,0,0" Content="{x:Static r:Strings.Common_Close}" IsCancel="True" IsDefault="True" Click="OnClose" />
+    <!-- RNF-59: visor de licencias de terceros -->
+    <StackPanel DockPanel.Dock="Top" Margin="0,0,0,6">
+      <TextBlock Classes="h2" Text="{x:Static r:Strings.About_ThirdParty}" />
+    </StackPanel>
+    <Border Classes="card" Padding="8">
+      <ScrollViewer>
+        <SelectableTextBlock x:Name="NoticesText" FontFamily="Consolas,Menlo,DejaVu Sans Mono,monospace" FontSize="12" TextWrapping="Wrap" />
+      </ScrollViewer>
+    </Border>
+  </DockPanel>
+</Window>

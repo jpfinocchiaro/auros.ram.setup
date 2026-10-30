@@ -1,0 +1,79 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Auros.Ram.App.ViewModels"
+        xmlns:m="using:Auros.Ram.Core.Model"
+        xmlns:r="using:Auros.Ram.App.Resources"
+        x:Class="Auros.Ram.App.Views.ScaleEditorWindow"
+        x:DataType="vm:ScaleEditorViewModel"
+        Title="{Binding WindowTitle}"
+        Width="760" Height="600" MinWidth="640" MinHeight="460"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource SurfaceAltBrush}">
+  <DockPanel Margin="16">
+    <StackPanel DockPanel.Dock="Top" Spacing="12" Margin="0,0,0,12">
+      <Grid ColumnDefinitions="2*,16,*">
+        <StackPanel>
+          <TextBlock Classes="label" Text="{x:Static r:Strings.Scale_Name}" />
+          <TextBox x:Name="NameBox" Text="{Binding Name}" MaxLength="150" />
+        </StackPanel>
+        <StackPanel Grid.Column="2">
+          <TextBlock Classes="label" Text="{x:Static r:Strings.Scale_Type}" />
+          <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Types}" SelectedItem="{Binding SelectedType}" IsEnabled="{Binding IsNew}" />
+        </StackPanel>
+      </Grid>
+      <TextBlock Classes="muted" TextWrapping="Wrap" Text="{x:Static r:Strings.Scale_LevelsHint}" />
+    </StackPanel>
+
+    <StackPanel DockPanel.Dock="Bottom" Spacing="8" Margin="0,12,0,0">
+      <TextBlock Classes="error" Text="{Binding Error}" IsVisible="{Binding Error, Converter={x:Static ObjectConverters.IsNotNull}}" />
+      <DockPanel>
+        <Button DockPanel.Dock="Left" Content="{x:Static r:Strings.Scale_AddLevel}" Command="{Binding AddLevelCommand}" />
+        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+          <Button Content="{x:Static r:Strings.Common_Cancel}" IsCancel="True" Click="OnCancel" />
+          <Button Classes="accent" Content="{x:Static r:Strings.Common_Save}" Command="{Binding SaveCommand}" />
+        </StackPanel>
+      </DockPanel>
+    </StackPanel>
+
+    <Border Classes="card" Padding="8">
+      <DockPanel>
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="130,*,170,110,120,Auto" Margin="4,0,4,6">
+          <TextBlock Classes="label" Text="{x:Static r:Strings.Scale_Order}" />
+          <TextBlock Grid.Column="1" Classes="label" Text="{x:Static r:Strings.Scale_LevelName}" />
+          <TextBlock Grid.Column="2" Classes="label" Text="{x:Static r:Strings.Scale_Color}" />
+          <TextBlock Grid.Column="3" Classes="label" Text="{x:Static r:Strings.Scale_Hex}" />
+          <TextBlock Grid.Column="4" Classes="label" Text="{x:Static r:Strings.Scale_Preview}" />
+        </Grid>
+        <ScrollViewer>
+          <ItemsControl ItemsSource="{Binding Levels}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:LevelEditViewModel">
+                <Grid ColumnDefinitions="130,*,170,110,120,Auto" Margin="4,3">
+                  <NumericUpDown Value="{Binding Order}" Minimum="0" Maximum="100" Increment="1" FormatString="0" Margin="0,0,6,0" />
+                  <TextBox Grid.Column="1" Text="{Binding Name}" MaxLength="80" Margin="0,0,6,0" Watermark="{x:Static r:Strings.Scale_LevelNameHint}" />
+                  <ComboBox Grid.Column="2" HorizontalAlignment="Stretch" ItemsSource="{Binding Colors}" SelectedItem="{Binding NamedColor}"
+                            PlaceholderText="{x:Static r:Strings.Scale_CustomColor}" Margin="0,0,6,0">
+                    <ComboBox.ItemTemplate>
+                      <DataTemplate x:DataType="m:NamedColor">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                          <Border Width="16" Height="16" CornerRadius="3" Background="{Binding Hex}" />
+                          <TextBlock Text="{Binding Name}" />
+                        </StackPanel>
+                      </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                  </ComboBox>
+                  <TextBox Grid.Column="3" Text="{Binding Hex}" MaxLength="7" Margin="0,0,6,0" />
+                  <Border Grid.Column="4" Background="{Binding Preview}" CornerRadius="4" Padding="6,4" Margin="0,0,6,0">
+                    <TextBlock Text="{Binding Name}" Foreground="{Binding PreviewText}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                  </Border>
+                  <Button Grid.Column="5" Content="✕" ToolTip.Tip="{x:Static r:Strings.Scale_RemoveLevel}"
+                          Command="{Binding Owner.RemoveLevelCommand}" CommandParameter="{Binding}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </DockPanel>
+    </Border>
+  </DockPanel>
+</Window>

@@ -1,0 +1,41 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Auros.Ram.App.ViewModels"
+             xmlns:views="using:Auros.Ram.App.Views"
+             xmlns:r="using:Auros.Ram.App.Resources"
+             x:Class="Auros.Ram.App.Views.DocumentView"
+             x:DataType="vm:DocumentViewModel">
+  <Panel>
+    <TabControl SelectedIndex="{Binding SelectedSection}" Padding="0" Margin="8,0,8,0" IsVisible="{Binding !IsLocked}">
+      <TabItem Header="{x:Static r:Strings.Section_Project}">
+        <views:ProjectView DataContext="{Binding Project}" />
+      </TabItem>
+      <TabItem Header="{x:Static r:Strings.Section_Risks}">
+        <views:RisksView DataContext="{Binding Risks}" />
+      </TabItem>
+      <TabItem Header="{x:Static r:Strings.Section_Matrix}">
+        <views:MatrixView DataContext="{Binding Matrix}" />
+      </TabItem>
+      <TabItem Header="{x:Static r:Strings.Section_Reports}">
+        <views:ReportsView DataContext="{Binding Reports}" />
+      </TabItem>
+      <TabItem Header="{x:Static r:Strings.Section_Scales}">
+        <views:ScalesView DataContext="{Binding Scales}" />
+      </TabItem>
+    </TabControl>
+
+    <!-- RNF-36: archivo bloqueado por inactividad; el contenido no se muestra hasta desbloquear. -->
+    <Border IsVisible="{Binding IsLocked}" Background="{DynamicResource SurfaceAltBrush}">
+      <Border Classes="card" Width="420" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <StackPanel Spacing="12">
+          <TextBlock Classes="h2" Text="{x:Static r:Strings.Lock_Title}" />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="{Binding FileName, StringFormat={x:Static r:Strings.Lock_Message}}" />
+          <TextBox x:Name="UnlockBox" PasswordChar="•" RevealPassword="False" Text="{Binding UnlockPassword}"
+                   Watermark="{x:Static r:Strings.Password_Label}" KeyDown="OnUnlockKeyDown" />
+          <TextBlock Classes="error" Text="{Binding UnlockError}" IsVisible="{Binding UnlockError, Converter={x:Static ObjectConverters.IsNotNull}}" />
+          <Button Classes="accent" HorizontalAlignment="Right" Content="{x:Static r:Strings.Lock_Unlock}" Command="{Binding UnlockCommand}" IsEnabled="{Binding !IsBusy}" />
+        </StackPanel>
+      </Border>
+    </Border>
+  </Panel>
+</UserControl>

@@ -1,0 +1,73 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Auros.Ram.App.ViewModels"
+             xmlns:r="using:Auros.Ram.App.Resources"
+             x:Class="Auros.Ram.App.Views.ScalesView"
+             x:DataType="vm:ScalesViewModel">
+  <ScrollViewer>
+    <StackPanel Margin="8,12" Spacing="16">
+      <DockPanel>
+        <Button DockPanel.Dock="Right" Content="{x:Static r:Strings.Scales_SaveTemplate}" Command="{Binding SaveTemplateCommand}"
+                ToolTip.Tip="{x:Static r:Strings.Scales_SaveTemplateTip}" />
+        <StackPanel Spacing="4">
+          <TextBlock Classes="h1" Text="{x:Static r:Strings.Section_Scales}" />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="{x:Static r:Strings.Scales_Intro}" />
+        </StackPanel>
+      </DockPanel>
+
+      <ItemsControl ItemsSource="{Binding Groups}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:ScaleGroup">
+            <Border Classes="card" Margin="0,0,0,16">
+              <StackPanel Spacing="10">
+                <DockPanel>
+                  <Button DockPanel.Dock="Right" Content="{x:Static r:Strings.Scales_Add}"
+                          Command="{Binding $parent[UserControl].((vm:ScalesViewModel)DataContext).AddCommand}" CommandParameter="{Binding}" />
+                  <StackPanel>
+                    <TextBlock Classes="h2" Text="{Binding Title}" />
+                    <TextBlock Classes="muted" Text="{Binding Purpose}" />
+                  </StackPanel>
+                </DockPanel>
+                <ItemsControl ItemsSource="{Binding Scales}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ScaleItem">
+                      <Border BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,1,0,0" Padding="0,10">
+                        <DockPanel>
+                          <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <Button Content="{x:Static r:Strings.Common_Edit}"
+                                    Command="{Binding $parent[UserControl].((vm:ScalesViewModel)DataContext).EditCommand}" CommandParameter="{Binding}" />
+                            <Button Content="{x:Static r:Strings.Common_Delete}"
+                                    Command="{Binding $parent[UserControl].((vm:ScalesViewModel)DataContext).DeleteCommand}" CommandParameter="{Binding}" />
+                          </StackPanel>
+                          <StackPanel Spacing="6">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                              <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                              <TextBlock Classes="muted" Text="{Binding LevelCount}" />
+                              <Border Classes="chip" Background="{DynamicResource AccentBrush}" IsVisible="{Binding IsAssigned}" Padding="6,1">
+                                <TextBlock Text="{x:Static r:Strings.Scales_Assigned}" Foreground="{DynamicResource SurfaceBrush}" FontSize="11" FontWeight="SemiBold" />
+                              </Border>
+                            </StackPanel>
+                            <ItemsControl ItemsSource="{Binding Levels}">
+                              <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+                              </ItemsControl.ItemsPanel>
+                              <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:LevelChip">
+                                  <ContentControl Content="{Binding}" Margin="0,0,6,4" />
+                                </DataTemplate>
+                              </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                          </StackPanel>
+                        </DockPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

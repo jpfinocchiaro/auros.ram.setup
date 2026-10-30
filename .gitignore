@@ -1,0 +1,13 @@
+bin/
+obj/
+artifacts/
+publish/
+TestResults/
+*.user
+.vs/
+.idea/
+*.swp
+# Nunca versionar matrices reales; solo los archivos de prueba del formato.
+*.rmx
+*.rmt
+!tests/Auros.Ram.Tests/Fixtures/*.rmx

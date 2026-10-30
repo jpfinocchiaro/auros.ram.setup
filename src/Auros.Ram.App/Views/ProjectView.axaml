@@ -1,0 +1,144 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Auros.Ram.App.ViewModels"
+             xmlns:m="using:Auros.Ram.Core.Model"
+             xmlns:r="using:Auros.Ram.App.Resources"
+             x:Class="Auros.Ram.App.Views.ProjectView"
+             x:DataType="vm:ProjectViewModel">
+  <ScrollViewer>
+    <Grid ColumnDefinitions="*,24,380" Margin="8,16">
+      <!-- Ficha del proyecto (RF-07, RF-08, RF-09) -->
+      <Border Classes="card" Grid.Column="0" VerticalAlignment="Top">
+        <StackPanel Spacing="14">
+          <TextBlock Classes="h2" Text="{x:Static r:Strings.Project_Title}" />
+
+          <Grid ColumnDefinitions="*,16,*" RowDefinitions="Auto,Auto,Auto">
+            <StackPanel Grid.Column="0" Grid.ColumnSpan="3">
+              <TextBlock Classes="label" Text="{x:Static r:Strings.Project_Name}" />
+              <TextBox Text="{Binding Name}" MaxLength="200" />
+            </StackPanel>
+            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,12,0,0">
+              <TextBlock Classes="label" Text="{x:Static r:Strings.Project_Client}" />
+              <TextBox Text="{Binding Client}" MaxLength="200" />
+            </StackPanel>
+            <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,12,0,0">
+              <TextBlock Classes="label" Text="{x:Static r:Strings.Project_Consultancy}" />
+              <TextBox Text="{Binding Consultancy}" MaxLength="200" />
+            </StackPanel>
+            <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,12,0,0">
+              <TextBlock Classes="label" Text="{x:Static r:Strings.Project_Date}" />
+              <CalendarDatePicker SelectedDate="{Binding Date}" HorizontalAlignment="Stretch" />
+            </StackPanel>
+            <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,12,0,0">
+              <TextBlock Classes="label" Text="{x:Static r:Strings.Project_Status}" />
+              <ComboBox ItemsSource="{Binding Statuses}" SelectedItem="{Binding Status}" HorizontalAlignment="Stretch" />
+            </StackPanel>
+          </Grid>
+
+          <TextBlock Classes="h2" Text="{x:Static r:Strings.Project_Logos}" Margin="0,8,0,0" />
+          <Grid ColumnDefinitions="*,16,*">
+            <StackPanel Spacing="6">
+              <TextBlock Classes="label" Text="{x:Static r:Strings.Project_ConsultancyLogo}" />
+              <Border BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="4" Height="84" Padding="6">
+                <Panel>
+                  <Image Source="{Binding ConsultancyLogoImage}" Stretch="Uniform" />
+                  <TextBlock Classes="muted" Text="{x:Static r:Strings.Project_NoLogo}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                             IsVisible="{Binding ConsultancyLogoImage, Converter={x:Static ObjectConverters.IsNull}}" />
+                </Panel>
+              </Border>
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <Button Content="{x:Static r:Strings.Project_PickLogoButton}" Command="{Binding PickLogoCommand}" CommandParameter="consultancy" />
+                <Button Content="{x:Static r:Strings.Common_Remove}" Command="{Binding ClearLogoCommand}" CommandParameter="consultancy" />
+              </StackPanel>
+            </StackPanel>
+            <StackPanel Grid.Column="2" Spacing="6">
+              <TextBlock Classes="label" Text="{x:Static r:Strings.Project_ClientLogo}" />
+              <Border BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="4" Height="84" Padding="6">
+                <Panel>
+                  <Image Source="{Binding ClientLogoImage}" Stretch="Uniform" />
+                  <TextBlock Classes="muted" Text="{x:Static r:Strings.Project_NoLogo}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                             IsVisible="{Binding ClientLogoImage, Converter={x:Static ObjectConverters.IsNull}}" />
+                </Panel>
+              </Border>
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <Button Content="{x:Static r:Strings.Project_PickLogoButton}" Command="{Binding PickLogoCommand}" CommandParameter="client" />
+                <Button Content="{x:Static r:Strings.Common_Remove}" Command="{Binding ClearLogoCommand}" CommandParameter="client" />
+              </StackPanel>
+            </StackPanel>
+          </Grid>
+
+          <TextBlock Classes="h2" Text="{x:Static r:Strings.Project_Scales}" Margin="0,8,0,0" />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="{Binding ScalesHint}" />
+          <Grid ColumnDefinitions="Auto,12,*" RowDefinitions="Auto,8,Auto,8,Auto">
+            <TextBlock Grid.Row="0" VerticalAlignment="Center" Classes="label" Text="{x:Static r:Strings.ScaleType_Risk}" />
+            <ComboBox Grid.Row="0" Grid.Column="2" HorizontalAlignment="Stretch" ItemsSource="{Binding RiskScales}" SelectedItem="{Binding RiskScale}" IsEnabled="{Binding CanChangeScales}" />
+            <TextBlock Grid.Row="2" VerticalAlignment="Center" Classes="label" Text="{x:Static r:Strings.ScaleType_Value}" />
+            <ComboBox Grid.Row="2" Grid.Column="2" HorizontalAlignment="Stretch" ItemsSource="{Binding ValueScales}" SelectedItem="{Binding ValueScale}" IsEnabled="{Binding CanChangeScales}" />
+            <TextBlock Grid.Row="4" VerticalAlignment="Center" Classes="label" Text="{x:Static r:Strings.ScaleType_Difficulty}" />
+            <ComboBox Grid.Row="4" Grid.Column="2" HorizontalAlignment="Stretch" ItemsSource="{Binding DifficultyScales}" SelectedItem="{Binding DifficultyScale}" IsEnabled="{Binding CanChangeScales}" />
+          </Grid>
+
+          <TextBlock Classes="error" Text="{Binding Error}" IsVisible="{Binding Error, Converter={x:Static ObjectConverters.IsNotNull}}" />
+          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+            <Button Content="{x:Static r:Strings.Common_Discard}" Command="{Binding RevertCommand}" IsEnabled="{Binding HasChanges}" />
+            <Button Classes="accent" Content="{x:Static r:Strings.Common_Apply}" Command="{Binding ApplyCommand}" IsEnabled="{Binding HasChanges}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <StackPanel Grid.Column="2" Spacing="16">
+        <!-- Panel del proyecto: distribución por nivel de riesgo (RF-18) -->
+        <Border Classes="card">
+          <StackPanel Spacing="10">
+            <TextBlock Classes="h2" Text="{x:Static r:Strings.Project_Distribution}" />
+            <TextBlock Classes="muted" Text="{Binding RiskCount, StringFormat={x:Static r:Strings.Project_RiskTotal}}" />
+            <ItemsControl ItemsSource="{Binding Distribution}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:DistributionRow">
+                  <Grid ColumnDefinitions="96,*,64" Margin="0,4">
+                    <ContentControl Content="{Binding Level}" />
+                    <Border Grid.Column="1" Height="14" CornerRadius="3" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0"
+                            Width="{Binding BarWidth}" Background="{Binding Level.Background}" />
+                    <TextBlock Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center">
+                      <Run Text="{Binding Count, Mode=OneWay}" FontWeight="SemiBold" />
+                      <Run Text="{Binding Percent, StringFormat=' ({0})', Mode=OneWay}" Foreground="{DynamicResource MutedTextBrush}" />
+                    </TextBlock>
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+
+        <!-- Escalas asignadas con sus niveles en color (RF-09) -->
+        <Border Classes="card">
+          <StackPanel Spacing="10">
+            <TextBlock Classes="h2" Text="{x:Static r:Strings.Project_AssignedScales}" />
+            <ItemsControl ItemsSource="{Binding AssignedScales}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:ScalePreview">
+                  <StackPanel Spacing="4" Margin="0,0,0,12">
+                    <TextBlock>
+                      <Run Text="{Binding TypeName, Mode=OneWay}" FontWeight="SemiBold" />
+                      <Run Text="{Binding ScaleName, StringFormat=' — {0}', Mode=OneWay}" Foreground="{DynamicResource MutedTextBrush}" />
+                    </TextBlock>
+                    <ItemsControl ItemsSource="{Binding Levels}">
+                      <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+                      </ItemsControl.ItemsPanel>
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:LevelChip">
+                          <ContentControl Content="{Binding}" Margin="0,0,6,6" />
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </Grid>
+  </ScrollViewer>
+</UserControl>

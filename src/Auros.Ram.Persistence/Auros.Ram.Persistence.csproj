@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- RNF-08: único componente que toca el disco y la criptografía de los archivos de matriz. -->
+  <PropertyGroup>
+    <RootNamespace>Auros.Ram.Persistence</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Auros.Ram.Core\Auros.Ram.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite.Core" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlcipher" />
+    <PackageReference Include="Konscious.Security.Cryptography.Argon2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\FileMessages.resx">
+      <StronglyTypedFileName>$(IntermediateOutputPath)FileMessages.Designer.cs</StronglyTypedFileName>
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedNamespace>Auros.Ram.Persistence.Resources</StronglyTypedNamespace>
+      <StronglyTypedClassName>FileMessages</StronglyTypedClassName>
+      <PublicClass>true</PublicClass>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Auros.Ram.Tests" />
+  </ItemGroup>
+</Project>

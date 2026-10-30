@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="About_Description" xml:space="preserve"><value>Matrices de riesgo cifradas: escalas parametrizables, clasificación en tres dimensiones, matriz de priorización e informes.</value></data>
+  <data name="About_ThirdParty" xml:space="preserve"><value>Licencias de terceros</value></data>
+  <data name="About_Version" xml:space="preserve"><value>Versión {0}</value></data>
+  <data name="Close_DontSave" xml:space="preserve"><value>No guardar</value></data>
+  <data name="Close_LockedMessage" xml:space="preserve"><value>El archivo está bloqueado y tiene cambios sin guardar. Desbloquéelo antes de cerrarlo.</value></data>
+  <data name="Close_LockedTitle" xml:space="preserve"><value>Archivo bloqueado</value></data>
+  <data name="Close_SaveMessage" xml:space="preserve"><value>¿Guardar los cambios de «{0}» antes de cerrar? Si no los guarda, se pierden.</value></data>
+  <data name="Close_SaveTitle" xml:space="preserve"><value>Cambios sin guardar</value></data>
+  <data name="Common_Accept" xml:space="preserve"><value>Aceptar</value></data>
+  <data name="Common_All" xml:space="preserve"><value>Todos</value></data>
+  <data name="Common_Apply" xml:space="preserve"><value>Aplicar cambios</value></data>
+  <data name="Common_Cancel" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="Common_CannotDo" xml:space="preserve"><value>No se puede realizar la acción</value></data>
+  <data name="Common_Close" xml:space="preserve"><value>Cerrar</value></data>
+  <data name="Common_Continue" xml:space="preserve"><value>Continuar</value></data>
+  <data name="Common_Delete" xml:space="preserve"><value>Eliminar</value></data>
+  <data name="Common_Discard" xml:space="preserve"><value>Descartar</value></data>
+  <data name="Common_Edit" xml:space="preserve"><value>Editar</value></data>
+  <data name="Common_Remove" xml:space="preserve"><value>Quitar</value></data>
+  <data name="Common_Save" xml:space="preserve"><value>Guardar</value></data>
+  <data name="Error_ReadFile" xml:space="preserve"><value>No se pudo leer el archivo. Verifique que exista y que no esté abierto en otro programa.</value></data>
+  <data name="Error_SaveTitle" xml:space="preserve"><value>No se pudo guardar</value></data>
+  <data name="Error_UnexpectedMessage" xml:space="preserve"><value>Ocurrió un error inesperado. Sus archivos no se modificaron. Guarde su trabajo y, si el problema se repite, reinicie la aplicación.</value></data>
+  <data name="Error_UnexpectedTitle" xml:space="preserve"><value>Error inesperado</value></data>
+  <data name="Export_Continue" xml:space="preserve"><value>Exportar</value></data>
+  <data name="Export_ErrorMessage" xml:space="preserve"><value>No se pudo exportar. Verifique que la carpeta exista, que tenga permisos y que el archivo de destino no esté abierto en otro programa.</value></data>
+  <data name="Export_ErrorTitle" xml:space="preserve"><value>No se pudo exportar</value></data>
+  <data name="Export_PdfPassword" xml:space="preserve"><value>Contraseña del PDF</value></data>
+  <data name="Export_PdfPasswordShort" xml:space="preserve"><value>La contraseña del PDF debe tener al menos 6 caracteres.</value></data>
+  <data name="Export_ProtectPdf" xml:space="preserve"><value>Proteger el PDF con contraseña</value></data>
+  <data name="Export_SaveTitle" xml:space="preserve"><value>Exportar</value></data>
+  <data name="Export_SuffixDetail" xml:space="preserve"><value>Ficha detallada</value></data>
+  <data name="Export_SuffixMatrix" xml:space="preserve"><value>Matriz de priorización</value></data>
+  <data name="Export_SuffixReport" xml:space="preserve"><value>Informe</value></data>
+  <data name="Export_SuffixRisks" xml:space="preserve"><value>Riesgos</value></data>
+  <data name="Export_SuffixSummary" xml:space="preserve"><value>Ficha resumen</value></data>
+  <data name="Export_WarningText" xml:space="preserve"><value>El archivo exportado NO queda cifrado: cualquiera que lo reciba podrá leer su contenido. Compártalo solo por canales seguros y bórrelo cuando ya no lo necesite.</value></data>
+  <data name="Export_WarningTitle" xml:space="preserve"><value>Exportar en un formato abierto</value></data>
+  <data name="FileType_Csv" xml:space="preserve"><value>CSV (separado por punto y coma)</value></data>
+  <data name="FileType_Image" xml:space="preserve"><value>Imagen PNG o JPG</value></data>
+  <data name="FileType_Json" xml:space="preserve"><value>JSON de auros.ram</value></data>
+  <data name="FileType_Matrix" xml:space="preserve"><value>Matriz de riesgo auros.ram</value></data>
+  <data name="FileType_Pdf" xml:space="preserve"><value>Documento PDF</value></data>
+  <data name="FileType_Template" xml:space="preserve"><value>Plantilla de escalas auros.ram</value></data>
+  <data name="FileType_Xlsx" xml:space="preserve"><value>Libro de Excel</value></data>
+  <data name="Import_ErrorTitle" xml:space="preserve"><value>No se pudo importar</value></data>
+  <data name="Import_Title" xml:space="preserve"><value>Importar desde JSON</value></data>
+  <data name="Lock_Message" xml:space="preserve"><value>«{0}» se bloqueó por inactividad. Ingrese la contraseña del archivo para continuar.</value></data>
+  <data name="Lock_Title" xml:space="preserve"><value>Archivo bloqueado</value></data>
+  <data name="Lock_Unlock" xml:space="preserve"><value>Desbloquear</value></data>
+  <data name="Matrix_AxisDifficulty" xml:space="preserve"><value>Dificultad de implementación (más fácil abajo)</value></data>
+  <data name="Matrix_AxisValue" xml:space="preserve"><value>Valor agregado (de menor a mayor →)</value></data>
+  <data name="Matrix_ExportPdf" xml:space="preserve"><value>Exportar PDF</value></data>
+  <data name="Matrix_ExportXlsx" xml:space="preserve"><value>Exportar Excel</value></data>
+  <data name="Matrix_Legend" xml:space="preserve"><value>Nivel de riesgo:</value></data>
+  <data name="Matrix_Tooltip" xml:space="preserve"><value>{0}
+Nivel de riesgo: {1}
+Clic para abrir la ficha</value></data>
+  <data name="Menu_About" xml:space="preserve"><value>Acerca de auros.ram</value></data>
+  <data name="Menu_ChangePassword" xml:space="preserve"><value>Cambiar contraseña…</value></data>
+  <data name="Menu_Close" xml:space="preserve"><value>Cerrar</value></data>
+  <data name="Menu_Edit" xml:space="preserve"><value>_Edición</value></data>
+  <data name="Menu_Exit" xml:space="preserve"><value>Salir</value></data>
+  <data name="Menu_Export" xml:space="preserve"><value>Exportar</value></data>
+  <data name="Menu_ExportCsvMatrix" xml:space="preserve"><value>CSV — Matriz de priorización…</value></data>
+  <data name="Menu_ExportCsvRisks" xml:space="preserve"><value>CSV — Lista de riesgos…</value></data>
+  <data name="Menu_ExportJson" xml:space="preserve"><value>JSON — Contenido completo…</value></data>
+  <data name="Menu_ExportPdfAll" xml:space="preserve"><value>PDF — Informe completo…</value></data>
+  <data name="Menu_ExportPdfDetail" xml:space="preserve"><value>PDF — Ficha detallada…</value></data>
+  <data name="Menu_ExportPdfMatrix" xml:space="preserve"><value>PDF — Matriz de priorización…</value></data>
+  <data name="Menu_ExportPdfSummary" xml:space="preserve"><value>PDF — Ficha resumen…</value></data>
+  <data name="Menu_ExportXlsx" xml:space="preserve"><value>Excel (.xlsx)…</value></data>
+  <data name="Menu_File" xml:space="preserve"><value>_Archivo</value></data>
+  <data name="Menu_Help" xml:space="preserve"><value>A_yuda</value></data>
+  <data name="Menu_ImportJson" xml:space="preserve"><value>Importar desde JSON…</value></data>
+  <data name="Menu_Lock" xml:space="preserve"><value>Bloquear ahora</value></data>
+  <data name="Menu_New" xml:space="preserve"><value>Nuevo…</value></data>
+  <data name="Menu_NewRisk" xml:space="preserve"><value>Nuevo riesgo…</value></data>
+  <data name="Menu_Open" xml:space="preserve"><value>Abrir…</value></data>
+  <data name="Menu_Preferences" xml:space="preserve"><value>Preferencias…</value></data>
+  <data name="Menu_Print" xml:space="preserve"><value>Imprimir…</value></data>
+  <data name="Menu_Recent" xml:space="preserve"><value>Recientes</value></data>
+  <data name="Menu_Redo" xml:space="preserve"><value>Rehacer</value></data>
+  <data name="Menu_Save" xml:space="preserve"><value>Guardar</value></data>
+  <data name="Menu_SaveAs" xml:space="preserve"><value>Guardar como…</value></data>
+  <data name="Menu_Settings" xml:space="preserve"><value>_Configuración</value></data>
+  <data name="Menu_Undo" xml:space="preserve"><value>Deshacer</value></data>
+  <data name="Menu_View" xml:space="preserve"><value>_Ver</value></data>
+  <data name="New_DefaultFileName" xml:space="preserve"><value>Matriz de riesgo</value></data>
+  <data name="New_ErrorTitle" xml:space="preserve"><value>No se puede usar ese archivo</value></data>
+  <data name="New_FileIsOpen" xml:space="preserve"><value>Ese archivo ya está abierto en otra pestaña. Elija otro nombre o cierre la pestaña.</value></data>
+  <data name="New_Intro" xml:space="preserve"><value>Cada matriz es un archivo cifrado con su propia contraseña. A continuación elegirá dónde guardarlo.</value></data>
+  <data name="New_NameRequired" xml:space="preserve"><value>Escriba el nombre del proyecto.</value></data>
+  <data name="New_PasswordTitle" xml:space="preserve"><value>Contraseña del archivo nuevo</value></data>
+  <data name="New_SaveTitle" xml:space="preserve"><value>Guardar la matriz nueva</value></data>
+  <data name="New_Scales" xml:space="preserve"><value>Escalas</value></data>
+  <data name="New_StandardScales" xml:space="preserve"><value>Usar las escalas estándar (Riesgo, Valor agregado y Dificultad)</value></data>
+  <data name="New_TemplateScales" xml:space="preserve"><value>Cargar las escalas desde una plantilla (.rmt)</value></data>
+  <data name="New_Title" xml:space="preserve"><value>Nueva matriz de riesgo</value></data>
+  <data name="Open_ErrorTitle" xml:space="preserve"><value>No se pudo abrir</value></data>
+  <data name="Open_MigratedMessage" xml:space="preserve"><value>El archivo era de una versión anterior y se actualizó al formato vigente. Se guardó una copia del original como «{0}» en la misma carpeta.</value></data>
+  <data name="Open_MigratedTitle" xml:space="preserve"><value>Archivo actualizado</value></data>
+  <data name="Open_NotFound" xml:space="preserve"><value>No se encontró el archivo:
+{0}
+Se quitó de la lista de recientes.</value></data>
+  <data name="Open_PasswordTitle" xml:space="preserve"><value>Abrir matriz</value></data>
+  <data name="Open_Title" xml:space="preserve"><value>Abrir matriz de riesgo</value></data>
+  <data name="Password_AckRequired" xml:space="preserve"><value>Confirme que entiende que la contraseña no se puede recuperar.</value></data>
+  <data name="Password_Acknowledge" xml:space="preserve"><value>Entiendo que si olvido la contraseña no podré abrir el archivo.</value></data>
+  <data name="Password_ChangeTitle" xml:space="preserve"><value>Cambiar contraseña</value></data>
+  <data name="Password_Confirm" xml:space="preserve"><value>Repita la contraseña</value></data>
+  <data name="Password_Current" xml:space="preserve"><value>Contraseña actual</value></data>
+  <data name="Password_CurrentRequired" xml:space="preserve"><value>Escriba la contraseña actual.</value></data>
+  <data name="Password_CurrentWrong" xml:space="preserve"><value>La contraseña actual no es correcta.</value></data>
+  <data name="Password_Label" xml:space="preserve"><value>Contraseña</value></data>
+  <data name="Password_MinLength" xml:space="preserve"><value>Al menos 12 caracteres. Use una frase larga, fácil de recordar.</value></data>
+  <data name="Password_Mismatch" xml:space="preserve"><value>Las contraseñas no coinciden.</value></data>
+  <data name="Password_New" xml:space="preserve"><value>Contraseña nueva</value></data>
+  <data name="Password_NoRecoveryText" xml:space="preserve"><value>La contraseña cifra el archivo. Ni auros.ram ni su fabricante pueden recuperarla: si se olvida, el archivo no se puede abrir nunca más.</value></data>
+  <data name="Password_NoRecoveryTitle" xml:space="preserve"><value>No hay forma de recuperar la contraseña</value></data>
+  <data name="Password_Required" xml:space="preserve"><value>Escriba la contraseña.</value></data>
+  <data name="Password_TooShort" xml:space="preserve"><value>La contraseña debe tener al menos 12 caracteres.</value></data>
+  <data name="Password_Wrong" xml:space="preserve"><value>La contraseña no es correcta.</value></data>
+  <data name="Prefs_Autosave" xml:space="preserve"><value>Autoguardado de recuperación (minutos)</value></data>
+  <data name="Prefs_AutosaveHint" xml:space="preserve"><value>Cada cuánto se guarda una copia cifrada de los cambios sin guardar, para recuperarlos tras un cierre inesperado.</value></data>
+  <data name="Prefs_Lock" xml:space="preserve"><value>Bloqueo por inactividad (minutos)</value></data>
+  <data name="Prefs_LockHint" xml:space="preserve"><value>Tras este tiempo sin usar la aplicación, los archivos abiertos se bloquean y piden la contraseña.</value></data>
+  <data name="Print_OpenFailed" xml:space="preserve"><value>No se pudo abrir el visor de PDF del sistema. El archivo quedó guardado en:
+{0}
+Ábralo e imprímalo desde allí.</value></data>
+  <data name="Print_SaveTitle" xml:space="preserve"><value>Guardar el PDF para imprimir</value></data>
+  <data name="Print_Title" xml:space="preserve"><value>Imprimir</value></data>
+  <data name="Project_AssignedScales" xml:space="preserve"><value>Escalas del proyecto</value></data>
+  <data name="Project_Client" xml:space="preserve"><value>Cliente</value></data>
+  <data name="Project_ClientLogo" xml:space="preserve"><value>Logo del cliente</value></data>
+  <data name="Project_Consultancy" xml:space="preserve"><value>Consultora</value></data>
+  <data name="Project_ConsultancyLogo" xml:space="preserve"><value>Logo de la consultora</value></data>
+  <data name="Project_Date" xml:space="preserve"><value>Fecha</value></data>
+  <data name="Project_Distribution" xml:space="preserve"><value>Distribución por nivel de riesgo</value></data>
+  <data name="Project_LogoInvalid" xml:space="preserve"><value>La imagen no se pudo leer. Use un archivo PNG o JPG.</value></data>
+  <data name="Project_LogoTooLarge" xml:space="preserve"><value>La imagen supera los 2 MB. Use una versión más liviana.</value></data>
+  <data name="Project_Logos" xml:space="preserve"><value>Logos para los informes</value></data>
+  <data name="Project_Name" xml:space="preserve"><value>Nombre del proyecto</value></data>
+  <data name="Project_NoLogo" xml:space="preserve"><value>Sin logo</value></data>
+  <data name="Project_PickLogo" xml:space="preserve"><value>Elegir logo</value></data>
+  <data name="Project_PickLogoButton" xml:space="preserve"><value>Elegir imagen…</value></data>
+  <data name="Project_RiskTotal" xml:space="preserve"><value>{0} riesgos cargados</value></data>
+  <data name="Project_Scales" xml:space="preserve"><value>Escalas asignadas</value></data>
+  <data name="Project_ScalesHint" xml:space="preserve"><value>Elija una escala de cada tipo. Una vez que haya riesgos cargados ya no se podrán cambiar.</value></data>
+  <data name="Project_ScalesLocked" xml:space="preserve"><value>El proyecto ya tiene riesgos: las escalas asignadas no se pueden cambiar. Puede editar sus niveles desde Configuración → Escalas.</value></data>
+  <data name="Project_Status" xml:space="preserve"><value>Estado</value></data>
+  <data name="Project_Title" xml:space="preserve"><value>Datos del proyecto</value></data>
+  <data name="Recovery_Discard" xml:space="preserve"><value>Descartar</value></data>
+  <data name="Recovery_Message" xml:space="preserve"><value>Se encontraron cambios sin guardar de una sesión anterior que se cerró de forma inesperada. ¿Quiere recuperarlos? Si los descarta, se abrirá la última versión guardada.</value></data>
+  <data name="Recovery_Recover" xml:space="preserve"><value>Recuperar cambios</value></data>
+  <data name="Recovery_Title" xml:space="preserve"><value>Recuperar cambios</value></data>
+  <data name="Reports_Detail" xml:space="preserve"><value>Ficha detallada por riesgo</value></data>
+  <data name="Reports_ExportCsv" xml:space="preserve"><value>Exportar CSV</value></data>
+  <data name="Reports_ExportDetailPdf" xml:space="preserve"><value>Exportar fichas a PDF</value></data>
+  <data name="Reports_ExportPdf" xml:space="preserve"><value>Exportar PDF</value></data>
+  <data name="Reports_NoJustification" xml:space="preserve"><value>(sin justificación)</value></data>
+  <data name="Reports_Summary" xml:space="preserve"><value>Ficha resumen de oportunidades de mejora</value></data>
+  <data name="Risk_Edit" xml:space="preserve"><value>Editar riesgo</value></data>
+  <data name="Risk_JustificationHint" xml:space="preserve"><value>Justificación (opcional, recomendada): por qué recibió este nivel</value></data>
+  <data name="Risk_Long" xml:space="preserve"><value>Descripción larga</value></data>
+  <data name="Risk_LongHint" xml:space="preserve"><value>Descripción larga — detalle, análisis y recomendación (obligatoria)</value></data>
+  <data name="Risk_New" xml:space="preserve"><value>Nuevo riesgo</value></data>
+  <data name="Risk_NoLevel" xml:space="preserve"><value>sin elegir</value></data>
+  <data name="Risk_Short" xml:space="preserve"><value>Descripción corta</value></data>
+  <data name="Risk_ShortHint" xml:space="preserve"><value>Descripción corta — resumen ejecutivo (obligatoria)</value></data>
+  <data name="Risk_Title" xml:space="preserve"><value>Título (obligatorio)</value></data>
+  <data name="Risks_Add" xml:space="preserve"><value>Nuevo riesgo</value></data>
+  <data name="Risks_ClearFilters" xml:space="preserve"><value>Limpiar</value></data>
+  <data name="Risks_ColRisk" xml:space="preserve"><value>Riesgo / oportunidad de mejora</value></data>
+  <data name="Risks_Count" xml:space="preserve"><value>Mostrando {0} de {1} riesgos</value></data>
+  <data name="Risks_DeleteMessage" xml:space="preserve"><value>¿Eliminar el riesgo «{0}»? Puede deshacerlo con Edición → Deshacer.</value></data>
+  <data name="Risks_DeleteTitle" xml:space="preserve"><value>Eliminar riesgo</value></data>
+  <data name="Risks_DescendingTip" xml:space="preserve"><value>Orden descendente (de mayor a menor)</value></data>
+  <data name="Risks_DifficultyShort" xml:space="preserve"><value>Dificultad</value></data>
+  <data name="Risks_EmptyHint" xml:space="preserve"><value>Cargue el primer riesgo: título, descripciones y un nivel de riesgo, valor agregado y dificultad.</value></data>
+  <data name="Risks_EmptyTitle" xml:space="preserve"><value>Todavía no hay riesgos</value></data>
+  <data name="Risks_Search" xml:space="preserve"><value>Buscar</value></data>
+  <data name="Risks_SearchHint" xml:space="preserve"><value>Texto en título o descripciones</value></data>
+  <data name="Risks_SortBy" xml:space="preserve"><value>Ordenar por</value></data>
+  <data name="Risks_SortCreated" xml:space="preserve"><value>Fecha de alta</value></data>
+  <data name="Risks_SortTitle" xml:space="preserve"><value>Título</value></data>
+  <data name="SaveAs_Title" xml:space="preserve"><value>Guardar como</value></data>
+  <data name="ScaleType_Difficulty" xml:space="preserve"><value>Dificultad de implementación</value></data>
+  <data name="ScaleType_Risk" xml:space="preserve"><value>Riesgo</value></data>
+  <data name="ScaleType_Value" xml:space="preserve"><value>Valor agregado</value></data>
+  <data name="Scale_AddLevel" xml:space="preserve"><value>+ Agregar nivel</value></data>
+  <data name="Scale_Color" xml:space="preserve"><value>Color</value></data>
+  <data name="Scale_CustomColor" xml:space="preserve"><value>Personalizado</value></data>
+  <data name="Scale_Edit" xml:space="preserve"><value>Editar escala</value></data>
+  <data name="Scale_Hex" xml:space="preserve"><value>Código</value></data>
+  <data name="Scale_LevelInUse" xml:space="preserve"><value>No se puede quitar el nivel «{0}» porque hay riesgos que lo usan.</value></data>
+  <data name="Scale_LevelName" xml:space="preserve"><value>Nombre del nivel</value></data>
+  <data name="Scale_LevelNameHint" xml:space="preserve"><value>Ej.: Alto</value></data>
+  <data name="Scale_LevelsHint" xml:space="preserve"><value>El orden ubica cada nivel en la escala (el número más bajo es el nivel más bajo) y define su posición en la matriz. Los cambios de nombre o color se reflejan en todos los riesgos e informes.</value></data>
+  <data name="Scale_Name" xml:space="preserve"><value>Nombre de la escala</value></data>
+  <data name="Scale_New" xml:space="preserve"><value>Nueva escala</value></data>
+  <data name="Scale_Order" xml:space="preserve"><value>Orden</value></data>
+  <data name="Scale_Preview" xml:space="preserve"><value>Vista</value></data>
+  <data name="Scale_RemoveLevel" xml:space="preserve"><value>Quitar nivel</value></data>
+  <data name="Scale_RemoveLevelMessage" xml:space="preserve"><value>¿Quitar el nivel «{0}» de la escala? El cambio se aplica al guardar la escala.</value></data>
+  <data name="Scale_RemoveLevelTitle" xml:space="preserve"><value>Quitar nivel</value></data>
+  <data name="Scale_Type" xml:space="preserve"><value>Tipo</value></data>
+  <data name="Scales_Add" xml:space="preserve"><value>+ Nueva escala</value></data>
+  <data name="Scales_Assigned" xml:space="preserve"><value>ASIGNADA AL PROYECTO</value></data>
+  <data name="Scales_DeleteAssigned" xml:space="preserve"><value>La escala «{0}» está asignada al proyecto y no se puede eliminar. Asigne otra escala en la ficha del proyecto primero.</value></data>
+  <data name="Scales_DeleteMessage" xml:space="preserve"><value>¿Eliminar la escala «{0}»? Puede deshacerlo con Edición → Deshacer.</value></data>
+  <data name="Scales_DeleteTitle" xml:space="preserve"><value>Eliminar escala</value></data>
+  <data name="Scales_Intro" xml:space="preserve"><value>Las escalas viven dentro de este archivo. Para reutilizarlas en otros archivos o distribuirlas a clientes, guárdelas como plantilla.</value></data>
+  <data name="Scales_LevelCount" xml:space="preserve"><value>{0} niveles</value></data>
+  <data name="Scales_PurposeDifficulty" xml:space="preserve"><value>Esfuerzo para implementar la mejora — eje Y de la matriz.</value></data>
+  <data name="Scales_PurposeRisk" xml:space="preserve"><value>Gravedad de la observación — color de cada riesgo (semáforo).</value></data>
+  <data name="Scales_PurposeValue" xml:space="preserve"><value>Beneficio de implementar la mejora — eje X de la matriz.</value></data>
+  <data name="Scales_SaveTemplate" xml:space="preserve"><value>Guardar como plantilla…</value></data>
+  <data name="Scales_SaveTemplateTip" xml:space="preserve"><value>Guarda todas las escalas de este archivo en una plantilla cifrada (.rmt)</value></data>
+  <data name="Section_Matrix" xml:space="preserve"><value>Matriz de priorización</value></data>
+  <data name="Section_Project" xml:space="preserve"><value>Proyecto</value></data>
+  <data name="Section_Reports" xml:space="preserve"><value>Informes</value></data>
+  <data name="Section_Risks" xml:space="preserve"><value>Riesgos</value></data>
+  <data name="Section_Scales" xml:space="preserve"><value>Escalas</value></data>
+  <data name="Status_Autosaved" xml:space="preserve"><value>Copia de recuperación guardada a las {0}</value></data>
+  <data name="Status_Exported" xml:space="preserve"><value>Exportado: {0}</value></data>
+  <data name="Status_Exporting" xml:space="preserve"><value>Exportando…</value></data>
+  <data name="Status_PasswordChanged" xml:space="preserve"><value>Contraseña cambiada y archivo cifrado de nuevo</value></data>
+  <data name="Status_Saved" xml:space="preserve"><value>Guardado a las {0}</value></data>
+  <data name="Status_Saving" xml:space="preserve"><value>Guardando…</value></data>
+  <data name="Status_TemplateSaved" xml:space="preserve"><value>Plantilla guardada</value></data>
+  <data name="Template_DefaultName" xml:space="preserve"><value>Escalas</value></data>
+  <data name="Template_ErrorTitle" xml:space="preserve"><value>No se pudo abrir la plantilla</value></data>
+  <data name="Template_OpenTitle" xml:space="preserve"><value>Elegir plantilla de escalas</value></data>
+  <data name="Template_PasswordOpenTitle" xml:space="preserve"><value>Abrir plantilla</value></data>
+  <data name="Template_PasswordTitle" xml:space="preserve"><value>Contraseña de la plantilla</value></data>
+  <data name="Template_SaveTitle" xml:space="preserve"><value>Guardar escalas como plantilla</value></data>
+  <data name="Welcome_Import" xml:space="preserve"><value>Importar JSON</value></data>
+  <data name="Welcome_ImportHint" xml:space="preserve"><value>Desde una exportación de auros.ram</value></data>
+  <data name="Welcome_New" xml:space="preserve"><value>Nueva matriz</value></data>
+  <data name="Welcome_NewHint" xml:space="preserve"><value>Con escalas estándar o una plantilla</value></data>
+  <data name="Welcome_Open" xml:space="preserve"><value>Abrir matriz…</value></data>
+  <data name="Welcome_OpenHint" xml:space="preserve"><value>Un archivo .rmx existente</value></data>
+  <data name="Welcome_Recent" xml:space="preserve"><value>Archivos recientes</value></data>
+  <data name="Welcome_SecurityNote" xml:space="preserve"><value>Cada matriz se guarda en un archivo cifrado (AES-256) protegido con su propia contraseña. La contraseña nunca se guarda y no se puede recuperar: anótela en un lugar seguro.</value></data>
+  <data name="Welcome_Subtitle" xml:space="preserve"><value>Matrices de riesgo: clasifique cada riesgo por gravedad, valor agregado y dificultad, y priorice con la matriz.</value></data>
+</root>

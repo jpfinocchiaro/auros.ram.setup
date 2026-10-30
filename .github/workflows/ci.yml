@@ -1,0 +1,37 @@
+# RNF-66: compila para las tres plataformas y ejecuta las pruebas en cada cambio.
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+          - os: macos-latest
+            rid: osx-arm64
+          - os: ubuntu-22.04
+            rid: linux-x64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Restaurar
+        run: dotnet restore Auros.Ram.slnx
+      - name: Compilar (analizadores y estilo, RNF-70)
+        run: dotnet build Auros.Ram.slnx --no-restore -c Release -warnaserror
+      - name: Pruebas con cobertura (RNF-67, RNF-68)
+        run: dotnet test Auros.Ram.slnx --no-build -c Release --collect:"XPlat Code Coverage"
+      - name: Publicar ejecutable autocontenido (RNF-10)
+        run: dotnet publish src/Auros.Ram.App -c Release -r ${{ matrix.rid }} -o publish/${{ matrix.rid }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: auros.ram-${{ matrix.rid }}
+          path: publish/${{ matrix.rid }}

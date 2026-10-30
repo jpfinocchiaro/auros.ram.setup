@@ -1,0 +1,79 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Auros.Ram.App.ViewModels"
+             x:Class="Auros.Ram.App.App"
+             RequestedThemeVariant="Default">
+  <!-- RNF-45: el tema sigue la preferencia claro/oscuro del sistema operativo. -->
+
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="SurfaceAltBrush" Color="#F4F5F7" />
+          <SolidColorBrush x:Key="BorderSubtleBrush" Color="#D9DCE1" />
+          <SolidColorBrush x:Key="MutedTextBrush" Color="#5A606B" />
+          <SolidColorBrush x:Key="AccentBrush" Color="#1E5BB8" />
+          <SolidColorBrush x:Key="ErrorBrush" Color="#B3261E" />
+          <SolidColorBrush x:Key="WarningBackBrush" Color="#FFF4E0" />
+          <SolidColorBrush x:Key="OverlayBrush" Color="#E6F4F5F7" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="SurfaceBrush" Color="#1F2125" />
+          <SolidColorBrush x:Key="SurfaceAltBrush" Color="#2A2D33" />
+          <SolidColorBrush x:Key="BorderSubtleBrush" Color="#3D414A" />
+          <SolidColorBrush x:Key="MutedTextBrush" Color="#A9AFBA" />
+          <SolidColorBrush x:Key="AccentBrush" Color="#7FB0FF" />
+          <SolidColorBrush x:Key="ErrorBrush" Color="#FF8A80" />
+          <SolidColorBrush x:Key="WarningBackBrush" Color="#3A2F1A" />
+          <SolidColorBrush x:Key="OverlayBrush" Color="#E61F2125" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
+
+  <Application.DataTemplates>
+    <!-- Nivel pintado de su color: el texto lo hace legible sin distinguir colores (RNF-46). -->
+    <DataTemplate DataType="vm:LevelChip">
+      <Border Classes="chip" Background="{Binding Background}" ToolTip.Tip="{Binding Name}">
+        <TextBlock Text="{Binding Name}" Foreground="{Binding Foreground}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+      </Border>
+    </DataTemplate>
+  </Application.DataTemplates>
+
+  <Application.Styles>
+    <FluentTheme />
+    <Style Selector="Border.chip">
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="Padding" Value="8,3" />
+      <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+    <Style Selector="TextBlock.h1">
+      <Setter Property="FontSize" Value="22" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.h2">
+      <Setter Property="FontSize" Value="16" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.muted">
+      <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+    </Style>
+    <Style Selector="TextBlock.label">
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Margin" Value="0,0,0,4" />
+    </Style>
+    <Style Selector="TextBlock.error">
+      <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Padding" Value="16" />
+    </Style>
+  </Application.Styles>
+</Application>

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- RNF-07: dominio independiente de la interfaz. -->
+  <PropertyGroup>
+    <RootNamespace>Auros.Ram.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Messages.resx">
+      <StronglyTypedFileName>$(IntermediateOutputPath)Messages.Designer.cs</StronglyTypedFileName>
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedNamespace>Auros.Ram.Core.Resources</StronglyTypedNamespace>
+      <StronglyTypedClassName>Messages</StronglyTypedClassName>
+      <PublicClass>true</PublicClass>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Auros.Ram.Tests" />
+  </ItemGroup>
+</Project>

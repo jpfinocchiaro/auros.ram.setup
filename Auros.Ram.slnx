@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Auros.Ram.App/Auros.Ram.App.csproj" />
+    <Project Path="src/Auros.Ram.Core/Auros.Ram.Core.csproj" />
+    <Project Path="src/Auros.Ram.Export/Auros.Ram.Export.csproj" />
+    <Project Path="src/Auros.Ram.Persistence/Auros.Ram.Persistence.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Auros.Ram.App.Tests/Auros.Ram.App.Tests.csproj" />
+    <Project Path="tests/Auros.Ram.Tests/Auros.Ram.Tests.csproj" />
+  </Folder>
+</Solution>
