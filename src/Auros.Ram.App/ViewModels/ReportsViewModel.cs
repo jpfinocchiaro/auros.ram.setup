@@ -14,8 +14,8 @@ public sealed record ReportItem(
     string ShortDescription,
     string LongDescription,
     LevelChip RiskLevel,
-    LevelChip ValueLevel,
-    LevelChip DifficultyLevel,
+    LevelChip ImpactLevel,
+    LevelChip ProbabilityLevel,
     IReadOnlyList<DetailDimension> Dimensions)
 {
     public string Heading => $"{Number}. {Title}";
@@ -36,7 +36,7 @@ public sealed partial class ReportsViewModel : ObservableObject
 
     [ObservableProperty] private ReportItem? _selected;
     [ObservableProperty] private string _projectName = "";
-    [ObservableProperty] private string _clientName = "";
+    [ObservableProperty] private string _companyName = "";
 
     public void Reload()
     {
@@ -48,17 +48,17 @@ public sealed partial class ReportsViewModel : ObservableObject
             var r = row.Risk;
             Items.Add(new ReportItem(
                 row.Number, r.Id, r.Title, r.ShortDescription, r.LongDescription,
-                new LevelChip(row.RiskLevel), new LevelChip(row.ValueLevel), new LevelChip(row.DifficultyLevel),
+                new LevelChip(row.RiskLevel), new LevelChip(row.ImpactLevel), new LevelChip(row.ProbabilityLevel),
                 [
-                    Dim(ScaleType.Risk, row.RiskLevel, r.RiskJustification),
-                    Dim(ScaleType.Value, row.ValueLevel, r.ValueJustification),
-                    Dim(ScaleType.Difficulty, row.DifficultyLevel, r.DifficultyJustification),
+                    new DetailDimension(ScaleType.Risk.DisplayName(), new LevelChip(row.RiskLevel), Resources.Strings.Reports_FromHeatMap, false),
+                    Dim(ScaleType.Impact, row.ImpactLevel, r.ImpactJustification),
+                    Dim(ScaleType.Probability, row.ProbabilityLevel, r.ProbabilityJustification),
                 ]));
         }
 
         Selected = Items.FirstOrDefault(i => i.RiskId == selectedId) ?? Items.FirstOrDefault();
         ProjectName = doc.Project.Name;
-        ClientName = doc.Project.Client;
+        CompanyName = doc.Project.Company;
     }
 
     private static DetailDimension Dim(ScaleType type, Level level, string justification) =>

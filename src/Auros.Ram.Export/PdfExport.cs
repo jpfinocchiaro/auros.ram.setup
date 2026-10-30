@@ -31,7 +31,7 @@ public static class PdfExport
         SystemFontResolver.EnsureInstalled();
         var document = new Document();
         document.Info.Title = doc.Project.Name;
-        document.Info.Author = doc.Project.Consultancy;
+        document.Info.Subject = doc.Project.Company;
         var normal = document.Styles[StyleNames.Normal]!;
         normal.Font.Name = SystemFontResolver.Family;
         normal.Font.Size = 9;
@@ -63,7 +63,7 @@ public static class PdfExport
         pdf.Save(path);
     }
 
-    // ---- Matriz de priorización -------------------------------------------
+    // ---- Matriz de riesgo ----------------------------------------------------
 
     private static void MatrixSection(Document document, RiskMatrixDocument doc, string appVersion)
     {
@@ -90,9 +90,9 @@ public static class PdfExport
         }
 
         var axis = table.AddRow();
-        axis.Cells[0].AddParagraph(ExportText.Axis_Difficulty).Format.Font.Bold = true;
+        axis.Cells[0].AddParagraph(ExportText.Axis_Impact).Format.Font.Bold = true;
         axis.Cells[1].MergeRight = m.Columns.Count - 1;
-        var axisText = axis.Cells[1].AddParagraph(ExportText.Axis_Value);
+        var axisText = axis.Cells[1].AddParagraph(ExportText.Axis_Probability);
         axisText.Format.Font.Bold = true;
         axisText.Format.Alignment = ParagraphAlignment.Center;
 
@@ -115,20 +115,24 @@ public static class PdfExport
 
             for (var c = 0; c < m.Columns.Count; c++)
             {
+                // Mapa de calor: la celda toma el color de su nivel de riesgo; la abreviatura lo dice sin color (RNF-46).
+                var cell = row.Cells[c + 1];
+                var level = m.LevelAt(r, c);
+                if (level is not null)
+                {
+                    cell.Shading.Color = ToColor(level.Color);
+                    cell.Format.Font.Color = ToColor(level.TextColor);
+                    var tag = cell.AddParagraph($"[{Fmt.Abbrev(level)}]");
+                    tag.Format.Font.Bold = true;
+                    tag.Format.Font.Size = 7;
+                    tag.Format.SpaceAfter = Unit.FromPoint(2);
+                }
+
                 foreach (var risk in m[r, c])
                 {
-                    var level = doc.LevelOf(risk, ScaleType.Risk);
-                    var p = row.Cells[c + 1].AddParagraph();
+                    var p = cell.AddParagraph("• " + risk.Title);
                     p.Format.SpaceAfter = Unit.FromPoint(2);
                     p.Format.LeftIndent = Unit.FromPoint(2);
-                    if (level is not null)
-                    {
-                        p.Format.Shading.Color = ToColor(level.Color);
-                        p.Format.Font.Color = ToColor(Palette.ContrastingText(level.Color));
-                        p.AddFormattedText($"[{Fmt.Abbrev(level)}] ", TextFormat.Bold);
-                    }
-
-                    p.AddText(risk.Title);
                 }
             }
         }
@@ -144,15 +148,24 @@ public static class PdfExport
             return;
         }
 
-        var p = section.AddParagraph();
-        p.Format.SpaceBefore = Unit.FromPoint(8);
-        p.AddText(ExportText.Matrix_Legend + "  ");
-        foreach (var level in scale.OrderedLevels.Reverse())
+        section.AddParagraph(ExportText.Matrix_Legend).Format.SpaceBefore = Unit.FromPoint(8);
+        var levels = scale.OrderedLevels.Reverse().ToList();
+        var table = section.AddTable();
+        table.Borders.Visible = false;
+        foreach (var _ in levels)
         {
-            var t = p.AddFormattedText($" [{Fmt.Abbrev(level)}] {level.Name} ");
-            t.Font.Bold = true;
-            t.Font.Color = ToColor(level.Color);
-            p.AddText("  ");
+            table.AddColumn(Unit.FromCentimeter(3.2));
+        }
+
+        var row = table.AddRow();
+        for (var i = 0; i < levels.Count; i++)
+        {
+            var cell = row.Cells[i];
+            cell.Shading.Color = ToColor(levels[i].Color);
+            var p = cell.AddParagraph($"[{Fmt.Abbrev(levels[i])}] {levels[i].Name}");
+            p.Format.Font.Bold = true;
+            p.Format.Font.Color = ToColor(levels[i].TextColor);
+            p.Format.Alignment = ParagraphAlignment.Center;
         }
     }
 
@@ -176,7 +189,7 @@ public static class PdfExport
         head.HeadingFormat = true;
         head.Shading.Color = HeaderFill;
         head.Format.Font.Bold = true;
-        string[] titles = [ExportText.Col_Number, ExportText.Col_Title, ExportText.Col_Short, ExportText.Col_Risk, ExportText.Col_Value, ExportText.Col_Difficulty];
+        string[] titles = [ExportText.Col_Number, ExportText.Col_Title, ExportText.Col_Short, ExportText.Col_Risk, ExportText.Col_Impact, ExportText.Col_Probability];
         for (var i = 0; i < titles.Length; i++)
         {
             head.Cells[i].AddParagraph(titles[i]);
@@ -189,8 +202,8 @@ public static class PdfExport
             row.Cells[1].AddParagraph(x.Risk.Title).Format.Font.Bold = true;
             row.Cells[2].AddParagraph(x.Risk.ShortDescription);
             LevelCell(row.Cells[3], x.RiskLevel, center: true);
-            LevelCell(row.Cells[4], x.ValueLevel, center: true);
-            LevelCell(row.Cells[5], x.DifficultyLevel, center: true);
+            LevelCell(row.Cells[4], x.ImpactLevel, center: true);
+            LevelCell(row.Cells[5], x.ProbabilityLevel, center: true);
             row.KeepWith = 0;
         }
     }
@@ -215,7 +228,7 @@ public static class PdfExport
             title.Format.Font.Bold = true;
             title.Format.SpaceAfter = Unit.FromPoint(4);
 
-            var meta = section.AddParagraph($"{ExportText.Project_Name}: {doc.Project.Name}    {ExportText.Project_Client}: {doc.Project.Client}");
+            var meta = section.AddParagraph($"{ExportText.Project_Name}: {doc.Project.Name}    {ExportText.Project_Company}: {doc.Project.Company}");
             meta.Format.SpaceAfter = Unit.FromPoint(8);
 
             var table = section.AddTable();
@@ -224,12 +237,12 @@ public static class PdfExport
             table.AddColumn(Unit.FromCentimeter(4.2));
             table.AddColumn(Unit.FromCentimeter(3.0));
             table.AddColumn(Unit.FromCentimeter(10.8));
-            foreach (var (type, level) in new[] { (ScaleType.Risk, x.RiskLevel), (ScaleType.Value, x.ValueLevel), (ScaleType.Difficulty, x.DifficultyLevel) })
+            foreach (var (type, level) in new[] { (ScaleType.Risk, x.RiskLevel), (ScaleType.Impact, x.ImpactLevel), (ScaleType.Probability, x.ProbabilityLevel) })
             {
                 var row = table.AddRow();
                 row.Cells[0].AddParagraph(type.DisplayName()).Format.Font.Bold = true;
                 LevelCell(row.Cells[1], level, center: true);
-                var justification = x.Risk.JustificationFor(type);
+                var justification = type == ScaleType.Risk ? ExportText.Label_FromHeatMap : x.Risk.JustificationFor(type);
                 var j = row.Cells[2].AddParagraph(string.IsNullOrWhiteSpace(justification) ? ExportText.Label_NoJustification : justification);
                 if (string.IsNullOrWhiteSpace(justification))
                 {
@@ -269,7 +282,7 @@ public static class PdfExport
         return section;
     }
 
-    /// <summary>Encabezado con logos de la consultora y del cliente (RF-15).</summary>
+    /// <summary>Encabezado con el logo de la empresa (RF-15).</summary>
     private static void Banner(Section section, RiskMatrixDocument doc, string title)
     {
         var width = section.PageSetup.PageWidth.Centimeter - 3.0;
@@ -280,15 +293,14 @@ public static class PdfExport
         table.AddColumn(Unit.FromCentimeter(4));
         var row = table.AddRow();
         row.VerticalAlignment = VerticalAlignment.Center;
-        Logo(row.Cells[0], doc.Project.ConsultancyLogo, ParagraphAlignment.Left);
+        Logo(row.Cells[0], doc.Project.CompanyLogo, ParagraphAlignment.Left);
         var center = row.Cells[1].AddParagraph();
         center.Format.Alignment = ParagraphAlignment.Center;
         center.AddFormattedText(title, new Font { Size = 14, Bold = true });
         center.AddLineBreak();
-        center.AddText($"{doc.Project.Name} — {doc.Project.Client}");
+        center.AddText(string.IsNullOrWhiteSpace(doc.Project.Company) ? doc.Project.Name : $"{doc.Project.Name} — {doc.Project.Company}");
         center.AddLineBreak();
-        center.AddFormattedText($"{doc.Project.Consultancy} · {doc.Project.Date.ToString("d", Fmt.Culture)}", new Font { Size = 8, Color = Colors.Gray });
-        Logo(row.Cells[2], doc.Project.ClientLogo, ParagraphAlignment.Right);
+        center.AddFormattedText(doc.Project.Date.ToString("d", Fmt.Culture), new Font { Size = 8, Color = Colors.Gray });
         section.AddParagraph().Format.SpaceAfter = Unit.FromPoint(6);
     }
 
@@ -321,7 +333,7 @@ public static class PdfExport
         cell.Shading.Color = ToColor(level.Color);
         var p = cell.AddParagraph(level.Name);
         p.Format.Font.Bold = true;
-        p.Format.Font.Color = ToColor(Palette.ContrastingText(level.Color));
+        p.Format.Font.Color = ToColor(level.TextColor);
         p.Format.Alignment = center ? ParagraphAlignment.Center : ParagraphAlignment.Left;
     }
 

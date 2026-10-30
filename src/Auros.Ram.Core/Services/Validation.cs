@@ -71,6 +71,11 @@ internal static class Validation
             throw new DomainException(Format(Messages.Error_LevelColorInvalid, level.Name), nameof(Level.Color));
         }
 
+        if (!Palette.IsValidHex(level.TextColor))
+        {
+            throw new DomainException(Format(Messages.Error_LevelTextColorInvalid, level.Name), nameof(Level.TextColor));
+        }
+
         if (level.Order is < Limits.LevelOrderMin or > Limits.LevelOrderMax)
         {
             throw new DomainException(
@@ -87,8 +92,7 @@ internal static class Validation
         }
 
         CheckLength(project.Name, Messages.Field_ProjectName, nameof(ProjectInfo.Name));
-        CheckLength(project.Client, Messages.Field_Client, nameof(ProjectInfo.Client));
-        CheckLength(project.Consultancy, Messages.Field_Consultancy, nameof(ProjectInfo.Consultancy));
+        CheckLength(project.Company, Messages.Field_Company, nameof(ProjectInfo.Company));
 
         // RF-08 / RN-02: las tres escalas son obligatorias y del tipo correcto.
         foreach (var type in Enum.GetValues<ScaleType>())
@@ -137,8 +141,8 @@ internal static class Validation
             throw new DomainException(Messages.Error_RiskLongRequired, nameof(Risk.LongDescription));
         }
 
-        // RF-11 / RN-03: cada nivel debe pertenecer a la escala asignada al proyecto.
-        foreach (var type in Enum.GetValues<ScaleType>())
+        // RF-11 / RN-03: impacto y probabilidad deben pertenecer a las escalas asignadas al proyecto.
+        foreach (var type in ScaleTypeExtensions.Dimensions)
         {
             var label = ScaleTypeName(type);
             var scale = doc.ProjectScale(type)
@@ -169,14 +173,13 @@ internal static class Validation
     private static string ScaleField(ScaleType type) => type switch
     {
         ScaleType.Risk => nameof(ProjectInfo.RiskScaleId),
-        ScaleType.Value => nameof(ProjectInfo.ValueScaleId),
-        _ => nameof(ProjectInfo.DifficultyScaleId),
+        ScaleType.Impact => nameof(ProjectInfo.ImpactScaleId),
+        _ => nameof(ProjectInfo.ProbabilityScaleId),
     };
 
     private static string LevelField(ScaleType type) => type switch
     {
-        ScaleType.Risk => nameof(Risk.RiskLevelId),
-        ScaleType.Value => nameof(Risk.ValueLevelId),
-        _ => nameof(Risk.DifficultyLevelId),
+        ScaleType.Impact => nameof(Risk.ImpactLevelId),
+        _ => nameof(Risk.ProbabilityLevelId),
     };
 }

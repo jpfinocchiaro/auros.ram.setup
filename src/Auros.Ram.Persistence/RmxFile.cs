@@ -86,7 +86,22 @@ public static class RmxFile
             throw new RmxFileException(RmxErrorKind.IoError, ex);
         }
 
-        return RmxHeader.Parse(buffer);
+        var header = RmxHeader.Parse(buffer);
+        EnsureSupported(header);
+        return header;
+    }
+
+    private static void EnsureSupported(RmxHeader header)
+    {
+        if (header.SchemaVersion > Schema.CurrentVersion)
+        {
+            throw new RmxFileException(RmxErrorKind.NewerVersion);
+        }
+
+        if (header.SchemaVersion < Schema.OldestSupportedVersion)
+        {
+            throw new RmxFileException(RmxErrorKind.ObsoleteVersion);
+        }
     }
 
     /// <summary>
@@ -166,10 +181,7 @@ public static class RmxFile
         }
 
         var header = RmxHeader.Parse(data);
-        if (header.SchemaVersion > Schema.CurrentVersion)
-        {
-            throw new RmxFileException(RmxErrorKind.NewerVersion);
-        }
+        EnsureSupported(header);
 
         if (header.Kind != expected)
         {

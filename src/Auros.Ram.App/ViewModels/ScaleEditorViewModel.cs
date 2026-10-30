@@ -9,7 +9,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace Auros.Ram.App.ViewModels;
 
-/// <summary>Un nivel en edición: nombre, color y orden (RF-03).</summary>
+/// <summary>Un nivel en edición: nombre, color de fondo, color de fuente y orden (RF-03).</summary>
 public sealed partial class LevelEditViewModel : ObservableObject
 {
     public LevelEditViewModel(Level level, ScaleEditorViewModel owner)
@@ -18,20 +18,27 @@ public sealed partial class LevelEditViewModel : ObservableObject
         Owner = owner;
         _name = level.Name;
         _hex = level.Color;
+        _textHex = level.TextColor;
         _order = level.Order;
-        _namedColor = Palette.Named.FirstOrDefault(c => string.Equals(c.Hex, level.Color, StringComparison.OrdinalIgnoreCase));
+        _namedColor = Find(Palette.Named, level.Color);
+        _namedTextColor = Find(Palette.TextNamed, level.TextColor);
     }
 
     public Guid Id { get; }
     public ScaleEditorViewModel Owner { get; }
     public IReadOnlyList<NamedColor> Colors => Palette.Named;
+    public IReadOnlyList<NamedColor> TextColors => Palette.TextNamed;
 
     [ObservableProperty]
     private string _name;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Preview), nameof(PreviewText))]
+    [NotifyPropertyChangedFor(nameof(Preview), nameof(LowContrast))]
     private string _hex;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PreviewText), nameof(LowContrast))]
+    private string _textHex;
 
     [ObservableProperty]
     private decimal? _order;
@@ -39,8 +46,15 @@ public sealed partial class LevelEditViewModel : ObservableObject
     [ObservableProperty]
     private NamedColor? _namedColor;
 
+    [ObservableProperty]
+    private NamedColor? _namedTextColor;
+
     public IBrush Preview => Brushes.FromHex(Hex);
-    public IBrush PreviewText => Brushes.FromHex(Palette.ContrastingText(Palette.IsValidHex(Hex) ? Hex : Palette.Gray));
+    public IBrush PreviewText => Brushes.FromHex(TextHex);
+
+    /// <summary>RNF-46: avisa si la fuente no se lee bien sobre el fondo (WCAG AA, 4,5:1).</summary>
+    public bool LowContrast =>
+        Palette.IsValidHex(Hex) && Palette.IsValidHex(TextHex) && Palette.ContrastRatio(Hex, TextHex) < 4.5;
 
     partial void OnNamedColorChanged(NamedColor? value)
     {
@@ -50,13 +64,36 @@ public sealed partial class LevelEditViewModel : ObservableObject
         }
     }
 
+    partial void OnNamedTextColorChanged(NamedColor? value)
+    {
+        if (value is not null)
+        {
+            TextHex = value.Hex;
+        }
+    }
+
+    // Si la fuente era la automática (blanco o negro según el fondo), acompaña el cambio de fondo.
+    partial void OnHexChanged(string? oldValue, string newValue)
+    {
+        if (oldValue is not null && Palette.IsValidHex(newValue) &&
+            string.Equals(TextHex, Palette.ContrastingText(oldValue), StringComparison.OrdinalIgnoreCase))
+        {
+            TextHex = Palette.ContrastingText(newValue);
+            NamedTextColor = Find(Palette.TextNamed, TextHex);
+        }
+    }
+
     public Level ToLevel() => new()
     {
         Id = Id,
         Name = Name,
         Color = Palette.Normalize(Hex),
+        TextColor = Palette.Normalize(TextHex),
         Order = (int)(Order ?? -1),
     };
+
+    private static NamedColor? Find(IReadOnlyList<NamedColor> list, string hex) =>
+        list.FirstOrDefault(c => string.Equals(c.Hex, hex, StringComparison.OrdinalIgnoreCase));
 }
 
 /// <summary>Alta y edición de una escala (RF-01 a RF-05).</summary>
@@ -104,7 +141,7 @@ public sealed partial class ScaleEditorViewModel : ObservableObject
     {
         var next = Levels.Count == 0 ? 1 : (int)Math.Min(Limits.LevelOrderMax, (Levels.Max(l => l.Order) ?? 0) + 1);
         var color = Palette.Named[Levels.Count % Palette.Named.Count].Hex;
-        Levels.Add(new LevelEditViewModel(new Level { Name = "", Color = color, Order = next }, this));
+        Levels.Add(new LevelEditViewModel(new Level { Name = "", Color = color, TextColor = Palette.ContrastingText(color), Order = next }, this));
     }
 
     [RelayCommand]

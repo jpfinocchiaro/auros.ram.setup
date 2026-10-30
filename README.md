@@ -9,7 +9,7 @@ Especificación: *Especificación de requerimientos — auros.ram* (códigos RF-
 
 | Proyecto | Rol |
 |---|---|
-| `src/Auros.Ram.Core` | Dominio sin UI (RNF-07): escalas, niveles, riesgos, validaciones, matriz de priorización, informes, deshacer/rehacer, JSON |
+| `src/Auros.Ram.Core` | Dominio sin UI (RNF-07): escalas, niveles, riesgos (impacto × probabilidad), mapa de calor, validaciones, matriz de riesgo, informes, deshacer/rehacer, JSON |
 | `src/Auros.Ram.Persistence` | Único acceso a disco y a criptografía (RNF-08): formato `.rmx`, SQLCipher, Argon2id, guardado atómico, recuperación, plantillas |
 | `src/Auros.Ram.Export` | Excel (ClosedXML), PDF (PDFsharp/MigraDoc) y CSV |
 | `src/Auros.Ram.App` | Interfaz Avalonia UI, patrón MVVM (CommunityToolkit.Mvvm) |

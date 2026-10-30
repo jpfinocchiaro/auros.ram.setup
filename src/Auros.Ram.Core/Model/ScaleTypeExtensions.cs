@@ -4,11 +4,16 @@ namespace Auros.Ram.Core.Model;
 
 public static class ScaleTypeExtensions
 {
+    /// <summary>Las dimensiones en que se clasifica cada riesgo, en el orden en que se muestran.</summary>
+    public static IReadOnlyList<ScaleType> Dimensions { get; } = [ScaleType.Impact, ScaleType.Probability];
+
+    public static bool IsDimension(this ScaleType type) => type is ScaleType.Impact or ScaleType.Probability;
+
     public static string DisplayName(this ScaleType type) => type switch
     {
         ScaleType.Risk => Messages.ScaleType_Risk,
-        ScaleType.Value => Messages.ScaleType_Value,
-        ScaleType.Difficulty => Messages.ScaleType_Difficulty,
+        ScaleType.Impact => Messages.ScaleType_Impact,
+        ScaleType.Probability => Messages.ScaleType_Probability,
         _ => type.ToString(),
     };
 

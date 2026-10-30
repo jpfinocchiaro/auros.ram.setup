@@ -20,7 +20,7 @@ public sealed partial class LevelOption(LevelChip chip, DimensionEditor owner) :
     private void Select() => owner.Select(this);
 }
 
-/// <summary>Una dimensión (Riesgo, Valor o Dificultad): nivel elegido y justificación.</summary>
+/// <summary>Una dimensión (Impacto o Probabilidad): nivel elegido y justificación.</summary>
 public sealed partial class DimensionEditor : ObservableObject
 {
     public DimensionEditor(ScaleType type, Scale? scale, Guid selected, string justification)
@@ -49,6 +49,8 @@ public sealed partial class DimensionEditor : ObservableObject
     [ObservableProperty]
     private string _justification;
 
+    public event EventHandler? SelectionChanged;
+
     public void Select(LevelOption option)
     {
         foreach (var o in Options)
@@ -57,6 +59,7 @@ public sealed partial class DimensionEditor : ObservableObject
         }
 
         OnPropertyChanged(nameof(SelectedText));
+        SelectionChanged?.Invoke(this, EventArgs.Empty);
     }
 }
 
@@ -73,9 +76,24 @@ public sealed partial class RiskEditorViewModel : ObservableObject
         _title = risk?.Title ?? "";
         _shortDescription = risk?.ShortDescription ?? "";
         _longDescription = risk?.LongDescription ?? "";
-        Dimensions = [.. Enum.GetValues<ScaleType>().Select(t =>
+        Dimensions = [.. ScaleTypeExtensions.Dimensions.Select(t =>
             new DimensionEditor(t, doc.ProjectScale(t), risk?.LevelIdFor(t) ?? Guid.Empty, risk?.JustificationFor(t) ?? ""))];
+        foreach (var d in Dimensions)
+        {
+            d.SelectionChanged += (_, _) => UpdateRiskLevel();
+        }
+
+        UpdateRiskLevel();
     }
+
+    /// <summary>Nivel de riesgo que resulta del impacto y la probabilidad elegidos (mapa de calor).</summary>
+    [ObservableProperty]
+    private LevelChip? _riskLevel;
+
+    public string RiskLevelLabel => ScaleType.Risk.DisplayName();
+
+    private void UpdateRiskLevel() =>
+        RiskLevel = LevelChip.From(HeatMap.Resolve(_doc, Dimensions[0].SelectedId, Dimensions[1].SelectedId));
 
     public string WindowTitle => _original is null ? Strings.Risk_New : Strings.Risk_Edit;
     public ObservableCollection<DimensionEditor> Dimensions { get; }
@@ -109,12 +127,10 @@ public sealed partial class RiskEditorViewModel : ObservableObject
         risk.Title = Title;
         risk.ShortDescription = ShortDescription;
         risk.LongDescription = LongDescription;
-        risk.RiskLevelId = Dimensions[0].SelectedId;
-        risk.ValueLevelId = Dimensions[1].SelectedId;
-        risk.DifficultyLevelId = Dimensions[2].SelectedId;
-        risk.RiskJustification = Dimensions[0].Justification;
-        risk.ValueJustification = Dimensions[1].Justification;
-        risk.DifficultyJustification = Dimensions[2].Justification;
+        risk.ImpactLevelId = Dimensions[0].SelectedId;
+        risk.ProbabilityLevelId = Dimensions[1].SelectedId;
+        risk.ImpactJustification = Dimensions[0].Justification;
+        risk.ProbabilityJustification = Dimensions[1].Justification;
 
         try
         {

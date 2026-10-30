@@ -54,8 +54,8 @@ public sealed class RiskMatrixDocument
         var scaleList = (scales ?? DefaultScales.Create()).Select(s => s.Clone()).ToList();
         var info = project?.Clone() ?? new ProjectInfo();
         info.RiskScaleId ??= scaleList.FirstOrDefault(s => s.Type == ScaleType.Risk)?.Id;
-        info.ValueScaleId ??= scaleList.FirstOrDefault(s => s.Type == ScaleType.Value)?.Id;
-        info.DifficultyScaleId ??= scaleList.FirstOrDefault(s => s.Type == ScaleType.Difficulty)?.Id;
+        info.ImpactScaleId ??= scaleList.FirstOrDefault(s => s.Type == ScaleType.Impact)?.Id;
+        info.ProbabilityScaleId ??= scaleList.FirstOrDefault(s => s.Type == ScaleType.Probability)?.Id;
         return new RiskMatrixDocument(info, scaleList, []);
     }
 
@@ -96,15 +96,24 @@ public sealed class RiskMatrixDocument
         return null;
     }
 
-    public Level? LevelOf(Risk risk, ScaleType type) => ProjectScale(type)?.FindLevel(risk.LevelIdFor(type));
+    /// <summary>
+    /// Nivel del riesgo en una escala. Para <see cref="ScaleType.Risk"/> no se elige: sale del mapa de calor
+    /// según su impacto y su probabilidad.
+    /// </summary>
+    public Level? LevelOf(Risk risk, ScaleType type) => type == ScaleType.Risk
+        ? HeatMap.Resolve(this, risk.ImpactLevelId, risk.ProbabilityLevelId)
+        : ProjectScale(type)?.FindLevel(risk.LevelIdFor(type));
+
+    public Level? RiskLevelOf(Risk risk) => LevelOf(risk, ScaleType.Risk);
 
     public Risk? FindRisk(Guid id) => _risks.Find(r => r.Id == id);
 
+    /// <summary>RF-05: un nivel está en uso si algún riesgo lo tiene o si es el nivel de riesgo que le toca a alguno.</summary>
     public bool IsLevelInUse(Guid levelId) =>
-        _risks.Exists(r => r.RiskLevelId == levelId || r.ValueLevelId == levelId || r.DifficultyLevelId == levelId);
+        _risks.Exists(r => r.ImpactLevelId == levelId || r.ProbabilityLevelId == levelId || RiskLevelOf(r)?.Id == levelId);
 
     public bool IsScaleAssigned(Guid scaleId) =>
-        Project.RiskScaleId == scaleId || Project.ValueScaleId == scaleId || Project.DifficultyScaleId == scaleId;
+        Project.RiskScaleId == scaleId || Project.ImpactScaleId == scaleId || Project.ProbabilityScaleId == scaleId;
 
     /// <summary>RF-09: con riesgos cargados las escalas asignadas quedan fijas.</summary>
     public bool CanChangeProjectScales => _risks.Count == 0;
@@ -119,14 +128,54 @@ public sealed class RiskMatrixDocument
 
         if (!CanChangeProjectScales &&
             (next.RiskScaleId != Project.RiskScaleId ||
-             next.ValueScaleId != Project.ValueScaleId ||
-             next.DifficultyScaleId != Project.DifficultyScaleId))
+             next.ImpactScaleId != Project.ImpactScaleId ||
+             next.ProbabilityScaleId != Project.ProbabilityScaleId))
         {
             throw new DomainException(Messages.Error_ScalesLockedByRisks);
         }
 
+        next.HeatMap = HeatMap.Prune(next.HeatMap, FindScale(next.RiskScaleId), FindScale(next.ImpactScaleId), FindScale(next.ProbabilityScaleId));
         var previous = Project;
         Apply(Messages.Undo_EditProject, DocumentChangeKind.Project,
+            () => Project = next,
+            () => Project = previous);
+    }
+
+    /// <summary>
+    /// Cambia el nivel de riesgo de una celda del mapa de calor. Se puede hacer con riesgos cargados:
+    /// el nivel de los riesgos de esa celda cambia con ella.
+    /// </summary>
+    public void SetHeatCell(Guid impactLevelId, Guid probabilityLevelId, Guid riskLevelId)
+    {
+        var impact = ProjectScale(ScaleType.Impact)?.FindLevel(impactLevelId);
+        var probability = ProjectScale(ScaleType.Probability)?.FindLevel(probabilityLevelId);
+        var level = ProjectScale(ScaleType.Risk)?.FindLevel(riskLevelId);
+        if (impact is null || probability is null || level is null)
+        {
+            throw new DomainException(Messages.Error_HeatCellInvalid);
+        }
+
+        var next = Project.Clone();
+        next.HeatMap = [.. Project.HeatMap.Where(c => c.ImpactLevelId != impactLevelId || c.ProbabilityLevelId != probabilityLevelId),
+            new HeatCell(impactLevelId, probabilityLevelId, riskLevelId)];
+        var previous = Project;
+        Apply(Validation.Format(Messages.Undo_EditHeatMap, impact.Name, probability.Name), DocumentChangeKind.Project,
+            () => Project = next,
+            () => Project = previous);
+    }
+
+    /// <summary>Vuelve todo el mapa de calor a los niveles por omisión.</summary>
+    public void ResetHeatMap()
+    {
+        if (Project.HeatMap.Count == 0)
+        {
+            return;
+        }
+
+        var next = Project.Clone();
+        next.HeatMap = [];
+        var previous = Project;
+        Apply(Messages.Undo_ResetHeatMap, DocumentChangeKind.Project,
             () => Project = next,
             () => Project = previous);
     }
@@ -289,9 +338,8 @@ public sealed class RiskMatrixDocument
         risk.Title = risk.Title.Trim();
         risk.ShortDescription = risk.ShortDescription.Trim();
         risk.LongDescription = risk.LongDescription.Trim();
-        risk.RiskJustification = risk.RiskJustification.Trim();
-        risk.ValueJustification = risk.ValueJustification.Trim();
-        risk.DifficultyJustification = risk.DifficultyJustification.Trim();
+        risk.ImpactJustification = risk.ImpactJustification.Trim();
+        risk.ProbabilityJustification = risk.ProbabilityJustification.Trim();
         return risk;
     }
 

@@ -7,25 +7,26 @@ internal static class Sample
 {
     public static RiskMatrixDocument Document(int riskCount = 3)
     {
-        var doc = RiskMatrixDocument.CreateNew(new ProjectInfo { Name = "Relevamiento 2026", Client = "Cliente S.A.", Consultancy = "Auros" });
+        var doc = RiskMatrixDocument.CreateNew(new ProjectInfo { Name = "Relevamiento 2026", Company = "Cliente S.A." });
         for (var i = 0; i < riskCount; i++)
         {
-            doc.AddRisk(NewRisk(doc, $"Riesgo {i + 1}", i % 4, i % 3, (i + 1) % 3));
+            doc.AddRisk(NewRisk(doc, $"Riesgo {i + 1}", i % 5, ((i * 2) + 1) % 5));
         }
 
         doc.MarkSaved();
         return doc;
     }
 
-    public static Risk NewRisk(RiskMatrixDocument doc, string title, int risk, int value, int difficulty) => new()
+    /// <param name="impact">Posición del nivel de impacto (0 = el menor).</param>
+    /// <param name="probability">Posición del nivel de probabilidad (0 = la menor).</param>
+    public static Risk NewRisk(RiskMatrixDocument doc, string title, int impact, int probability) => new()
     {
         Title = title,
         ShortDescription = "Resumen de " + title,
         LongDescription = "Detalle, análisis y recomendación de " + title,
-        RiskLevelId = Level(doc, ScaleType.Risk, risk).Id,
-        ValueLevelId = Level(doc, ScaleType.Value, value).Id,
-        DifficultyLevelId = Level(doc, ScaleType.Difficulty, difficulty).Id,
-        RiskJustification = "Porque sí",
+        ImpactLevelId = Level(doc, ScaleType.Impact, impact).Id,
+        ProbabilityLevelId = Level(doc, ScaleType.Probability, probability).Id,
+        ImpactJustification = "Porque sí",
     };
 
     public static Level Level(RiskMatrixDocument doc, ScaleType type, int index) =>

@@ -14,6 +14,8 @@ public static partial class Palette
     public const string Violet = "#7B3FB5";
     public const string Blue = "#1E6FD9";
     public const string Gray = "#8A8F98";
+    public const string White = "#FFFFFF";
+    public const string Black = "#000000";
 
     public static IReadOnlyList<NamedColor> Named { get; } =
     [
@@ -26,6 +28,14 @@ public static partial class Palette
         new(Messages.Color_Gray, Gray),
     ];
 
+    /// <summary>Colores de fuente: blanco y negro primero, después los mismos de la paleta.</summary>
+    public static IReadOnlyList<NamedColor> TextNamed { get; } =
+    [
+        new(Messages.Color_White, White),
+        new(Messages.Color_Black, Black),
+        .. Named,
+    ];
+
     [GeneratedRegex("^#[0-9A-Fa-f]{6}$")]
     private static partial Regex HexRegex();
 
@@ -33,13 +43,21 @@ public static partial class Palette
 
     public static string Normalize(string value) => value.Trim().ToUpperInvariant();
 
+    /// <summary>Relación de contraste WCAG entre dos colores (1 a 21). AA para texto normal pide 4,5.</summary>
+    public static double ContrastRatio(string a, string b)
+    {
+        var la = RelativeLuminance(a);
+        var lb = RelativeLuminance(b);
+        return (Math.Max(la, lb) + 0.05) / (Math.Min(la, lb) + 0.05);
+    }
+
     /// <summary>Negro o blanco, el que tenga más contraste sobre el color dado (WCAG).</summary>
     public static string ContrastingText(string hex)
     {
         var l = RelativeLuminance(hex);
         var contrastWhite = 1.05 / (l + 0.05);
         var contrastBlack = (l + 0.05) / 0.05;
-        return contrastBlack >= contrastWhite ? "#000000" : "#FFFFFF";
+        return contrastBlack >= contrastWhite ? Black : White;
     }
 
     public static double RelativeLuminance(string hex)

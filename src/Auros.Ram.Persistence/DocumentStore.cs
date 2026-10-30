@@ -16,26 +16,23 @@ internal static class DocumentStore
 
         var p = doc.Project;
         using (var cmd = Command(c, tx, """
-            INSERT INTO project (id, name, client, consultancy, date, status, consultancy_logo, client_logo,
-                                 risk_scale_id, value_scale_id, difficulty_scale_id)
-            VALUES (1, $name, $client, $consultancy, $date, $status, $clogo, $klogo, $rs, $vs, $ds);
+            INSERT INTO project (id, name, company, date, status, company_logo, risk_scale_id, impact_scale_id, probability_scale_id)
+            VALUES (1, $name, $company, $date, $status, $logo, $rs, $is, $ps);
             """))
         {
             cmd.Parameters.AddWithValue("$name", p.Name);
-            cmd.Parameters.AddWithValue("$client", p.Client);
-            cmd.Parameters.AddWithValue("$consultancy", p.Consultancy);
+            cmd.Parameters.AddWithValue("$company", p.Company);
             cmd.Parameters.AddWithValue("$date", p.Date.ToString(DateFormat, CultureInfo.InvariantCulture));
             cmd.Parameters.AddWithValue("$status", (int)p.Status);
-            cmd.Parameters.AddWithValue("$clogo", (object?)p.ConsultancyLogo ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("$klogo", (object?)p.ClientLogo ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("$logo", (object?)p.CompanyLogo ?? DBNull.Value);
             cmd.Parameters.AddWithValue("$rs", Id(p.RiskScaleId));
-            cmd.Parameters.AddWithValue("$vs", Id(p.ValueScaleId));
-            cmd.Parameters.AddWithValue("$ds", Id(p.DifficultyScaleId));
+            cmd.Parameters.AddWithValue("$is", Id(p.ImpactScaleId));
+            cmd.Parameters.AddWithValue("$ps", Id(p.ProbabilityScaleId));
             cmd.ExecuteNonQuery();
         }
 
         using (var scaleCmd = Command(c, tx, "INSERT INTO scale (id, position, name, type) VALUES ($id, $pos, $name, $type);"))
-        using (var levelCmd = Command(c, tx, "INSERT INTO level (id, scale_id, name, color, ord) VALUES ($id, $scale, $name, $color, $ord);"))
+        using (var levelCmd = Command(c, tx, "INSERT INTO level (id, scale_id, name, color, text_color, ord) VALUES ($id, $scale, $name, $color, $text, $ord);"))
         {
             var sId = scaleCmd.Parameters.Add("$id", SqliteType.Text);
             var sPos = scaleCmd.Parameters.Add("$pos", SqliteType.Integer);
@@ -45,6 +42,7 @@ internal static class DocumentStore
             var lScale = levelCmd.Parameters.Add("$scale", SqliteType.Text);
             var lName = levelCmd.Parameters.Add("$name", SqliteType.Text);
             var lColor = levelCmd.Parameters.Add("$color", SqliteType.Text);
+            var lText = levelCmd.Parameters.Add("$text", SqliteType.Text);
             var lOrd = levelCmd.Parameters.Add("$ord", SqliteType.Integer);
 
             for (var i = 0; i < doc.Scales.Count; i++)
@@ -62,20 +60,34 @@ internal static class DocumentStore
                     lScale.Value = s.Id.ToString();
                     lName.Value = l.Name;
                     lColor.Value = l.Color;
+                    lText.Value = l.TextColor;
                     lOrd.Value = l.Order;
                     levelCmd.ExecuteNonQuery();
                 }
             }
         }
 
+        using (var cmd = Command(c, tx, "INSERT OR REPLACE INTO heat_cell (impact_level_id, probability_level_id, risk_level_id) VALUES ($i, $p, $r);"))
+        {
+            var i = cmd.Parameters.Add("$i", SqliteType.Text);
+            var pr = cmd.Parameters.Add("$p", SqliteType.Text);
+            var r = cmd.Parameters.Add("$r", SqliteType.Text);
+            foreach (var cell in p.HeatMap)
+            {
+                i.Value = cell.ImpactLevelId.ToString();
+                pr.Value = cell.ProbabilityLevelId.ToString();
+                r.Value = cell.RiskLevelId.ToString();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
         using (var cmd = Command(c, tx, """
-            INSERT INTO risk (id, position, title, short_description, long_description, risk_level_id, value_level_id,
-                              difficulty_level_id, risk_justification, value_justification, difficulty_justification,
-                              created_utc, modified_utc)
-            VALUES ($id, $pos, $title, $short, $long, $rl, $vl, $dl, $rj, $vj, $dj, $created, $modified);
+            INSERT INTO risk (id, position, title, short_description, long_description, impact_level_id, probability_level_id,
+                              impact_justification, probability_justification, created_utc, modified_utc)
+            VALUES ($id, $pos, $title, $short, $long, $il, $pl, $ij, $pj, $created, $modified);
             """))
         {
-            var names = new[] { "$id", "$pos", "$title", "$short", "$long", "$rl", "$vl", "$dl", "$rj", "$vj", "$dj", "$created", "$modified" };
+            var names = new[] { "$id", "$pos", "$title", "$short", "$long", "$il", "$pl", "$ij", "$pj", "$created", "$modified" };
             var prm = names.Select(n => cmd.Parameters.Add(n, SqliteType.Text)).ToArray();
             prm[1].SqliteType = SqliteType.Integer;
             for (var i = 0; i < doc.Risks.Count; i++)
@@ -86,14 +98,12 @@ internal static class DocumentStore
                 prm[2].Value = r.Title;
                 prm[3].Value = r.ShortDescription;
                 prm[4].Value = r.LongDescription;
-                prm[5].Value = r.RiskLevelId.ToString();
-                prm[6].Value = r.ValueLevelId.ToString();
-                prm[7].Value = r.DifficultyLevelId.ToString();
-                prm[8].Value = r.RiskJustification;
-                prm[9].Value = r.ValueJustification;
-                prm[10].Value = r.DifficultyJustification;
-                prm[11].Value = r.CreatedUtc.ToString("o", CultureInfo.InvariantCulture);
-                prm[12].Value = r.ModifiedUtc.ToString("o", CultureInfo.InvariantCulture);
+                prm[5].Value = r.ImpactLevelId.ToString();
+                prm[6].Value = r.ProbabilityLevelId.ToString();
+                prm[7].Value = r.ImpactJustification;
+                prm[8].Value = r.ProbabilityJustification;
+                prm[9].Value = r.CreatedUtc.ToString("o", CultureInfo.InvariantCulture);
+                prm[10].Value = r.ModifiedUtc.ToString("o", CultureInfo.InvariantCulture);
                 cmd.ExecuteNonQuery();
             }
         }
@@ -111,8 +121,7 @@ internal static class DocumentStore
     {
         var project = new ProjectInfo();
         using (var cmd = Command(c, null, """
-            SELECT name, client, consultancy, date, status, consultancy_logo, client_logo,
-                   risk_scale_id, value_scale_id, difficulty_scale_id
+            SELECT name, company, date, status, company_logo, risk_scale_id, impact_scale_id, probability_scale_id
             FROM project WHERE id = 1;
             """))
         using (var r = cmd.ExecuteReader())
@@ -120,15 +129,13 @@ internal static class DocumentStore
             if (r.Read())
             {
                 project.Name = r.GetString(0);
-                project.Client = r.GetString(1);
-                project.Consultancy = r.GetString(2);
-                project.Date = DateOnly.ParseExact(r.GetString(3), DateFormat, CultureInfo.InvariantCulture);
-                project.Status = (ProjectStatus)r.GetInt32(4);
-                project.ConsultancyLogo = r.IsDBNull(5) ? null : (byte[])r[5];
-                project.ClientLogo = r.IsDBNull(6) ? null : (byte[])r[6];
-                project.RiskScaleId = OptionalGuid(r, 7);
-                project.ValueScaleId = OptionalGuid(r, 8);
-                project.DifficultyScaleId = OptionalGuid(r, 9);
+                project.Company = r.GetString(1);
+                project.Date = DateOnly.ParseExact(r.GetString(2), DateFormat, CultureInfo.InvariantCulture);
+                project.Status = (ProjectStatus)r.GetInt32(3);
+                project.CompanyLogo = r.IsDBNull(4) ? null : (byte[])r[4];
+                project.RiskScaleId = OptionalGuid(r, 5);
+                project.ImpactScaleId = OptionalGuid(r, 6);
+                project.ProbabilityScaleId = OptionalGuid(r, 7);
             }
         }
 
@@ -145,22 +152,41 @@ internal static class DocumentStore
             }
         }
 
-        using (var cmd = Command(c, null, "SELECT id, scale_id, name, color, ord FROM level ORDER BY ord, name;"))
+        using (var cmd = Command(c, null, "SELECT id, scale_id, name, color, text_color, ord FROM level ORDER BY ord, name;"))
         using (var r = cmd.ExecuteReader())
         {
             while (r.Read())
             {
                 if (byId.TryGetValue(Guid.Parse(r.GetString(1)), out var s))
                 {
-                    s.Levels.Add(new Level { Id = Guid.Parse(r.GetString(0)), Name = r.GetString(2), Color = r.GetString(3), Order = r.GetInt32(4) });
+                    s.Levels.Add(new Level
+                    {
+                        Id = Guid.Parse(r.GetString(0)),
+                        Name = r.GetString(2),
+                        Color = r.GetString(3),
+                        TextColor = r.GetString(4),
+                        Order = r.GetInt32(5),
+                    });
                 }
             }
         }
 
+        var heat = new List<HeatCell>();
+        using (var cmd = Command(c, null, "SELECT impact_level_id, probability_level_id, risk_level_id FROM heat_cell;"))
+        using (var r = cmd.ExecuteReader())
+        {
+            while (r.Read())
+            {
+                heat.Add(new HeatCell(Guid.Parse(r.GetString(0)), Guid.Parse(r.GetString(1)), Guid.Parse(r.GetString(2))));
+            }
+        }
+
+        project.HeatMap = heat;
+
         var risks = new List<Risk>();
         using (var cmd = Command(c, null, """
-            SELECT id, title, short_description, long_description, risk_level_id, value_level_id, difficulty_level_id,
-                   risk_justification, value_justification, difficulty_justification, created_utc, modified_utc
+            SELECT id, title, short_description, long_description, impact_level_id, probability_level_id,
+                   impact_justification, probability_justification, created_utc, modified_utc
             FROM risk ORDER BY position;
             """))
         using (var r = cmd.ExecuteReader())
@@ -173,14 +199,12 @@ internal static class DocumentStore
                     Title = r.GetString(1),
                     ShortDescription = r.GetString(2),
                     LongDescription = r.GetString(3),
-                    RiskLevelId = Guid.Parse(r.GetString(4)),
-                    ValueLevelId = Guid.Parse(r.GetString(5)),
-                    DifficultyLevelId = Guid.Parse(r.GetString(6)),
-                    RiskJustification = r.GetString(7),
-                    ValueJustification = r.GetString(8),
-                    DifficultyJustification = r.GetString(9),
-                    CreatedUtc = DateTime.Parse(r.GetString(10), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind),
-                    ModifiedUtc = DateTime.Parse(r.GetString(11), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind),
+                    ImpactLevelId = Guid.Parse(r.GetString(4)),
+                    ProbabilityLevelId = Guid.Parse(r.GetString(5)),
+                    ImpactJustification = r.GetString(6),
+                    ProbabilityJustification = r.GetString(7),
+                    CreatedUtc = DateTime.Parse(r.GetString(8), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind),
+                    ModifiedUtc = DateTime.Parse(r.GetString(9), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind),
                 });
             }
         }

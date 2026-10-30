@@ -30,23 +30,20 @@ public sealed partial class ProjectViewModel : ObservableObject
         [.. Enum.GetValues<ProjectStatus>().Select(s => new Choice<ProjectStatus>(s.DisplayName(), s))];
 
     public ObservableCollection<Scale> RiskScales { get; } = [];
-    public ObservableCollection<Scale> ValueScales { get; } = [];
-    public ObservableCollection<Scale> DifficultyScales { get; } = [];
+    public ObservableCollection<Scale> ImpactScales { get; } = [];
+    public ObservableCollection<Scale> ProbabilityScales { get; } = [];
     public ObservableCollection<ScalePreview> AssignedScales { get; } = [];
     public ObservableCollection<DistributionRow> Distribution { get; } = [];
 
     [ObservableProperty] private string _name = "";
-    [ObservableProperty] private string _client = "";
-    [ObservableProperty] private string _consultancy = "";
+    [ObservableProperty] private string _company = "";
     [ObservableProperty] private DateTime? _date;
     [ObservableProperty] private Choice<ProjectStatus>? _status;
     [ObservableProperty] private Scale? _riskScale;
-    [ObservableProperty] private Scale? _valueScale;
-    [ObservableProperty] private Scale? _difficultyScale;
-    [ObservableProperty] private byte[]? _consultancyLogo;
-    [ObservableProperty] private byte[]? _clientLogo;
-    [ObservableProperty] private Bitmap? _consultancyLogoImage;
-    [ObservableProperty] private Bitmap? _clientLogoImage;
+    [ObservableProperty] private Scale? _impactScale;
+    [ObservableProperty] private Scale? _probabilityScale;
+    [ObservableProperty] private byte[]? _companyLogo;
+    [ObservableProperty] private Bitmap? _companyLogoImage;
     [ObservableProperty] private bool _canChangeScales;
     [ObservableProperty] private bool _hasChanges;
     [ObservableProperty] private string? _error;
@@ -59,16 +56,15 @@ public sealed partial class ProjectViewModel : ObservableObject
     protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
     {
         base.OnPropertyChanged(e);
-        if (!_loading && e.PropertyName is nameof(Name) or nameof(Client) or nameof(Consultancy) or nameof(Date)
-            or nameof(Status) or nameof(RiskScale) or nameof(ValueScale) or nameof(DifficultyScale)
-            or nameof(ConsultancyLogo) or nameof(ClientLogo))
+        if (!_loading && e.PropertyName is nameof(Name) or nameof(Company) or nameof(Date)
+            or nameof(Status) or nameof(RiskScale) or nameof(ImpactScale) or nameof(ProbabilityScale)
+            or nameof(CompanyLogo))
         {
             HasChanges = true;
         }
     }
 
-    partial void OnConsultancyLogoChanged(byte[]? value) => ConsultancyLogoImage = Brushes.Image(value);
-    partial void OnClientLogoChanged(byte[]? value) => ClientLogoImage = Brushes.Image(value);
+    partial void OnCompanyLogoChanged(byte[]? value) => CompanyLogoImage = Brushes.Image(value);
 
     /// <summary>Vuelve a leer la ficha desde el documento (descarta lo no aplicado).</summary>
     public void Reload()
@@ -77,22 +73,20 @@ public sealed partial class ProjectViewModel : ObservableObject
         var doc = _owner.Document;
         var p = doc.Project;
         Name = p.Name;
-        Client = p.Client;
-        Consultancy = p.Consultancy;
+        Company = p.Company;
         Date = p.Date.ToDateTime(TimeOnly.MinValue);
         Status = Statuses.First(s => s.Value == p.Status);
         Fill(RiskScales, doc.Scales.Where(s => s.Type == ScaleType.Risk));
-        Fill(ValueScales, doc.Scales.Where(s => s.Type == ScaleType.Value));
-        Fill(DifficultyScales, doc.Scales.Where(s => s.Type == ScaleType.Difficulty));
+        Fill(ImpactScales, doc.Scales.Where(s => s.Type == ScaleType.Impact));
+        Fill(ProbabilityScales, doc.Scales.Where(s => s.Type == ScaleType.Probability));
         RiskScale = RiskScales.FirstOrDefault(s => s.Id == p.RiskScaleId);
-        ValueScale = ValueScales.FirstOrDefault(s => s.Id == p.ValueScaleId);
-        DifficultyScale = DifficultyScales.FirstOrDefault(s => s.Id == p.DifficultyScaleId);
-        ConsultancyLogo = p.ConsultancyLogo;
-        ClientLogo = p.ClientLogo;
+        ImpactScale = ImpactScales.FirstOrDefault(s => s.Id == p.ImpactScaleId);
+        ProbabilityScale = ProbabilityScales.FirstOrDefault(s => s.Id == p.ProbabilityScaleId);
+        CompanyLogo = p.CompanyLogo;
         CanChangeScales = doc.CanChangeProjectScales;
         RiskCount = doc.Risks.Count;
 
-        Fill(AssignedScales, Enum.GetValues<ScaleType>().Select(t =>
+        Fill(AssignedScales, new[] { ScaleType.Impact, ScaleType.Probability, ScaleType.Risk }.Select(t =>
         {
             var s = doc.ProjectScale(t);
             return new ScalePreview(t.DisplayName(), s?.Name ?? "—", [.. (s?.OrderedLevels ?? []).Select(l => new LevelChip(l))]);
@@ -112,15 +106,13 @@ public sealed partial class ProjectViewModel : ObservableObject
     {
         var p = _owner.Document.Project.Clone();
         p.Name = Name.Trim();
-        p.Client = Client.Trim();
-        p.Consultancy = Consultancy.Trim();
+        p.Company = Company.Trim();
         p.Date = Date is { } d ? DateOnly.FromDateTime(d.Date) : p.Date;
         p.Status = Status?.Value ?? p.Status;
         p.RiskScaleId = RiskScale?.Id;
-        p.ValueScaleId = ValueScale?.Id;
-        p.DifficultyScaleId = DifficultyScale?.Id;
-        p.ConsultancyLogo = ConsultancyLogo;
-        p.ClientLogo = ClientLogo;
+        p.ImpactScaleId = ImpactScale?.Id;
+        p.ProbabilityScaleId = ProbabilityScale?.Id;
+        p.CompanyLogo = CompanyLogo;
         try
         {
             _owner.Document.UpdateProject(p);
@@ -135,7 +127,7 @@ public sealed partial class ProjectViewModel : ObservableObject
     private void Revert() => Reload();
 
     [RelayCommand]
-    private async Task PickLogo(string which)
+    private async Task PickLogo()
     {
         var path = await _owner.Ui.PickOpenFileAsync(Strings.Project_PickLogo, FileKind.Image);
         if (path is null)
@@ -157,28 +149,11 @@ public sealed partial class ProjectViewModel : ObservableObject
             return;
         }
 
-        if (which == "client")
-        {
-            ClientLogo = bytes;
-        }
-        else
-        {
-            ConsultancyLogo = bytes;
-        }
+        CompanyLogo = bytes;
     }
 
     [RelayCommand]
-    private void ClearLogo(string which)
-    {
-        if (which == "client")
-        {
-            ClientLogo = null;
-        }
-        else
-        {
-            ConsultancyLogo = null;
-        }
-    }
+    private void ClearLogo() => CompanyLogo = null;
 
     private static void Fill<T>(ObservableCollection<T> target, IEnumerable<T> items)
     {

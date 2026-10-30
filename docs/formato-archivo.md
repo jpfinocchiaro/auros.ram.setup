@@ -1,4 +1,4 @@
-# Formato de archivo `.rmx` / `.rmt` (contenedor v1, esquema v1)
+# Formato de archivo `.rmx` / `.rmt` (contenedor v1, esquema v3)
 
 Cada matriz (`.rmx`) y cada plantilla de escalas (`.rmt`) es un único archivo autocontenido,
 independiente del sistema operativo (RNF-11, RNF-53). Implementación: `src/Auros.Ram.Persistence`.
@@ -67,24 +67,34 @@ La base se arma en un archivo de trabajo cifrado, se le antepone la cabecera y s
 temporal junto al original (`.nombre.rmx.<guid>.tmp`, con *write-through*). Luego un renombrado
 reemplaza el original. En ningún momento el original queda a medio escribir.
 
-## Esquema v1
+## Esquema v3
 
 | Tabla | Contenido |
 |---|---|
 | `meta` | clave/valor (`app_version`) |
-| `project` | una fila: datos del proyecto, logos (BLOB) y las tres escalas asignadas |
-| `scale` | escalas (id, posición, nombre, tipo 1 Riesgo / 2 Valor / 3 Dificultad) |
-| `level` | niveles (id, escala, nombre, color `#RRGGBB`, orden 0–100) |
-| `risk` | riesgos (id, posición, título, descripciones, los tres niveles, justificaciones, fechas UTC ISO-8601) |
+| `project` | una fila: nombre, empresa, fecha, estado, logo de la empresa (BLOB) y las escalas de riesgo, impacto y probabilidad |
+| `scale` | escalas (id, posición, nombre, tipo 1 Nivel de riesgo / 2 Impacto / 3 Probabilidad) |
+| `level` | niveles (id, escala, nombre, color de fondo `#RRGGBB`, color de fuente `text_color` `#RRGGBB`, orden 0–100) |
+| `heat_cell` | mapa de calor: nivel de riesgo elegido para una combinación de impacto y probabilidad (las que faltan usan el valor por omisión) |
+| `risk` | riesgos (id, posición, título, descripciones, nivel de impacto y de probabilidad, sus justificaciones, fechas UTC ISO-8601) |
 
+El nivel de riesgo de cada riesgo no se guarda: se calcula con el mapa de calor.
 `PRAGMA user_version` guarda la versión del esquema.
+
+### Historial
+
+| Versión | Cambio |
+|---|---|
+| 1, 2 | Versiones de prueba con tres dimensiones (riesgo, valor agregado, dificultad). **No se migran**: al abrirlas, la aplicación avisa que son de una versión de prueba y no toca el archivo (`Schema.OldestSupportedVersion`) |
+| 3 | Impacto y probabilidad de ocurrencia; nivel de riesgo por mapa de calor; una empresa por matriz; color de fuente por nivel |
 
 ## Cómo agregar una versión del esquema (RNF-69)
 
 1. Agregar un paso nuevo **al final** de `Schema.Steps` (nunca editar uno publicado), idempotente.
 2. Ajustar `DocumentStore` para leer y escribir las columnas nuevas.
 3. Generar el archivo de prueba de la versión nueva (ver `tests/Auros.Ram.Tests/FixtureGenerator.cs`)
-   y conservar los anteriores en `tests/Auros.Ram.Tests/Fixtures` (RNF-68).
+   y conservar los anteriores en `tests/Auros.Ram.Tests/Fixtures` (RNF-68). Los de las versiones de
+   prueba están en `Fixtures/trial` y solo se usan para comprobar que se rechazan.
 
 ## Archivos auxiliares (RNF-25, RNF-37)
 

@@ -122,10 +122,7 @@ public sealed partial class NewMatrixViewModel : ObservableObject
     private string _name = "";
 
     [ObservableProperty]
-    private string _client = "";
-
-    [ObservableProperty]
-    private string _consultancy = "";
+    private string _company = "";
 
     [ObservableProperty]
     private bool _useStandardScales = true;

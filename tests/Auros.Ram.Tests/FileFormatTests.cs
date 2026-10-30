@@ -15,8 +15,9 @@ public class FileFormatTests
     {
         using var dir = new TempDir();
         var doc = Sample.Document(25);
+        doc.SetHeatCell(doc.Risks[0].ImpactLevelId, doc.Risks[0].ProbabilityLevelId, Sample.Level(doc, ScaleType.Risk, 3).Id);
         var p = doc.Project.Clone();
-        p.ConsultancyLogo = [9, 8, 7];
+        p.CompanyLogo = [9, 8, 7];
         doc.UpdateProject(p);
         var path = dir.File("matriz.rmx");
 
@@ -30,12 +31,17 @@ public class FileFormatTests
         var back = result.Document;
         Assert.Null(result.BackupPath);
         Assert.Equal(doc.Project.Name, back.Project.Name);
-        Assert.Equal(doc.Project.ConsultancyLogo, back.Project.ConsultancyLogo);
+        Assert.Equal(doc.Project.Company, back.Project.Company);
+        Assert.Equal(doc.Project.CompanyLogo, back.Project.CompanyLogo);
+        Assert.Equal(
+            doc.Scales.SelectMany(s => s.Levels).Select(l => (l.Id, l.Color, l.TextColor)).OrderBy(x => x.Id),
+            back.Scales.SelectMany(s => s.Levels).Select(l => (l.Id, l.Color, l.TextColor)).OrderBy(x => x.Id));
         Assert.Equal(doc.Project.RiskScaleId, back.Project.RiskScaleId);
         Assert.Equal(doc.Scales.Select(s => (s.Id, s.Name, s.Type, s.Levels.Count)), back.Scales.Select(s => (s.Id, s.Name, s.Type, s.Levels.Count)));
         Assert.Equal(
-            doc.Risks.Select(r => (r.Id, r.Title, r.ShortDescription, r.LongDescription, r.RiskLevelId, r.ValueLevelId, r.DifficultyLevelId, r.RiskJustification)),
-            back.Risks.Select(r => (r.Id, r.Title, r.ShortDescription, r.LongDescription, r.RiskLevelId, r.ValueLevelId, r.DifficultyLevelId, r.RiskJustification)));
+            doc.Risks.Select(r => (r.Id, r.Title, r.ShortDescription, r.LongDescription, r.ImpactLevelId, r.ProbabilityLevelId, r.ImpactJustification, r.ProbabilityJustification)),
+            back.Risks.Select(r => (r.Id, r.Title, r.ShortDescription, r.LongDescription, r.ImpactLevelId, r.ProbabilityLevelId, r.ImpactJustification, r.ProbabilityJustification)));
+        Assert.Equal(doc.Project.HeatMap, back.Project.HeatMap);
         Assert.Equal(RmxFile.CurrentSchemaVersion, result.Header.SchemaVersion);
         Assert.Equal(KdfAlgorithm.Argon2id, result.Header.Kdf.Algorithm);
     }
@@ -155,7 +161,7 @@ public class FileFormatTests
         RmxFile.Save(doc, path, key);
         File.SetLastWriteTimeUtc(path, DateTime.UtcNow.AddMinutes(-1));
 
-        doc.AddRisk(Sample.NewRisk(doc, "sin guardar", 0, 0, 0));
+        doc.AddRisk(Sample.NewRisk(doc, "sin guardar", 0, 0));
         RecoveryStore.Save(doc, path, key);
         Assert.True(RecoveryStore.HasRecovery(path));
 
@@ -261,7 +267,7 @@ public class FileFormatTests
     {
         using var dir = new TempDir();
         var doc = Sample.Document(0);
-        var bulk = Enumerable.Range(0, 5000).Select(i => Sample.NewRisk(doc, $"Riesgo {i}", i % 4, i % 3, i % 3)).ToList();
+        var bulk = Enumerable.Range(0, 5000).Select(i => Sample.NewRisk(doc, $"Riesgo {i}", i % 5, (i / 5) % 5)).ToList();
         foreach (var r in bulk)
         {
             r.LongDescription = new string('x', 1500);
@@ -287,18 +293,36 @@ public class FileFormatTests
     public void Fixture_files_of_every_published_version_open_RNF68()
     {
         var fixtures = Path.Combine(AppContext.BaseDirectory, "Fixtures");
-        var files = Directory.Exists(fixtures) ? Directory.GetFiles(fixtures, "*.rmx") : [];
+        var files = Directory.Exists(fixtures) ? Directory.GetFiles(fixtures, "schema-v*.rmx") : [];
         Assert.NotEmpty(files);
         using var dir = new TempDir();
         foreach (var file in files)
         {
-            // Se abre una copia: la migración reescribe el archivo.
+            // Se abre una copia: una migración reescribiría el archivo.
             var copy = dir.File(Path.GetFileName(file));
             File.Copy(file, copy);
             var result = RmxFile.Open(copy, FixtureGenerator.Password);
             using var _ = result.Key;
             Assert.Equal(FixtureGenerator.RiskCount, result.Document.Risks.Count);
+            Assert.Equal("Cliente S.A.", result.Document.Project.Company);
+            Assert.All(result.Document.Risks, r => Assert.NotNull(result.Document.RiskLevelOf(r)));
+            Assert.Equal(RmxFile.CurrentSchemaVersion, result.Header.SchemaVersion);
         }
+    }
+
+    [Fact]
+    public void Trial_versions_are_rejected_without_touching_the_file()
+    {
+        // Archivos de las versiones de prueba (valor agregado y dificultad): se rechazan antes de pedir la contraseña.
+        var trial = Path.Combine(AppContext.BaseDirectory, "Fixtures", "trial", "schema-v1.rmx");
+        using var dir = new TempDir();
+        var copy = dir.File("viejo.rmx");
+        File.Copy(trial, copy);
+        var before = File.ReadAllBytes(copy);
+
+        Assert.Equal(RmxErrorKind.ObsoleteVersion, Assert.Throws<RmxFileException>(() => RmxFile.ReadHeader(copy)).Kind);
+        Assert.Equal(RmxErrorKind.ObsoleteVersion, Assert.Throws<RmxFileException>(() => RmxFile.Open(copy, FixtureGenerator.Password)).Kind);
+        Assert.Equal(before, File.ReadAllBytes(copy));
     }
 }
 

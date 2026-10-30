@@ -11,23 +11,23 @@ internal static class Schema
 {
     private static readonly (int Version, string Sql)[] Steps =
     [
-        (1, """
+        // v3: riesgos clasificados por impacto y probabilidad; el nivel de riesgo sale del mapa de calor.
+        // Las versiones 1 y 2 (valor agregado y dificultad) fueron de prueba: no se migran (ver OldestSupportedVersion).
+        (3, """
             CREATE TABLE IF NOT EXISTS meta (
                 key   TEXT PRIMARY KEY,
                 value TEXT NOT NULL
             );
             CREATE TABLE IF NOT EXISTS project (
-                id                   INTEGER PRIMARY KEY CHECK (id = 1),
-                name                 TEXT NOT NULL,
-                client               TEXT NOT NULL,
-                consultancy          TEXT NOT NULL,
-                date                 TEXT NOT NULL,
-                status               INTEGER NOT NULL,
-                consultancy_logo     BLOB,
-                client_logo          BLOB,
-                risk_scale_id        TEXT,
-                value_scale_id       TEXT,
-                difficulty_scale_id  TEXT
+                id                    INTEGER PRIMARY KEY CHECK (id = 1),
+                name                  TEXT NOT NULL,
+                company               TEXT NOT NULL,
+                date                  TEXT NOT NULL,
+                status                INTEGER NOT NULL,
+                company_logo          BLOB,
+                risk_scale_id         TEXT,
+                impact_scale_id       TEXT,
+                probability_scale_id  TEXT
             );
             CREATE TABLE IF NOT EXISTS scale (
                 id        TEXT PRIMARY KEY,
@@ -36,30 +36,38 @@ internal static class Schema
                 type      INTEGER NOT NULL
             );
             CREATE TABLE IF NOT EXISTS level (
-                id        TEXT PRIMARY KEY,
-                scale_id  TEXT NOT NULL REFERENCES scale(id) ON DELETE CASCADE,
-                name      TEXT NOT NULL,
-                color     TEXT NOT NULL,
-                ord       INTEGER NOT NULL
+                id          TEXT PRIMARY KEY,
+                scale_id    TEXT NOT NULL REFERENCES scale(id) ON DELETE CASCADE,
+                name        TEXT NOT NULL,
+                color       TEXT NOT NULL,
+                text_color  TEXT NOT NULL,
+                ord         INTEGER NOT NULL
             );
             CREATE INDEX IF NOT EXISTS ix_level_scale ON level(scale_id);
+            CREATE TABLE IF NOT EXISTS heat_cell (
+                impact_level_id       TEXT NOT NULL,
+                probability_level_id  TEXT NOT NULL,
+                risk_level_id         TEXT NOT NULL,
+                PRIMARY KEY (impact_level_id, probability_level_id)
+            );
             CREATE TABLE IF NOT EXISTS risk (
-                id                        TEXT PRIMARY KEY,
-                position                  INTEGER NOT NULL,
-                title                     TEXT NOT NULL,
-                short_description         TEXT NOT NULL,
-                long_description          TEXT NOT NULL,
-                risk_level_id             TEXT NOT NULL,
-                value_level_id            TEXT NOT NULL,
-                difficulty_level_id       TEXT NOT NULL,
-                risk_justification        TEXT NOT NULL,
-                value_justification       TEXT NOT NULL,
-                difficulty_justification  TEXT NOT NULL,
-                created_utc               TEXT NOT NULL,
-                modified_utc              TEXT NOT NULL
+                id                         TEXT PRIMARY KEY,
+                position                   INTEGER NOT NULL,
+                title                      TEXT NOT NULL,
+                short_description          TEXT NOT NULL,
+                long_description           TEXT NOT NULL,
+                impact_level_id            TEXT NOT NULL,
+                probability_level_id       TEXT NOT NULL,
+                impact_justification       TEXT NOT NULL,
+                probability_justification  TEXT NOT NULL,
+                created_utc                TEXT NOT NULL,
+                modified_utc               TEXT NOT NULL
             );
             """),
     ];
+
+    /// <summary>Archivos con un esquema anterior a este no se abren (versiones de prueba sin migración).</summary>
+    public const int OldestSupportedVersion = 3;
 
     public static int CurrentVersion => Steps[^1].Version;
 

@@ -6,15 +6,15 @@
 
 | Código | Estado | Dónde / nota |
 |---|---|---|
-| F1, RF-01 a RF-05 | ✅ | `RiskMatrixDocument`, `Validation`; pantalla Escalas agrupada por tipo; confirmación al quitar o eliminar |
+| F1, RF-01 a RF-05 | ✅ | **Por decisión del cliente, dos dimensiones: Impacto y Probabilidad de ocurrencia**; el nivel de riesgo sale de un **mapa de calor** editable (Escalas). `RiskMatrixDocument`, `Validation`, `HeatMap`; confirmación al quitar o eliminar. Cada nivel tiene **color de fondo y color de fuente**, con aviso de contraste bajo |
 | RF-06 | ✅ | Escalas → *Guardar como plantilla* (`.rmt` cifrado); Nueva matriz → *desde plantilla* |
-| RF-07 a RF-09 | ✅ | Ficha del proyecto con logos; escalas bloqueadas cuando hay riesgos |
-| RF-10 a RF-12 | ✅ | Editor con botones de color y justificación; búsqueda, filtros por las 3 dimensiones y orden |
-| RF-13, RF-14 | ✅ | Matriz dinámica (tamaño según escalas), celdas de igual altura, *tooltip* y clic para abrir la ficha |
-| RF-15 | ✅ | Logos en pantalla y en PDF; exportación PDF/Excel e impresión |
+| RF-07 a RF-09 | ✅ | Ficha del proyecto: **una matriz corresponde a una sola empresa** (por decisión del cliente no existe la consultora); logo de la empresa; escalas bloqueadas cuando hay riesgos |
+| RF-10 a RF-12 | ✅ | Editor con botones de color y justificación por dimensión, y el nivel de riesgo resultante a la vista; búsqueda, filtros por nivel de riesgo, impacto y probabilidad, y orden |
+| RF-13, RF-14 | ✅ | Matriz de riesgo impacto × probabilidad pintada como mapa de calor; tamaño según escalas, celdas de igual altura, *tooltip* y clic para abrir la ficha |
+| RF-15 | ✅ | Logo de la empresa en pantalla y en PDF; exportación PDF/Excel e impresión |
 | RF-16 a RF-19 | ✅ | Ficha resumen, ficha detallada y distribución; todo se calcula en el momento |
 | RN-02 a RN-12 | ✅ | RN-06: se aplica la regla más estricta de RF-05 (una escala asignada nunca se elimina) |
-| F6 | — | Se respetó el alcance actual: nivel de riesgo único elegido a mano, sin controles. El formato es versionado para agregarlos con una migración |
+| F6 | 🟡 | Probabilidad × impacto implementado (mapa de calor). Controles: no existen todavía; el formato es versionado para agregarlos con una migración |
 
 ## Parte II — No funcionales
 
@@ -41,7 +41,7 @@
 | RNF-53 | ✅ | El formato no depende del sistema operativo (little endian fijo, SQLite) |
 | RNF-55 a RNF-58 | ⏳ | Licenciamiento, activación y período de prueba |
 | RNF-59, RNF-60 | ✅ | Visor de licencias en Acerca de; versión semántica en Acerca de y en la cabecera del archivo |
-| RNF-61 | ✅ | Excel con formato, PDF y CSV (separador `;`) de la matriz completa y de la de priorización |
+| RNF-61 | ✅ | Excel con formato, PDF y CSV (separador `;`) de la lista de riesgos y de la matriz de riesgo |
 | RNF-62 | ⏳ | Importación desde Excel/CSV |
 | RNF-63 | ✅ | Exportación e importación JSON documentada y versionada |
 | RNF-64 | ⏳ | Copiar y pegar con Excel |

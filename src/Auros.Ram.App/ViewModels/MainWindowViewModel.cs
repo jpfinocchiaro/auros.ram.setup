@@ -13,6 +13,8 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace Auros.Ram.App.ViewModels;
 
+public sealed record SketchRow(IReadOnlyList<LevelChip> Cells);
+
 public sealed record RecentItem(string Path)
 {
     public string Name => System.IO.Path.GetFileName(Path);
@@ -69,6 +71,16 @@ public sealed partial class MainWindowViewModel : ObservableObject
     public bool CanEdit => Active is { IsLocked: false };
     public bool HasRecent => Recent.Count > 0;
     public string Version => AppInfo.Version;
+
+    /// <summary>Mapa de calor de las escalas estándar, para la pantalla de bienvenida (el impacto mayor arriba).</summary>
+    public IReadOnlyList<SketchRow> SampleHeatMap { get; } = BuildSample();
+
+    private static IReadOnlyList<SketchRow> BuildSample()
+    {
+        var m = Auros.Ram.Core.Services.PriorityMatrix.Build(RiskMatrixDocument.CreateNew());
+        return [.. Enumerable.Range(0, m.Rows.Count).Select(r =>
+            new SketchRow([.. Enumerable.Range(0, m.Columns.Count).Select(c => LevelChip.From(m.LevelAt(r, c))!)]))];
+    }
 
     partial void OnActiveChanged(DocumentViewModel? oldValue, DocumentViewModel? newValue)
     {
@@ -127,8 +139,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         var doc = RiskMatrixDocument.CreateNew(new ProjectInfo
         {
             Name = request.Name.Trim(),
-            Client = request.Client.Trim(),
-            Consultancy = request.Consultancy.Trim(),
+            Company = request.Company.Trim(),
         }, scales);
         await CreateFileAsync(doc, FileNameFor(request.Name));
     }

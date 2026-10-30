@@ -15,16 +15,10 @@
       <TextBlock Classes="label" Text="{x:Static r:Strings.Project_Name}" />
       <TextBox x:Name="NameBox" Text="{Binding Name}" MaxLength="200" />
     </StackPanel>
-    <Grid ColumnDefinitions="*,12,*">
-      <StackPanel>
-        <TextBlock Classes="label" Text="{x:Static r:Strings.Project_Client}" />
-        <TextBox Text="{Binding Client}" MaxLength="200" />
-      </StackPanel>
-      <StackPanel Grid.Column="2">
-        <TextBlock Classes="label" Text="{x:Static r:Strings.Project_Consultancy}" />
-        <TextBox Text="{Binding Consultancy}" MaxLength="200" />
-      </StackPanel>
-    </Grid>
+    <StackPanel>
+      <TextBlock Classes="label" Text="{x:Static r:Strings.Project_Company}" />
+      <TextBox Text="{Binding Company}" MaxLength="200" />
+    </StackPanel>
     <StackPanel Spacing="4">
       <TextBlock Classes="label" Text="{x:Static r:Strings.New_Scales}" />
       <RadioButton GroupName="scales" IsChecked="{Binding UseStandardScales}" Content="{x:Static r:Strings.New_StandardScales}" />

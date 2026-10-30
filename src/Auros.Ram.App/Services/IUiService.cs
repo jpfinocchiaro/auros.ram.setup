@@ -20,7 +20,7 @@ public enum SaveChoice
     Cancel,
 }
 
-public sealed record NewMatrixRequest(string Name, string Client, string Consultancy, bool FromTemplate);
+public sealed record NewMatrixRequest(string Name, string Company, bool FromTemplate);
 
 /// <summary>Respuesta a la advertencia de exportación en claro (RNF-38).</summary>
 public sealed record ExportConfirmation(string? PdfPassword);

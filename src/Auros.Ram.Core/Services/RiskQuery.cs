@@ -5,8 +5,8 @@ namespace Auros.Ram.Core.Services;
 public enum RiskSortField
 {
     Risk,
-    Value,
-    Difficulty,
+    Impact,
+    Probability,
     Title,
     Created,
 }
@@ -15,9 +15,12 @@ public enum RiskSortField
 public sealed record RiskFilter
 {
     public string? Text { get; init; }
+
+    /// <summary>Nivel de riesgo resultante del mapa de calor.</summary>
     public Guid? RiskLevelId { get; init; }
-    public Guid? ValueLevelId { get; init; }
-    public Guid? DifficultyLevelId { get; init; }
+
+    public Guid? ImpactLevelId { get; init; }
+    public Guid? ProbabilityLevelId { get; init; }
     public RiskSortField SortBy { get; init; } = RiskSortField.Risk;
     public bool Descending { get; init; } = true;
 }
@@ -30,17 +33,17 @@ public static class RiskQuery
 
         if (filter.RiskLevelId is { } r)
         {
-            query = query.Where(x => x.RiskLevelId == r);
+            query = query.Where(x => doc.RiskLevelOf(x)?.Id == r);
         }
 
-        if (filter.ValueLevelId is { } v)
+        if (filter.ImpactLevelId is { } i)
         {
-            query = query.Where(x => x.ValueLevelId == v);
+            query = query.Where(x => x.ImpactLevelId == i);
         }
 
-        if (filter.DifficultyLevelId is { } d)
+        if (filter.ProbabilityLevelId is { } p)
         {
-            query = query.Where(x => x.DifficultyLevelId == d);
+            query = query.Where(x => x.ProbabilityLevelId == p);
         }
 
         if (!string.IsNullOrWhiteSpace(filter.Text))
@@ -52,16 +55,21 @@ public static class RiskQuery
 
         var orders = LevelOrders(doc);
         int Ord(Guid id) => orders.TryGetValue(id, out var o) ? o : int.MinValue;
+        int RiskOrd(Risk x) => doc.RiskLevelOf(x)?.Order ?? int.MinValue;
 
         IOrderedEnumerable<Risk> sorted = filter.SortBy switch
         {
-            RiskSortField.Value => Sort(query, x => Ord(x.ValueLevelId), filter.Descending),
-            RiskSortField.Difficulty => Sort(query, x => Ord(x.DifficultyLevelId), filter.Descending),
+            RiskSortField.Impact => Sort(query, x => Ord(x.ImpactLevelId), filter.Descending),
+            RiskSortField.Probability => Sort(query, x => Ord(x.ProbabilityLevelId), filter.Descending),
             RiskSortField.Title => filter.Descending
                 ? query.OrderByDescending(x => x.Title, StringComparer.CurrentCultureIgnoreCase)
                 : query.OrderBy(x => x.Title, StringComparer.CurrentCultureIgnoreCase),
             RiskSortField.Created => Sort(query, x => x.CreatedUtc, filter.Descending),
-            _ => Sort(query, x => Ord(x.RiskLevelId), filter.Descending),
+
+            // A igual nivel de riesgo, primero el de mayor impacto y después el más probable.
+            _ => Sort(query, RiskOrd, filter.Descending)
+                .ThenByDescending(x => Ord(x.ImpactLevelId))
+                .ThenByDescending(x => Ord(x.ProbabilityLevelId)),
         };
 
         return [.. sorted.ThenBy(x => x.Title, StringComparer.CurrentCultureIgnoreCase)];

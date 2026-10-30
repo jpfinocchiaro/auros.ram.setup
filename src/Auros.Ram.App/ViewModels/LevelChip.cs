@@ -13,8 +13,9 @@ public sealed class LevelChip
         Name = level.Name;
         Order = level.Order;
         Hex = level.Color;
+        TextHex = level.TextColor;
         Background = Brushes.FromHex(level.Color);
-        Foreground = Brushes.FromHex(Palette.ContrastingText(level.Color));
+        Foreground = Brushes.FromHex(level.TextColor);
         var trimmed = level.Name.Trim();
         Abbrev = (trimmed.Length <= 3 ? trimmed : trimmed[..3]).ToUpperInvariant();
     }
@@ -23,6 +24,7 @@ public sealed class LevelChip
     public string Name { get; }
     public int Order { get; }
     public string Hex { get; }
+    public string TextHex { get; }
     public string Abbrev { get; }
     public IBrush Background { get; }
     public IBrush Foreground { get; }
@@ -34,8 +36,8 @@ public sealed class LevelChip
 
 internal static class Brushes
 {
-    public static IBrush FromHex(string hex) =>
-        Color.TryParse(hex, out var c) ? new SolidColorBrush(c) : Avalonia.Media.Brushes.Gray;
+    public static IBrush FromHex(string hex, byte alpha = 0xFF) =>
+        Color.TryParse(hex, out var c) ? new SolidColorBrush(new Color(alpha, c.R, c.G, c.B)) : Avalonia.Media.Brushes.Gray;
 
     public static Bitmap? Image(byte[]? bytes)
     {

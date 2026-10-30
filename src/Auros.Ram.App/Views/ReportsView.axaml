@@ -4,7 +4,7 @@
              xmlns:r="using:Auros.Ram.App.Resources"
              x:Class="Auros.Ram.App.Views.ReportsView"
              x:DataType="vm:ReportsViewModel">
-  <TabControl Margin="8,4" Padding="0,8,0,0">
+  <TabControl Classes="sub" Margin="24,8,24,0" Padding="0,8,0,0">
     <!-- RF-16: Ficha resumen de oportunidades de mejora -->
     <TabItem Header="{x:Static r:Strings.Reports_Summary}">
       <DockPanel>
@@ -20,8 +20,8 @@
               <TextBlock Grid.Column="1" Classes="label" Text="{x:Static r:Strings.Risks_ColRisk}" />
               <TextBlock Grid.Column="2" Classes="label" Text="{x:Static r:Strings.Risk_Short}" />
               <TextBlock Grid.Column="3" Classes="label" Text="{x:Static r:Strings.ScaleType_Risk}" />
-              <TextBlock Grid.Column="4" Classes="label" Text="{x:Static r:Strings.ScaleType_Value}" />
-              <TextBlock Grid.Column="5" Classes="label" Text="{x:Static r:Strings.Risks_DifficultyShort}" />
+              <TextBlock Grid.Column="4" Classes="label" Text="{x:Static r:Strings.ScaleType_Impact}" />
+              <TextBlock Grid.Column="5" Classes="label" Text="{x:Static r:Strings.Risks_ProbabilityShort}" />
             </Grid>
             <ListBox ItemsSource="{Binding Items}" Background="Transparent">
               <ListBox.ItemTemplate>
@@ -31,8 +31,8 @@
                     <TextBlock Grid.Column="1" Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,12,0" />
                     <TextBlock Grid.Column="2" Text="{Binding ShortDescription}" TextWrapping="Wrap" Margin="0,0,12,0" />
                     <ContentControl Grid.Column="3" Content="{Binding RiskLevel}" VerticalAlignment="Top" />
-                    <ContentControl Grid.Column="4" Content="{Binding ValueLevel}" VerticalAlignment="Top" />
-                    <ContentControl Grid.Column="5" Content="{Binding DifficultyLevel}" VerticalAlignment="Top" />
+                    <ContentControl Grid.Column="4" Content="{Binding ImpactLevel}" VerticalAlignment="Top" />
+                    <ContentControl Grid.Column="5" Content="{Binding ProbabilityLevel}" VerticalAlignment="Top" />
                   </Grid>
                 </DataTemplate>
               </ListBox.ItemTemplate>
@@ -69,8 +69,8 @@
                   <Run Text="{x:Static r:Strings.Project_Name}" /><Run Text=": " />
                   <Run Text="{Binding $parent[UserControl].((vm:ReportsViewModel)DataContext).ProjectName, Mode=OneWay}" />
                   <Run Text="   " />
-                  <Run Text="{x:Static r:Strings.Project_Client}" /><Run Text=": " />
-                  <Run Text="{Binding $parent[UserControl].((vm:ReportsViewModel)DataContext).ClientName, Mode=OneWay}" />
+                  <Run Text="{x:Static r:Strings.Project_Company}" /><Run Text=": " />
+                  <Run Text="{Binding $parent[UserControl].((vm:ReportsViewModel)DataContext).CompanyName, Mode=OneWay}" />
                 </TextBlock>
                 <ItemsControl ItemsSource="{Binding Dimensions}">
                   <ItemsControl.ItemTemplate>

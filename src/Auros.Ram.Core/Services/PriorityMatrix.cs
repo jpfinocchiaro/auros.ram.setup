@@ -3,28 +3,31 @@ using Auros.Ram.Core.Model;
 namespace Auros.Ram.Core.Services;
 
 /// <summary>
-/// Matriz de priorización (F4): columnas = Valor agregado de menor a mayor (izquierda → derecha),
-/// filas = Dificultad con la más fácil abajo. Cada celda lista sus riesgos del más alto al más bajo.
+/// Matriz de riesgo (F4): columnas = Probabilidad de ocurrencia de menor a mayor (izquierda → derecha),
+/// filas = Impacto con el mayor arriba. Cada celda tiene su nivel de riesgo (mapa de calor) y lista sus
+/// riesgos por título.
 /// </summary>
 public sealed class PriorityMatrix
 {
     private readonly IReadOnlyList<Risk>[,] _cells;
+    private readonly Level?[,] _levels;
 
-    private PriorityMatrix(IReadOnlyList<Level> columns, IReadOnlyList<Level> rows, IReadOnlyList<Risk>[,] cells)
+    private PriorityMatrix(IReadOnlyList<Level> columns, IReadOnlyList<Level> rows, IReadOnlyList<Risk>[,] cells, Level?[,] levels)
     {
         Columns = columns;
         Rows = rows;
         _cells = cells;
+        _levels = levels;
         foreach (var cell in cells)
         {
             MaxCellCount = Math.Max(MaxCellCount, cell.Count);
         }
     }
 
-    /// <summary>Niveles de Valor agregado, de menor a mayor.</summary>
+    /// <summary>Niveles de Probabilidad, de menor a mayor.</summary>
     public IReadOnlyList<Level> Columns { get; }
 
-    /// <summary>Niveles de Dificultad, de arriba hacia abajo: la más difícil arriba, la más fácil abajo.</summary>
+    /// <summary>Niveles de Impacto, de arriba hacia abajo: el mayor arriba, el menor abajo.</summary>
     public IReadOnlyList<Level> Rows { get; }
 
     /// <summary>RF-14: todas las celdas toman la altura de la que más riesgos tiene.</summary>
@@ -32,28 +35,32 @@ public sealed class PriorityMatrix
 
     public IReadOnlyList<Risk> this[int row, int column] => _cells[row, column];
 
+    /// <summary>Nivel de riesgo de la celda según el mapa de calor.</summary>
+    public Level? LevelAt(int row, int column) => _levels[row, column];
+
     public static PriorityMatrix Build(RiskMatrixDocument doc)
     {
         // RN-08: solo las escalas asignadas al proyecto.
-        var columns = doc.ProjectScale(ScaleType.Value)?.OrderedLevels ?? [];
-        var rows = doc.ProjectScale(ScaleType.Difficulty)?.OrderedLevels.Reverse().ToList() ?? [];
-        var riskOrders = doc.ProjectScale(ScaleType.Risk)?.Levels.ToDictionary(l => l.Id, l => l.Order) ?? [];
+        var columns = doc.ProjectScale(ScaleType.Probability)?.OrderedLevels ?? [];
+        var rows = doc.ProjectScale(ScaleType.Impact)?.OrderedLevels.Reverse().ToList() ?? [];
 
         var colIndex = columns.Select((l, i) => (l.Id, i)).ToDictionary(x => x.Id, x => x.i);
         var rowIndex = rows.Select((l, i) => (l.Id, i)).ToDictionary(x => x.Id, x => x.i);
 
         var buckets = new List<Risk>[rows.Count, columns.Count];
+        var levels = new Level?[rows.Count, columns.Count];
         for (var r = 0; r < rows.Count; r++)
         {
             for (var c = 0; c < columns.Count; c++)
             {
                 buckets[r, c] = [];
+                levels[r, c] = HeatMap.Resolve(doc, rows[r].Id, columns[c].Id);
             }
         }
 
         foreach (var risk in doc.Risks)
         {
-            if (rowIndex.TryGetValue(risk.DifficultyLevelId, out var r) && colIndex.TryGetValue(risk.ValueLevelId, out var c))
+            if (rowIndex.TryGetValue(risk.ImpactLevelId, out var r) && colIndex.TryGetValue(risk.ProbabilityLevelId, out var c))
             {
                 buckets[r, c].Add(risk);
             }
@@ -64,12 +71,10 @@ public sealed class PriorityMatrix
         {
             for (var c = 0; c < columns.Count; c++)
             {
-                cells[r, c] = [.. buckets[r, c]
-                    .OrderByDescending(x => riskOrders.TryGetValue(x.RiskLevelId, out var o) ? o : int.MinValue)
-                    .ThenBy(x => x.Title, StringComparer.CurrentCultureIgnoreCase)];
+                cells[r, c] = [.. buckets[r, c].OrderBy(x => x.Title, StringComparer.CurrentCultureIgnoreCase)];
             }
         }
 
-        return new PriorityMatrix(columns, rows, cells);
+        return new PriorityMatrix(columns, rows, cells, levels);
     }
 }

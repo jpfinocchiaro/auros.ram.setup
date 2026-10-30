@@ -74,6 +74,17 @@
             </DataTemplate>
           </ItemsControl.ItemTemplate>
         </ItemsControl>
+
+        <!-- El nivel de riesgo no se elige: resulta del impacto y la probabilidad (mapa de calor). -->
+        <Border Classes="card" Padding="12">
+          <DockPanel>
+            <ContentControl DockPanel.Dock="Right" Content="{Binding RiskLevel}" VerticalAlignment="Center" />
+            <StackPanel Spacing="2">
+              <TextBlock Text="{Binding RiskLevelLabel}" FontWeight="SemiBold" />
+              <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{x:Static r:Strings.Risk_LevelFromHeatMap}" />
+            </StackPanel>
+          </DockPanel>
+        </Border>
       </StackPanel>
     </ScrollViewer>
   </DockPanel>

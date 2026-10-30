@@ -9,11 +9,14 @@ namespace Auros.Ram.Core.Serialization;
 /// <summary>
 /// RNF-63: exportación e importación del contenido completo en JSON.
 /// El esquema está documentado en docs/formato-json.md y se versiona con <see cref="FormatVersion"/>.
+/// Versión 3: riesgos clasificados por impacto y probabilidad, con mapa de calor. Las versiones 1 y 2
+/// (valor agregado y dificultad) fueron de prueba y ya no se importan.
 /// </summary>
 public static class JsonExchange
 {
     public const string FormatId = "auros.ram/matrix";
-    public const int FormatVersion = 1;
+    public const int FormatVersion = 3;
+    public const int OldestSupportedVersion = 3;
 
     private static readonly JsonSerializerOptions Options = new()
     {
@@ -34,22 +37,26 @@ public static class JsonExchange
             Project = new ProjectDto
             {
                 Name = p.Name,
-                Client = p.Client,
-                Consultancy = p.Consultancy,
+                Company = p.Company,
                 Date = p.Date,
                 Status = p.Status,
-                ConsultancyLogo = p.ConsultancyLogo,
-                ClientLogo = p.ClientLogo,
+                CompanyLogo = p.CompanyLogo,
                 RiskScaleId = p.RiskScaleId,
-                ValueScaleId = p.ValueScaleId,
-                DifficultyScaleId = p.DifficultyScaleId,
+                ImpactScaleId = p.ImpactScaleId,
+                ProbabilityScaleId = p.ProbabilityScaleId,
+                HeatMap = [.. p.HeatMap.Select(c => new HeatCellDto
+                {
+                    ImpactLevelId = c.ImpactLevelId,
+                    ProbabilityLevelId = c.ProbabilityLevelId,
+                    RiskLevelId = c.RiskLevelId,
+                })],
             },
             Scales = [.. doc.Scales.Select(s => new ScaleDto
             {
                 Id = s.Id,
                 Name = s.Name,
                 Type = s.Type,
-                Levels = [.. s.OrderedLevels.Select(l => new LevelDto { Id = l.Id, Name = l.Name, Color = l.Color, Order = l.Order })],
+                Levels = [.. s.OrderedLevels.Select(l => new LevelDto { Id = l.Id, Name = l.Name, Color = l.Color, TextColor = l.TextColor, Order = l.Order })],
             })],
             Risks = [.. doc.Risks.Select(r => new RiskDto
             {
@@ -57,12 +64,10 @@ public static class JsonExchange
                 Title = r.Title,
                 ShortDescription = r.ShortDescription,
                 LongDescription = r.LongDescription,
-                RiskLevelId = r.RiskLevelId,
-                ValueLevelId = r.ValueLevelId,
-                DifficultyLevelId = r.DifficultyLevelId,
-                RiskJustification = r.RiskJustification,
-                ValueJustification = r.ValueJustification,
-                DifficultyJustification = r.DifficultyJustification,
+                ImpactLevelId = r.ImpactLevelId,
+                ProbabilityLevelId = r.ProbabilityLevelId,
+                ImpactJustification = r.ImpactJustification,
+                ProbabilityJustification = r.ProbabilityJustification,
                 CreatedUtc = r.CreatedUtc,
                 ModifiedUtc = r.ModifiedUtc,
             })],
@@ -93,12 +98,22 @@ public static class JsonExchange
             throw new DomainException(Messages.Error_JsonNewerVersion);
         }
 
+        if (dto.FormatVersion < OldestSupportedVersion)
+        {
+            throw new DomainException(Messages.Error_JsonObsoleteVersion);
+        }
+
         var scales = (dto.Scales ?? []).Select(s => new Scale
         {
             Id = s.Id,
             Name = s.Name ?? "",
             Type = s.Type,
-            Levels = [.. (s.Levels ?? []).Select(l => new Level { Id = l.Id, Name = l.Name ?? "", Color = Palette.Normalize(l.Color ?? ""), Order = l.Order })],
+            Levels = [.. (s.Levels ?? []).Select(l =>
+            {
+                var color = Palette.Normalize(l.Color ?? "");
+                var text = l.TextColor is null ? Palette.ContrastingText(color) : Palette.Normalize(l.TextColor);
+                return new Level { Id = l.Id, Name = l.Name ?? "", Color = color, TextColor = text, Order = l.Order };
+            })],
         }).ToList();
         foreach (var scale in scales)
         {
@@ -109,19 +124,20 @@ public static class JsonExchange
         var project = new ProjectInfo
         {
             Name = p.Name ?? "",
-            Client = p.Client ?? "",
-            Consultancy = p.Consultancy ?? "",
+            Company = p.Company ?? "",
             Date = p.Date ?? DateOnly.FromDateTime(DateTime.Today),
             Status = p.Status,
-            ConsultancyLogo = p.ConsultancyLogo,
-            ClientLogo = p.ClientLogo,
+            CompanyLogo = p.CompanyLogo,
             RiskScaleId = p.RiskScaleId,
-            ValueScaleId = p.ValueScaleId,
-            DifficultyScaleId = p.DifficultyScaleId,
+            ImpactScaleId = p.ImpactScaleId,
+            ProbabilityScaleId = p.ProbabilityScaleId,
         };
 
         var doc = new RiskMatrixDocument(project, scales, []);
         Validation.ValidateProject(project, doc);
+        project.HeatMap = HeatMap.Prune(
+            [.. (p.HeatMap ?? []).Select(c => new HeatCell(c.ImpactLevelId, c.ProbabilityLevelId, c.RiskLevelId))],
+            doc.ProjectScale(ScaleType.Risk), doc.ProjectScale(ScaleType.Impact), doc.ProjectScale(ScaleType.Probability));
 
         var risks = (dto.Risks ?? []).Select(r => new Risk
         {
@@ -129,12 +145,10 @@ public static class JsonExchange
             Title = r.Title ?? "",
             ShortDescription = r.ShortDescription ?? "",
             LongDescription = r.LongDescription ?? "",
-            RiskLevelId = r.RiskLevelId,
-            ValueLevelId = r.ValueLevelId,
-            DifficultyLevelId = r.DifficultyLevelId,
-            RiskJustification = r.RiskJustification ?? "",
-            ValueJustification = r.ValueJustification ?? "",
-            DifficultyJustification = r.DifficultyJustification ?? "",
+            ImpactLevelId = r.ImpactLevelId,
+            ProbabilityLevelId = r.ProbabilityLevelId,
+            ImpactJustification = r.ImpactJustification ?? "",
+            ProbabilityJustification = r.ProbabilityJustification ?? "",
             CreatedUtc = r.CreatedUtc ?? DateTime.UtcNow,
             ModifiedUtc = r.ModifiedUtc ?? DateTime.UtcNow,
         }).ToList();
@@ -168,15 +182,21 @@ public static class JsonExchange
     private sealed class ProjectDto
     {
         public string? Name { get; set; }
-        public string? Client { get; set; }
-        public string? Consultancy { get; set; }
+        public string? Company { get; set; }
         public DateOnly? Date { get; set; }
         public ProjectStatus Status { get; set; }
-        public byte[]? ConsultancyLogo { get; set; }
-        public byte[]? ClientLogo { get; set; }
+        public byte[]? CompanyLogo { get; set; }
         public Guid? RiskScaleId { get; set; }
-        public Guid? ValueScaleId { get; set; }
-        public Guid? DifficultyScaleId { get; set; }
+        public Guid? ImpactScaleId { get; set; }
+        public Guid? ProbabilityScaleId { get; set; }
+        public List<HeatCellDto>? HeatMap { get; set; }
+    }
+
+    private sealed class HeatCellDto
+    {
+        public Guid ImpactLevelId { get; set; }
+        public Guid ProbabilityLevelId { get; set; }
+        public Guid RiskLevelId { get; set; }
     }
 
     private sealed class ScaleDto
@@ -192,6 +212,7 @@ public static class JsonExchange
         public Guid Id { get; set; }
         public string? Name { get; set; }
         public string? Color { get; set; }
+        public string? TextColor { get; set; }
         public int Order { get; set; }
     }
 
@@ -201,12 +222,10 @@ public static class JsonExchange
         public string? Title { get; set; }
         public string? ShortDescription { get; set; }
         public string? LongDescription { get; set; }
-        public Guid RiskLevelId { get; set; }
-        public Guid ValueLevelId { get; set; }
-        public Guid DifficultyLevelId { get; set; }
-        public string? RiskJustification { get; set; }
-        public string? ValueJustification { get; set; }
-        public string? DifficultyJustification { get; set; }
+        public Guid ImpactLevelId { get; set; }
+        public Guid ProbabilityLevelId { get; set; }
+        public string? ImpactJustification { get; set; }
+        public string? ProbabilityJustification { get; set; }
         public DateTime? CreatedUtc { get; set; }
         public DateTime? ModifiedUtc { get; set; }
     }

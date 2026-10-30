@@ -6,7 +6,7 @@ using ClosedXML.Excel;
 
 namespace Auros.Ram.Export;
 
-/// <summary>Excel con formato (RNF-61): proyecto, ficha resumen, matriz de priorización y escalas.</summary>
+/// <summary>Excel con formato (RNF-61): proyecto, ficha resumen, matriz de riesgo y escalas.</summary>
 public static class XlsxExport
 {
     public static void Write(RiskMatrixDocument doc, string path)
@@ -28,13 +28,12 @@ public static class XlsxExport
         (string, string)[] rows =
         [
             (ExportText.Project_Name, p.Name),
-            (ExportText.Project_Client, p.Client),
-            (ExportText.Project_Consultancy, p.Consultancy),
+            (ExportText.Project_Company, p.Company),
             (ExportText.Project_Date, p.Date.ToString("d", Fmt.Culture)),
             (ExportText.Project_Status, p.Status.DisplayName()),
+            (ScaleType.Impact.DisplayName(), doc.ProjectScale(ScaleType.Impact)?.Name ?? ""),
+            (ScaleType.Probability.DisplayName(), doc.ProjectScale(ScaleType.Probability)?.Name ?? ""),
             (ScaleType.Risk.DisplayName(), doc.ProjectScale(ScaleType.Risk)?.Name ?? ""),
-            (ScaleType.Value.DisplayName(), doc.ProjectScale(ScaleType.Value)?.Name ?? ""),
-            (ScaleType.Difficulty.DisplayName(), doc.ProjectScale(ScaleType.Difficulty)?.Name ?? ""),
         ];
         for (var i = 0; i < rows.Length; i++)
         {
@@ -50,9 +49,9 @@ public static class XlsxExport
     {
         string[] headers =
         [
-            ExportText.Col_Number, ExportText.Col_Title, ExportText.Col_Short, ExportText.Col_Risk, ExportText.Col_Value,
-            ExportText.Col_Difficulty, ExportText.Col_Long, ExportText.Col_RiskJustification,
-            ExportText.Col_ValueJustification, ExportText.Col_DifficultyJustification,
+            ExportText.Col_Number, ExportText.Col_Title, ExportText.Col_Short, ExportText.Col_Risk, ExportText.Col_Impact,
+            ExportText.Col_Probability, ExportText.Col_Long, ExportText.Col_ImpactJustification,
+            ExportText.Col_ProbabilityJustification,
         ];
         for (var c = 0; c < headers.Length; c++)
         {
@@ -66,12 +65,11 @@ public static class XlsxExport
             ws.Cell(row, 2).Value = x.Risk.Title;
             ws.Cell(row, 3).Value = x.Risk.ShortDescription;
             Colored(ws.Cell(row, 4), x.RiskLevel);
-            Colored(ws.Cell(row, 5), x.ValueLevel);
-            Colored(ws.Cell(row, 6), x.DifficultyLevel);
+            Colored(ws.Cell(row, 5), x.ImpactLevel);
+            Colored(ws.Cell(row, 6), x.ProbabilityLevel);
             ws.Cell(row, 7).Value = x.Risk.LongDescription;
-            ws.Cell(row, 8).Value = x.Risk.RiskJustification;
-            ws.Cell(row, 9).Value = x.Risk.ValueJustification;
-            ws.Cell(row, 10).Value = x.Risk.DifficultyJustification;
+            ws.Cell(row, 8).Value = x.Risk.ImpactJustification;
+            ws.Cell(row, 9).Value = x.Risk.ProbabilityJustification;
             row++;
         }
 
@@ -79,7 +77,7 @@ public static class XlsxExport
         ws.Column(2).Width = 40;
         ws.Column(3).Width = 60;
         ws.Columns(4, 6).Width = 16;
-        ws.Columns(7, 10).Width = 60;
+        ws.Columns(7, 9).Width = 60;
         ws.Range(1, 1, Math.Max(row - 1, 1), headers.Length).Style.Alignment.WrapText = true;
         ws.Range(1, 1, Math.Max(row - 1, 1), headers.Length).Style.Alignment.Vertical = XLAlignmentVerticalValues.Top;
         ws.SheetView.FreezeRows(1);
@@ -89,13 +87,13 @@ public static class XlsxExport
         }
     }
 
-    /// <summary>Cada nivel de dificultad ocupa un bloque de filas; cada riesgo es una celda con su color.</summary>
+    /// <summary>Cada nivel de impacto ocupa un bloque de filas; el bloque de cada celda toma el color de su nivel de riesgo.</summary>
     private static void WriteMatrix(IXLWorksheet ws, RiskMatrixDocument doc)
     {
         var m = PriorityMatrix.Build(doc);
         var block = Math.Max(1, m.MaxCellCount);
 
-        ws.Cell(1, 2).Value = ExportText.Axis_Value;
+        ws.Cell(1, 2).Value = ExportText.Axis_Probability;
         ws.Range(1, 2, 1, m.Columns.Count + 1).Merge().Style.Font.SetBold().Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
         for (var c = 0; c < m.Columns.Count; c++)
         {
@@ -103,7 +101,7 @@ public static class XlsxExport
             ws.Column(c + 2).Width = 38;
         }
 
-        Header(ws.Cell(2, 1), ExportText.Axis_Difficulty);
+        Header(ws.Cell(2, 1), ExportText.Axis_Impact);
         ws.Column(1).Width = 26;
 
         for (var r = 0; r < m.Rows.Count; r++)
@@ -115,17 +113,19 @@ public static class XlsxExport
 
             for (var c = 0; c < m.Columns.Count; c++)
             {
+                var level = m.LevelAt(r, c);
+                if (level is not null)
+                {
+                    var area = ws.Range(top, c + 2, top + block - 1, c + 2);
+                    area.Style.Fill.BackgroundColor = XLColor.FromHtml(level.Color);
+                    area.Style.Font.FontColor = XLColor.FromHtml(level.TextColor);
+                }
+
                 var cellRisks = m[r, c];
                 for (var i = 0; i < cellRisks.Count; i++)
                 {
-                    var level = doc.LevelOf(cellRisks[i], ScaleType.Risk);
                     var cell = ws.Cell(top + i, c + 2);
                     cell.Value = level is null ? cellRisks[i].Title : $"[{Fmt.Abbrev(level)}] {cellRisks[i].Title}";
-                    if (level is not null)
-                    {
-                        Fill(cell, level.Color);
-                    }
-
                     cell.Style.Alignment.WrapText = true;
                 }
             }
@@ -147,14 +147,14 @@ public static class XlsxExport
             {
                 var cell = ws.Cell(legendRow, col++);
                 cell.Value = $"[{Fmt.Abbrev(level)}] {level.Name}";
-                Fill(cell, level.Color);
+                Fill(cell, level);
             }
         }
     }
 
     private static void WriteScales(IXLWorksheet ws, RiskMatrixDocument doc)
     {
-        string[] headers = [ExportText.Col_Scale, ExportText.Col_Type, ExportText.Col_Order, ExportText.Col_Level, ExportText.Col_Color];
+        string[] headers = [ExportText.Col_Scale, ExportText.Col_Type, ExportText.Col_Order, ExportText.Col_Level, ExportText.Col_Color, ExportText.Col_TextColor];
         for (var c = 0; c < headers.Length; c++)
         {
             Header(ws.Cell(1, c + 1), headers[c]);
@@ -170,6 +170,7 @@ public static class XlsxExport
                 ws.Cell(row, 3).Value = level.Order;
                 Colored(ws.Cell(row, 4), level);
                 ws.Cell(row, 5).Value = level.Color;
+                ws.Cell(row, 6).Value = level.TextColor;
                 row++;
             }
         }
@@ -187,13 +188,13 @@ public static class XlsxExport
     private static void Colored(IXLCell cell, Level level)
     {
         cell.Value = level.Name;
-        Fill(cell, level.Color);
+        Fill(cell, level);
         cell.Style.Font.Bold = true;
     }
 
-    private static void Fill(IXLCell cell, string hex)
+    private static void Fill(IXLCell cell, Level level)
     {
-        cell.Style.Fill.BackgroundColor = XLColor.FromHtml(hex);
-        cell.Style.Font.FontColor = XLColor.FromHtml(Palette.ContrastingText(hex));
+        cell.Style.Fill.BackgroundColor = XLColor.FromHtml(level.Color);
+        cell.Style.Font.FontColor = XLColor.FromHtml(level.TextColor);
     }
 }

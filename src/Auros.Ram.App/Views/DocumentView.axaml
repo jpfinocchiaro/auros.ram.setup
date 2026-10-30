@@ -6,7 +6,7 @@
              x:Class="Auros.Ram.App.Views.DocumentView"
              x:DataType="vm:DocumentViewModel">
   <Panel>
-    <TabControl SelectedIndex="{Binding SelectedSection}" Padding="0" Margin="8,0,8,0" IsVisible="{Binding !IsLocked}">
+    <TabControl Classes="rail" SelectedIndex="{Binding SelectedSection}" IsVisible="{Binding !IsLocked}">
       <TabItem Header="{x:Static r:Strings.Section_Project}">
         <views:ProjectView DataContext="{Binding Project}" />
       </TabItem>

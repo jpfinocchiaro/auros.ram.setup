@@ -3,30 +3,79 @@
              xmlns:vm="using:Auros.Ram.App.ViewModels"
              x:Class="Auros.Ram.App.App"
              RequestedThemeVariant="Default">
-  <!-- RNF-45: el tema sigue la preferencia claro/oscuro del sistema operativo. -->
+  <!-- RNF-45: el tema sigue la preferencia claro/oscuro del sistema operativo.
+
+       Identidad visual: una hoja de trabajo de relevamiento. La interfaz se mantiene quieta
+       (papel, tinta, grafito, reglas) para que los únicos colores fuertes sean los de las
+       escalas del usuario. El petróleo es el único color propio: acciones y selección.
+       Se eligió porque no se confunde con ningún color de la paleta de niveles. -->
 
   <Application.Resources>
     <ResourceDictionary>
+      <FontFamily x:Key="ContentControlThemeFontFamily">fonts:Plex#IBM Plex Sans</FontFamily>
+      <FontFamily x:Key="CondensedFontFamily">fonts:Plex#IBM Plex Sans Condensed</FontFamily>
+      <x:Double x:Key="ControlContentThemeFontSize">14</x:Double>
+      <CornerRadius x:Key="ControlCornerRadius">3</CornerRadius>
+
       <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
+          <!-- Papel, hoja, tinta, grafito, regla, petróleo -->
+          <SolidColorBrush x:Key="SurfaceAltBrush" Color="#F5F6F3" />
           <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF" />
-          <SolidColorBrush x:Key="SurfaceAltBrush" Color="#F4F5F7" />
-          <SolidColorBrush x:Key="BorderSubtleBrush" Color="#D9DCE1" />
-          <SolidColorBrush x:Key="MutedTextBrush" Color="#5A606B" />
-          <SolidColorBrush x:Key="AccentBrush" Color="#1E5BB8" />
+          <SolidColorBrush x:Key="InkBrush" Color="#1C2733" />
+          <SolidColorBrush x:Key="MutedTextBrush" Color="#5E6A75" />
+          <SolidColorBrush x:Key="BorderSubtleBrush" Color="#D9DDD8" />
+          <SolidColorBrush x:Key="AccentBrush" Color="#1D5866" />
+          <SolidColorBrush x:Key="AccentSoftBrush" Color="#E2EDEF" />
+          <SolidColorBrush x:Key="RailBrush" Color="#ECEEEA" />
           <SolidColorBrush x:Key="ErrorBrush" Color="#B3261E" />
-          <SolidColorBrush x:Key="WarningBackBrush" Color="#FFF4E0" />
-          <SolidColorBrush x:Key="OverlayBrush" Color="#E6F4F5F7" />
+          <SolidColorBrush x:Key="WarningBackBrush" Color="#FBF1DC" />
+          <SolidColorBrush x:Key="OverlayBrush" Color="#E6F5F6F3" />
+
+          <SolidColorBrush x:Key="ButtonBackground" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#EEF1ED" />
+          <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#E2E6E1" />
+          <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#F5F6F3" />
+          <SolidColorBrush x:Key="ButtonBorderBrush" Color="#C8CEC8" />
+          <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="#9FA8A0" />
+          <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#9FA8A0" />
+          <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="#E1E4E0" />
+          <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="#9AA3AB" />
+          <SolidColorBrush x:Key="ToggleButtonBackground" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="ToggleButtonBackgroundPointerOver" Color="#EEF1ED" />
+          <SolidColorBrush x:Key="ToggleButtonBorderBrush" Color="#C8CEC8" />
+          <SolidColorBrush x:Key="ComboBoxBackgroundDisabled" Color="#F5F6F3" />
+          <SolidColorBrush x:Key="ComboBoxBorderBrushDisabled" Color="#DDE1DC" />
+          <SolidColorBrush x:Key="ComboBoxForegroundDisabled" Color="#7D8790" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
-          <SolidColorBrush x:Key="SurfaceBrush" Color="#1F2125" />
-          <SolidColorBrush x:Key="SurfaceAltBrush" Color="#2A2D33" />
-          <SolidColorBrush x:Key="BorderSubtleBrush" Color="#3D414A" />
-          <SolidColorBrush x:Key="MutedTextBrush" Color="#A9AFBA" />
-          <SolidColorBrush x:Key="AccentBrush" Color="#7FB0FF" />
+          <SolidColorBrush x:Key="SurfaceAltBrush" Color="#161B20" />
+          <SolidColorBrush x:Key="SurfaceBrush" Color="#1E252C" />
+          <SolidColorBrush x:Key="InkBrush" Color="#E6EAEE" />
+          <SolidColorBrush x:Key="MutedTextBrush" Color="#9AA6B1" />
+          <SolidColorBrush x:Key="BorderSubtleBrush" Color="#2F3943" />
+          <SolidColorBrush x:Key="AccentBrush" Color="#7CC0CE" />
+          <SolidColorBrush x:Key="AccentSoftBrush" Color="#1F3A41" />
+          <SolidColorBrush x:Key="RailBrush" Color="#12171B" />
           <SolidColorBrush x:Key="ErrorBrush" Color="#FF8A80" />
           <SolidColorBrush x:Key="WarningBackBrush" Color="#3A2F1A" />
-          <SolidColorBrush x:Key="OverlayBrush" Color="#E61F2125" />
+          <SolidColorBrush x:Key="OverlayBrush" Color="#E6161B20" />
+
+          <SolidColorBrush x:Key="ButtonBackground" Color="#1E252C" />
+          <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#26303A" />
+          <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#2C3742" />
+          <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#1A2026" />
+          <SolidColorBrush x:Key="ButtonBorderBrush" Color="#3A4652" />
+          <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="#55636F" />
+          <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#55636F" />
+          <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="#2A333C" />
+          <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="#5F6B76" />
+          <SolidColorBrush x:Key="ToggleButtonBackground" Color="#1E252C" />
+          <SolidColorBrush x:Key="ToggleButtonBackgroundPointerOver" Color="#26303A" />
+          <SolidColorBrush x:Key="ToggleButtonBorderBrush" Color="#3A4652" />
+          <SolidColorBrush x:Key="ComboBoxBackgroundDisabled" Color="#1A2026" />
+          <SolidColorBrush x:Key="ComboBoxBorderBrushDisabled" Color="#2A333C" />
+          <SolidColorBrush x:Key="ComboBoxForegroundDisabled" Color="#76838E" />
         </ResourceDictionary>
       </ResourceDictionary.ThemeDictionaries>
     </ResourceDictionary>
@@ -42,14 +91,24 @@
   </Application.DataTemplates>
 
   <Application.Styles>
-    <FluentTheme />
-    <Style Selector="Border.chip">
-      <Setter Property="CornerRadius" Value="4" />
-      <Setter Property="Padding" Value="8,3" />
-      <Setter Property="HorizontalAlignment" Value="Left" />
+    <FluentTheme>
+      <FluentTheme.Palettes>
+        <ColorPaletteResources x:Key="Light" Accent="#1D5866" BaseHigh="#1C2733" RegionColor="#F5F6F3" ErrorText="#B3261E" />
+        <ColorPaletteResources x:Key="Dark" Accent="#2C7383" BaseHigh="#E6EAEE" RegionColor="#161B20" ErrorText="#FF8A80" />
+      </FluentTheme.Palettes>
+    </FluentTheme>
+
+    <!-- Escala tipográfica: 12 / 14 / 16 / 20 / 28. Semibold para jerarquía, nunca mayúsculas. -->
+    <Style Selector="Window">
+      <Setter Property="Foreground" Value="{DynamicResource InkBrush}" />
+    </Style>
+    <Style Selector="TextBlock.display">
+      <Setter Property="FontSize" Value="28" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="LetterSpacing" Value="-0.3" />
     </Style>
     <Style Selector="TextBlock.h1">
-      <Setter Property="FontSize" Value="22" />
+      <Setter Property="FontSize" Value="20" />
       <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
     <Style Selector="TextBlock.h2">
@@ -61,6 +120,7 @@
     </Style>
     <Style Selector="TextBlock.label">
       <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="FontSize" Value="13" />
       <Setter Property="Margin" Value="0,0,0,4" />
     </Style>
     <Style Selector="TextBlock.error">
@@ -68,12 +128,77 @@
       <Setter Property="TextWrapping" Value="Wrap" />
       <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
+
+    <!-- Hoja: superficie de trabajo blanca con una regla fina. Sin sombras. -->
     <Style Selector="Border.card">
       <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
       <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}" />
       <Setter Property="BorderThickness" Value="1" />
-      <Setter Property="CornerRadius" Value="6" />
-      <Setter Property="Padding" Value="16" />
+      <Setter Property="CornerRadius" Value="2" />
+      <Setter Property="Padding" Value="20" />
+    </Style>
+    <Style Selector="Border.chip">
+      <Setter Property="CornerRadius" Value="2" />
+      <Setter Property="Padding" Value="7,2" />
+      <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+    <!-- Muestra de color de un nivel: cuadrado chico junto al nombre, en ejes y leyendas. -->
+    <Style Selector="Border.swatch">
+      <Setter Property="Width" Value="10" />
+      <Setter Property="Height" Value="10" />
+      <Setter Property="CornerRadius" Value="1" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- Pestañas de archivos abiertos: discretas, arriba. -->
+    <Style Selector="TabControl.files > TabItem">
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="MinHeight" Value="36" />
+      <Setter Property="Padding" Value="14,0,6,0" />
+    </Style>
+
+    <!-- Pestañas internas de una sección (informes): del tamaño del texto, no de un título. -->
+    <Style Selector="TabControl.sub > TabItem">
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="MinHeight" Value="40" />
+      <Setter Property="Padding" Value="0,0,24,0" />
+    </Style>
+    <Style Selector="TabControl.sub > TabItem:selected">
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <!-- Riel de secciones a la izquierda. La selección es una barra de petróleo y texto en tinta. -->
+    <Style Selector="TabControl.rail">
+      <Setter Property="TabStripPlacement" Value="Left" />
+      <Setter Property="Padding" Value="0" />
+    </Style>
+    <Style Selector="TabControl.rail">
+      <Setter Property="Background" Value="{DynamicResource RailBrush}" />
+    </Style>
+    <Style Selector="TabControl.rail /template/ ContentPresenter#PART_SelectedContentHost">
+      <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}" />
+      <Setter Property="BorderThickness" Value="1,0,0,0" />
+    </Style>
+    <Style Selector="TabControl.rail /template/ ItemsPresenter#PART_ItemsPresenter">
+      <Setter Property="Margin" Value="0,12,0,0" />
+    </Style>
+    <Style Selector="TabControl.rail /template/ Border#PART_BorderSeparator">
+      <Setter Property="Background" Value="{DynamicResource BorderSubtleBrush}" />
+    </Style>
+    <Style Selector="TabControl.rail > TabItem">
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="MinHeight" Value="38" />
+      <Setter Property="MinWidth" Value="176" />
+      <Setter Property="Padding" Value="20,0,16,0" />
+      <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+    </Style>
+    <Style Selector="TabControl.rail > TabItem:selected">
+      <Setter Property="Foreground" Value="{DynamicResource InkBrush}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TabControl.rail > TabItem:selected /template/ Border#PART_LayoutRoot">
+      <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
     </Style>
   </Application.Styles>
 </Application>

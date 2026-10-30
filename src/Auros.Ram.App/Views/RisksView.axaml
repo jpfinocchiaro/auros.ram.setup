@@ -4,7 +4,7 @@
              xmlns:r="using:Auros.Ram.App.Resources"
              x:Class="Auros.Ram.App.Views.RisksView"
              x:DataType="vm:RisksViewModel">
-  <DockPanel Margin="8,12">
+  <DockPanel Margin="24,20">
     <!-- Búsqueda, filtros por dimensión y orden (RF-12) -->
     <Border DockPanel.Dock="Top" Classes="card" Padding="12" Margin="0,0,0,10">
       <Grid ColumnDefinitions="2*,12,*,12,*,12,*,12,*,Auto,Auto" RowDefinitions="Auto,Auto">
@@ -12,10 +12,10 @@
         <TextBox Grid.Row="1" Text="{Binding SearchText}" Watermark="{x:Static r:Strings.Risks_SearchHint}" />
         <TextBlock Grid.Column="2" Classes="label" Text="{x:Static r:Strings.ScaleType_Risk}" />
         <ComboBox Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch" ItemsSource="{Binding RiskFilters}" SelectedItem="{Binding RiskFilter}" />
-        <TextBlock Grid.Column="4" Classes="label" Text="{x:Static r:Strings.ScaleType_Value}" />
-        <ComboBox Grid.Column="4" Grid.Row="1" HorizontalAlignment="Stretch" ItemsSource="{Binding ValueFilters}" SelectedItem="{Binding ValueFilter}" />
-        <TextBlock Grid.Column="6" Classes="label" Text="{x:Static r:Strings.Risks_DifficultyShort}" />
-        <ComboBox Grid.Column="6" Grid.Row="1" HorizontalAlignment="Stretch" ItemsSource="{Binding DifficultyFilters}" SelectedItem="{Binding DifficultyFilter}" />
+        <TextBlock Grid.Column="4" Classes="label" Text="{x:Static r:Strings.ScaleType_Impact}" />
+        <ComboBox Grid.Column="4" Grid.Row="1" HorizontalAlignment="Stretch" ItemsSource="{Binding ImpactFilters}" SelectedItem="{Binding ImpactFilter}" />
+        <TextBlock Grid.Column="6" Classes="label" Text="{x:Static r:Strings.Risks_ProbabilityShort}" />
+        <ComboBox Grid.Column="6" Grid.Row="1" HorizontalAlignment="Stretch" ItemsSource="{Binding ProbabilityFilters}" SelectedItem="{Binding ProbabilityFilter}" />
         <TextBlock Grid.Column="8" Classes="label" Text="{x:Static r:Strings.Risks_SortBy}" />
         <ComboBox Grid.Column="8" Grid.Row="1" HorizontalAlignment="Stretch" ItemsSource="{Binding SortOptions}" SelectedItem="{Binding SortBy}" />
         <ToggleButton Grid.Column="9" Grid.Row="1" Margin="6,0,0,0" IsChecked="{Binding Descending}"
@@ -37,25 +37,27 @@
 
     <Border Classes="card" Padding="0">
       <DockPanel>
-        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,130,130,130" Margin="12,8">
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,130,130,130" Margin="28,10,12,8">
           <TextBlock Classes="label" Text="{x:Static r:Strings.Risks_ColRisk}" />
           <TextBlock Grid.Column="1" Classes="label" Text="{x:Static r:Strings.ScaleType_Risk}" />
-          <TextBlock Grid.Column="2" Classes="label" Text="{x:Static r:Strings.ScaleType_Value}" />
-          <TextBlock Grid.Column="3" Classes="label" Text="{x:Static r:Strings.Risks_DifficultyShort}" />
+          <TextBlock Grid.Column="2" Classes="label" Text="{x:Static r:Strings.ScaleType_Impact}" />
+          <TextBlock Grid.Column="3" Classes="label" Text="{x:Static r:Strings.Risks_ProbabilityShort}" />
         </Grid>
         <Panel>
           <ListBox ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" DoubleTapped="OnRiskDoubleTapped" KeyDown="OnListKeyDown"
                    Background="Transparent">
             <ListBox.ItemTemplate>
               <DataTemplate x:DataType="vm:RiskRow">
-                <Grid ColumnDefinitions="*,130,130,130" Margin="0,4">
-                  <StackPanel Spacing="2" Margin="0,0,12,0">
+                <Grid ColumnDefinitions="Auto,*,130,130,130" Margin="0,4">
+                  <!-- Barra del color del nivel de riesgo: se lee la gravedad de la lista de un vistazo. -->
+                  <Border Width="4" CornerRadius="1" Margin="0,0,12,0" Background="{Binding RiskLevel.Background, FallbackValue=Transparent}" />
+                  <StackPanel Grid.Column="1" Spacing="2" Margin="0,0,12,0">
                     <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                     <TextBlock Classes="muted" FontSize="12" Text="{Binding ShortDescription}" TextTrimming="CharacterEllipsis" MaxLines="2" TextWrapping="Wrap" />
                   </StackPanel>
-                  <ContentControl Grid.Column="1" Content="{Binding RiskLevel}" VerticalAlignment="Center" />
-                  <ContentControl Grid.Column="2" Content="{Binding ValueLevel}" VerticalAlignment="Center" />
-                  <ContentControl Grid.Column="3" Content="{Binding DifficultyLevel}" VerticalAlignment="Center" />
+                  <ContentControl Grid.Column="2" Content="{Binding RiskLevel}" VerticalAlignment="Center" />
+                  <ContentControl Grid.Column="3" Content="{Binding ImpactLevel}" VerticalAlignment="Center" />
+                  <ContentControl Grid.Column="4" Content="{Binding ProbabilityLevel}" VerticalAlignment="Center" />
                 </Grid>
               </DataTemplate>
             </ListBox.ItemTemplate>

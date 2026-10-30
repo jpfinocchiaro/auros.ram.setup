@@ -8,7 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace Auros.Ram.App.ViewModels;
 
-public sealed record RiskRow(Risk Risk, LevelChip? RiskLevel, LevelChip? ValueLevel, LevelChip? DifficultyLevel)
+public sealed record RiskRow(Risk Risk, LevelChip? RiskLevel, LevelChip? ImpactLevel, LevelChip? ProbabilityLevel)
 {
     public string Title => Risk.Title;
     public string ShortDescription => Risk.ShortDescription;
@@ -26,8 +26,8 @@ public sealed partial class RisksViewModel : ObservableObject
         SortOptions =
         [
             new(ScaleType.Risk.DisplayName(), RiskSortField.Risk),
-            new(ScaleType.Value.DisplayName(), RiskSortField.Value),
-            new(ScaleType.Difficulty.DisplayName(), RiskSortField.Difficulty),
+            new(ScaleType.Impact.DisplayName(), RiskSortField.Impact),
+            new(ScaleType.Probability.DisplayName(), RiskSortField.Probability),
             new(Strings.Risks_SortTitle, RiskSortField.Title),
             new(Strings.Risks_SortCreated, RiskSortField.Created),
         ];
@@ -37,14 +37,14 @@ public sealed partial class RisksViewModel : ObservableObject
 
     public ObservableCollection<RiskRow> Items { get; } = [];
     public ObservableCollection<FilterOption> RiskFilters { get; } = [];
-    public ObservableCollection<FilterOption> ValueFilters { get; } = [];
-    public ObservableCollection<FilterOption> DifficultyFilters { get; } = [];
+    public ObservableCollection<FilterOption> ImpactFilters { get; } = [];
+    public ObservableCollection<FilterOption> ProbabilityFilters { get; } = [];
     public IReadOnlyList<Choice<RiskSortField>> SortOptions { get; }
 
     [ObservableProperty] private string _searchText = "";
     [ObservableProperty] private FilterOption? _riskFilter;
-    [ObservableProperty] private FilterOption? _valueFilter;
-    [ObservableProperty] private FilterOption? _difficultyFilter;
+    [ObservableProperty] private FilterOption? _impactFilter;
+    [ObservableProperty] private FilterOption? _probabilityFilter;
     [ObservableProperty] private Choice<RiskSortField> _sortBy;
     [ObservableProperty] private bool _descending = true;
     [ObservableProperty] private RiskRow? _selected;
@@ -54,8 +54,8 @@ public sealed partial class RisksViewModel : ObservableObject
 
     partial void OnSearchTextChanged(string value) => Refresh();
     partial void OnRiskFilterChanged(FilterOption? value) => Refresh();
-    partial void OnValueFilterChanged(FilterOption? value) => Refresh();
-    partial void OnDifficultyFilterChanged(FilterOption? value) => Refresh();
+    partial void OnImpactFilterChanged(FilterOption? value) => Refresh();
+    partial void OnProbabilityFilterChanged(FilterOption? value) => Refresh();
     partial void OnSortByChanged(Choice<RiskSortField> value) => Refresh();
     partial void OnDescendingChanged(bool value) => Refresh();
 
@@ -65,8 +65,8 @@ public sealed partial class RisksViewModel : ObservableObject
         _loading = true;
         var doc = _owner.Document;
         RiskFilter = Rebuild(RiskFilters, doc.ProjectScale(ScaleType.Risk), RiskFilter);
-        ValueFilter = Rebuild(ValueFilters, doc.ProjectScale(ScaleType.Value), ValueFilter);
-        DifficultyFilter = Rebuild(DifficultyFilters, doc.ProjectScale(ScaleType.Difficulty), DifficultyFilter);
+        ImpactFilter = Rebuild(ImpactFilters, doc.ProjectScale(ScaleType.Impact), ImpactFilter);
+        ProbabilityFilter = Rebuild(ProbabilityFilters, doc.ProjectScale(ScaleType.Probability), ProbabilityFilter);
         _loading = false;
         Refresh();
         OnPropertyChanged(nameof(HasRisks));
@@ -85,8 +85,8 @@ public sealed partial class RisksViewModel : ObservableObject
         {
             Text = SearchText,
             RiskLevelId = RiskFilter?.LevelId,
-            ValueLevelId = ValueFilter?.LevelId,
-            DifficultyLevelId = DifficultyFilter?.LevelId,
+            ImpactLevelId = ImpactFilter?.LevelId,
+            ProbabilityLevelId = ProbabilityFilter?.LevelId,
             SortBy = SortBy.Value,
             Descending = Descending,
         };
@@ -102,9 +102,9 @@ public sealed partial class RisksViewModel : ObservableObject
 
         var rows = RiskQuery.Apply(doc, filter).Select(r => new RiskRow(
             r,
-            levels.GetValueOrDefault(r.RiskLevelId),
-            levels.GetValueOrDefault(r.ValueLevelId),
-            levels.GetValueOrDefault(r.DifficultyLevelId))).ToList();
+            doc.RiskLevelOf(r) is { } level ? levels.GetValueOrDefault(level.Id) : null,
+            levels.GetValueOrDefault(r.ImpactLevelId),
+            levels.GetValueOrDefault(r.ProbabilityLevelId))).ToList();
 
         Items.Clear();
         foreach (var row in rows)
@@ -145,8 +145,8 @@ public sealed partial class RisksViewModel : ObservableObject
         _loading = true;
         SearchText = "";
         RiskFilter = RiskFilters.FirstOrDefault();
-        ValueFilter = ValueFilters.FirstOrDefault();
-        DifficultyFilter = DifficultyFilters.FirstOrDefault();
+        ImpactFilter = ImpactFilters.FirstOrDefault();
+        ProbabilityFilter = ProbabilityFilters.FirstOrDefault();
         _loading = false;
         Refresh();
     }

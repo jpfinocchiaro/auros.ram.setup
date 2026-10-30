@@ -19,7 +19,7 @@ public static class TestAppBuilder
 {
     public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>()
         .UseSkia()
-        .WithInterFont()
+        .WithPlexFont()
         .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false })
         .LogToDelegate(BindingErrors.Add, LogEventLevel.Warning, LogArea.Binding);
 }
@@ -51,6 +51,11 @@ public class UiSmokeTests
     {
         AppPaths.UseRoot(Path.Combine(Path.GetTempPath(), "auros-ram-uitests", Guid.NewGuid().ToString("N")));
         BindingErrors.All.Clear();
+        // AUROS_THEME=Dark para revisar el tema oscuro en las capturas.
+        if (Environment.GetEnvironmentVariable("AUROS_THEME") == "Dark")
+        {
+            Application.Current!.RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Dark;
+        }
 
         var window = new MainWindow { Width = 1366, Height = 768 };
         var ui = new UiService(window);
@@ -164,31 +169,30 @@ public class UiSmokeTests
         var doc = RiskMatrixDocument.CreateNew(new ProjectInfo
         {
             Name = "Relevamiento de seguridad 2026",
-            Client = "ACME S.A.",
-            Consultancy = "Auros Consultores",
+            Company = "ACME S.A.",
         });
-        (string Title, int R, int V, int D)[] risks =
+        // Impacto y probabilidad: posición del nivel, 0 = el menor.
+        (string Title, int I, int P)[] risks =
         [
-            ("Cuentas de administrador compartidas", 3, 2, 0),
-            ("Sin copias de seguridad fuera del sitio", 2, 2, 1),
-            ("Contraseñas sin vencimiento", 1, 1, 0),
-            ("Parches de servidores atrasados", 2, 1, 1),
-            ("Falta de plan de continuidad", 3, 2, 2),
-            ("Inventario de activos incompleto", 0, 0, 1),
-            ("Registros de auditoría desactivados", 2, 2, 0),
-            ("Accesos de ex empleados vigentes", 3, 2, 0),
+            ("Cuentas de administrador compartidas", 4, 3),
+            ("Sin copias de seguridad fuera del sitio", 4, 1),
+            ("Contraseñas sin vencimiento", 2, 3),
+            ("Parches de servidores atrasados", 3, 3),
+            ("Falta de plan de continuidad", 4, 0),
+            ("Inventario de activos incompleto", 1, 2),
+            ("Registros de auditoría desactivados", 2, 2),
+            ("Accesos de ex empleados vigentes", 3, 4),
         ];
-        foreach (var (title, r, v, d) in risks)
+        foreach (var (title, i, p) in risks)
         {
             doc.AddRisk(new Risk
             {
                 Title = title,
                 ShortDescription = $"Resumen ejecutivo: {title.ToLowerInvariant()}.",
                 LongDescription = "Detalle del hallazgo, análisis del impacto y recomendación de mejora.",
-                RiskLevelId = doc.ProjectScale(ScaleType.Risk)!.OrderedLevels[r].Id,
-                ValueLevelId = doc.ProjectScale(ScaleType.Value)!.OrderedLevels[v].Id,
-                DifficultyLevelId = doc.ProjectScale(ScaleType.Difficulty)!.OrderedLevels[d].Id,
-                RiskJustification = r >= 2 ? "Expone información sensible de clientes." : "",
+                ImpactLevelId = doc.ProjectScale(ScaleType.Impact)!.OrderedLevels[i].Id,
+                ProbabilityLevelId = doc.ProjectScale(ScaleType.Probability)!.OrderedLevels[p].Id,
+                ImpactJustification = i >= 3 ? "Expone información sensible de clientes." : "",
             });
         }
 

@@ -4,41 +4,41 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="Col_Number" xml:space="preserve"><value>N°</value></data>
-  <data name="Col_Title" xml:space="preserve"><value>Título</value></data>
-  <data name="Col_Short" xml:space="preserve"><value>Descripción corta</value></data>
-  <data name="Col_Long" xml:space="preserve"><value>Descripción larga</value></data>
-  <data name="Col_Risk" xml:space="preserve"><value>Riesgo</value></data>
-  <data name="Col_Value" xml:space="preserve"><value>Valor agregado</value></data>
-  <data name="Col_Difficulty" xml:space="preserve"><value>Dificultad</value></data>
-  <data name="Col_RiskJustification" xml:space="preserve"><value>Justificación del riesgo</value></data>
-  <data name="Col_ValueJustification" xml:space="preserve"><value>Justificación del valor</value></data>
-  <data name="Col_DifficultyJustification" xml:space="preserve"><value>Justificación de la dificultad</value></data>
-  <data name="Col_Scale" xml:space="preserve"><value>Escala</value></data>
-  <data name="Col_Type" xml:space="preserve"><value>Tipo</value></data>
-  <data name="Col_Level" xml:space="preserve"><value>Nivel</value></data>
-  <data name="Col_Color" xml:space="preserve"><value>Color</value></data>
-  <data name="Col_Order" xml:space="preserve"><value>Orden</value></data>
+  <data name="Axis_Impact" xml:space="preserve"><value>Impacto ↑</value></data>
+  <data name="Axis_Probability" xml:space="preserve"><value>Probabilidad de ocurrencia →</value></data>
+  <data name="Col_Color" xml:space="preserve"><value>Color de fondo</value></data>
   <data name="Col_Field" xml:space="preserve"><value>Campo</value></data>
   <data name="Col_FieldValue" xml:space="preserve"><value>Valor</value></data>
-  <data name="Sheet_Risks" xml:space="preserve"><value>Riesgos</value></data>
-  <data name="Sheet_Matrix" xml:space="preserve"><value>Matriz de priorización</value></data>
-  <data name="Sheet_Summary" xml:space="preserve"><value>Ficha resumen</value></data>
-  <data name="Sheet_Scales" xml:space="preserve"><value>Escalas</value></data>
-  <data name="Sheet_Project" xml:space="preserve"><value>Proyecto</value></data>
-  <data name="Project_Name" xml:space="preserve"><value>Proyecto</value></data>
-  <data name="Project_Client" xml:space="preserve"><value>Cliente</value></data>
-  <data name="Project_Consultancy" xml:space="preserve"><value>Consultora</value></data>
-  <data name="Project_Date" xml:space="preserve"><value>Fecha</value></data>
-  <data name="Project_Status" xml:space="preserve"><value>Estado</value></data>
-  <data name="Title_Matrix" xml:space="preserve"><value>Matriz de priorización</value></data>
-  <data name="Title_Summary" xml:space="preserve"><value>Ficha resumen de oportunidades de mejora</value></data>
-  <data name="Title_Detail" xml:space="preserve"><value>Ficha detallada por riesgo</value></data>
-  <data name="Axis_Value" xml:space="preserve"><value>Valor agregado →</value></data>
-  <data name="Axis_Difficulty" xml:space="preserve"><value>Dificultad de implementación</value></data>
-  <data name="Matrix_Legend" xml:space="preserve"><value>Color de cada riesgo según su nivel de riesgo:</value></data>
+  <data name="Col_Impact" xml:space="preserve"><value>Impacto</value></data>
+  <data name="Col_ImpactJustification" xml:space="preserve"><value>Justificación del impacto</value></data>
+  <data name="Col_Level" xml:space="preserve"><value>Nivel</value></data>
+  <data name="Col_Long" xml:space="preserve"><value>Descripción larga</value></data>
+  <data name="Col_Number" xml:space="preserve"><value>N°</value></data>
+  <data name="Col_Order" xml:space="preserve"><value>Orden</value></data>
+  <data name="Col_Probability" xml:space="preserve"><value>Probabilidad de ocurrencia</value></data>
+  <data name="Col_ProbabilityJustification" xml:space="preserve"><value>Justificación de la probabilidad</value></data>
+  <data name="Col_Risk" xml:space="preserve"><value>Nivel de riesgo</value></data>
+  <data name="Col_Scale" xml:space="preserve"><value>Escala</value></data>
+  <data name="Col_Short" xml:space="preserve"><value>Descripción corta</value></data>
+  <data name="Col_TextColor" xml:space="preserve"><value>Color de fuente</value></data>
+  <data name="Col_Title" xml:space="preserve"><value>Título</value></data>
+  <data name="Col_Type" xml:space="preserve"><value>Tipo</value></data>
+  <data name="Generated_On" xml:space="preserve"><value>Generado el {0} con auros.ram {1}</value></data>
   <data name="Label_Justification" xml:space="preserve"><value>Justificación:</value></data>
   <data name="Label_NoJustification" xml:space="preserve"><value>(sin justificación)</value></data>
+  <data name="Label_FromHeatMap" xml:space="preserve"><value>Resulta del impacto y la probabilidad según el mapa de calor.</value></data>
+  <data name="Matrix_Legend" xml:space="preserve"><value>Nivel de riesgo de cada celda:</value></data>
   <data name="Page_Footer" xml:space="preserve"><value>Página {0} de {1}</value></data>
-  <data name="Generated_On" xml:space="preserve"><value>Generado el {0} con auros.ram {1}</value></data>
+  <data name="Project_Company" xml:space="preserve"><value>Empresa</value></data>
+  <data name="Project_Date" xml:space="preserve"><value>Fecha</value></data>
+  <data name="Project_Name" xml:space="preserve"><value>Proyecto</value></data>
+  <data name="Project_Status" xml:space="preserve"><value>Estado</value></data>
+  <data name="Sheet_Matrix" xml:space="preserve"><value>Matriz de riesgo</value></data>
+  <data name="Sheet_Project" xml:space="preserve"><value>Proyecto</value></data>
+  <data name="Sheet_Risks" xml:space="preserve"><value>Riesgos</value></data>
+  <data name="Sheet_Scales" xml:space="preserve"><value>Escalas</value></data>
+  <data name="Sheet_Summary" xml:space="preserve"><value>Ficha resumen</value></data>
+  <data name="Title_Detail" xml:space="preserve"><value>Ficha detallada por riesgo</value></data>
+  <data name="Title_Matrix" xml:space="preserve"><value>Matriz de riesgo</value></data>
+  <data name="Title_Summary" xml:space="preserve"><value>Ficha resumen de riesgos</value></data>
 </root>

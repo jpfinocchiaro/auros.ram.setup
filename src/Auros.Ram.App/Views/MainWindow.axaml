@@ -81,13 +81,13 @@
 
     <Panel>
       <views:WelcomeView IsVisible="{Binding !HasDocuments}" />
-      <TabControl IsVisible="{Binding HasDocuments}" ItemsSource="{Binding Documents}" SelectedItem="{Binding Active}" Padding="0">
+      <TabControl Classes="files" IsVisible="{Binding HasDocuments}" ItemsSource="{Binding Documents}" SelectedItem="{Binding Active}" Padding="0">
         <TabControl.ItemTemplate>
           <DataTemplate x:DataType="vm:DocumentViewModel">
             <StackPanel Orientation="Horizontal" Spacing="6">
-              <TextBlock Text="{Binding Header}" VerticalAlignment="Center" FontSize="14" />
+              <TextBlock Text="{Binding Header}" VerticalAlignment="Center" />
               <TextBlock Text="🔒" IsVisible="{Binding IsLocked}" VerticalAlignment="Center" />
-              <Button Content="✕" Padding="5,1" Background="Transparent" FontSize="11" VerticalAlignment="Center"
+              <Button Content="✕" Padding="5,1" Background="Transparent" BorderThickness="0" FontSize="11" VerticalAlignment="Center"
                       ToolTip.Tip="{x:Static r:Strings.Menu_Close}"
                       Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).CloseCommand}"
                       CommandParameter="{Binding}" />

@@ -23,7 +23,7 @@ public class ExportTests
 
         var matrix = dir.File("matriz.csv");
         CsvExport.WriteMatrix(doc, matrix);
-        Assert.Equal(4, File.ReadAllLines(matrix).Length);
+        Assert.Equal(6, File.ReadAllLines(matrix).Length);   // encabezado + 5 niveles de impacto
     }
 
     [Fact]

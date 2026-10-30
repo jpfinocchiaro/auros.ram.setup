@@ -17,32 +17,33 @@ public static class CsvExport
     {
         var sb = new StringBuilder();
         Line(sb, ExportText.Col_Number, ExportText.Col_Title, ExportText.Col_Short, ExportText.Col_Long,
-            ExportText.Col_Risk, ExportText.Col_Value, ExportText.Col_Difficulty,
-            ExportText.Col_RiskJustification, ExportText.Col_ValueJustification, ExportText.Col_DifficultyJustification);
+            ExportText.Col_Risk, ExportText.Col_Impact, ExportText.Col_Probability,
+            ExportText.Col_ImpactJustification, ExportText.Col_ProbabilityJustification);
         foreach (var row in Reports.Summary(doc))
         {
             var r = row.Risk;
             Line(sb, row.Number.ToString(Fmt.Culture), r.Title, r.ShortDescription, r.LongDescription,
-                row.RiskLevel.Name, row.ValueLevel.Name, row.DifficultyLevel.Name,
-                r.RiskJustification, r.ValueJustification, r.DifficultyJustification);
+                row.RiskLevel.Name, row.ImpactLevel.Name, row.ProbabilityLevel.Name,
+                r.ImpactJustification, r.ProbabilityJustification);
         }
 
         File.WriteAllText(path, sb.ToString(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
     }
 
-    /// <summary>Matriz de priorización: una fila por nivel de dificultad, una columna por nivel de valor.</summary>
+    /// <summary>Matriz de riesgo: una fila por nivel de impacto, una columna por nivel de probabilidad.</summary>
     public static void WriteMatrix(RiskMatrixDocument doc, string path)
     {
         var m = PriorityMatrix.Build(doc);
         var risk = RiskQuery.LevelOrders(doc);
         var sb = new StringBuilder();
-        Line(sb, [$"{ExportText.Axis_Difficulty} \\ {ExportText.Col_Value}", .. m.Columns.Select(c => c.Name)]);
+        Line(sb, [$"{ExportText.Col_Impact} \\ {ExportText.Col_Probability}", .. m.Columns.Select(c => c.Name)]);
         for (var r = 0; r < m.Rows.Count; r++)
         {
             var cells = new List<string> { m.Rows[r].Name };
             for (var c = 0; c < m.Columns.Count; c++)
             {
-                cells.Add(string.Join(" | ", m[r, c].Select(x => $"[{doc.LevelOf(x, Core.Model.ScaleType.Risk)?.Name}] {x.Title}")));
+                var titles = string.Join(" | ", m[r, c].Select(x => x.Title));
+                cells.Add(m.LevelAt(r, c) is { } level ? $"[{level.Name}] {titles}".TrimEnd() : titles);
             }
 
             Line(sb, [.. cells]);

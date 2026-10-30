@@ -6,9 +6,17 @@
         x:Class="Auros.Ram.App.Views.ScaleEditorWindow"
         x:DataType="vm:ScaleEditorViewModel"
         Title="{Binding WindowTitle}"
-        Width="760" Height="600" MinWidth="640" MinHeight="460"
+        Width="1000" Height="600" MinWidth="900" MinHeight="460"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource SurfaceAltBrush}">
+  <Window.Resources>
+    <DataTemplate x:Key="NamedColorTemplate" x:DataType="m:NamedColor">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Border Width="16" Height="16" CornerRadius="2" Background="{Binding Hex}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" />
+        <TextBlock Text="{Binding Name}" />
+      </StackPanel>
+    </DataTemplate>
+  </Window.Resources>
   <DockPanel Margin="16">
     <StackPanel DockPanel.Dock="Top" Spacing="12" Margin="0,0,0,12">
       <Grid ColumnDefinitions="2*,16,*">
@@ -37,35 +45,39 @@
 
     <Border Classes="card" Padding="8">
       <DockPanel>
-        <Grid DockPanel.Dock="Top" ColumnDefinitions="130,*,170,110,120,Auto" Margin="4,0,4,6">
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="120,*,236,236,130,Auto" Margin="4,0,4,6">
           <TextBlock Classes="label" Text="{x:Static r:Strings.Scale_Order}" />
           <TextBlock Grid.Column="1" Classes="label" Text="{x:Static r:Strings.Scale_LevelName}" />
           <TextBlock Grid.Column="2" Classes="label" Text="{x:Static r:Strings.Scale_Color}" />
-          <TextBlock Grid.Column="3" Classes="label" Text="{x:Static r:Strings.Scale_Hex}" />
+          <TextBlock Grid.Column="3" Classes="label" Text="{x:Static r:Strings.Scale_TextColor}" />
           <TextBlock Grid.Column="4" Classes="label" Text="{x:Static r:Strings.Scale_Preview}" />
         </Grid>
         <ScrollViewer>
           <ItemsControl ItemsSource="{Binding Levels}">
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="vm:LevelEditViewModel">
-                <Grid ColumnDefinitions="130,*,170,110,120,Auto" Margin="4,3">
+                <Grid ColumnDefinitions="120,*,236,236,130,Auto" Margin="4,3">
                   <NumericUpDown Value="{Binding Order}" Minimum="0" Maximum="100" Increment="1" FormatString="0" Margin="0,0,6,0" />
                   <TextBox Grid.Column="1" Text="{Binding Name}" MaxLength="80" Margin="0,0,6,0" Watermark="{x:Static r:Strings.Scale_LevelNameHint}" />
-                  <ComboBox Grid.Column="2" HorizontalAlignment="Stretch" ItemsSource="{Binding Colors}" SelectedItem="{Binding NamedColor}"
-                            PlaceholderText="{x:Static r:Strings.Scale_CustomColor}" Margin="0,0,6,0">
-                    <ComboBox.ItemTemplate>
-                      <DataTemplate x:DataType="m:NamedColor">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                          <Border Width="16" Height="16" CornerRadius="3" Background="{Binding Hex}" />
-                          <TextBlock Text="{Binding Name}" />
-                        </StackPanel>
-                      </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                  </ComboBox>
-                  <TextBox Grid.Column="3" Text="{Binding Hex}" MaxLength="7" Margin="0,0,6,0" />
-                  <Border Grid.Column="4" Background="{Binding Preview}" CornerRadius="4" Padding="6,4" Margin="0,0,6,0">
-                    <TextBlock Text="{Binding Name}" Foreground="{Binding PreviewText}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                  </Border>
+                  <!-- Color de fondo: de la paleta o un código #RRGGBB -->
+                  <Grid Grid.Column="2" ColumnDefinitions="*,84" Margin="0,0,6,0">
+                    <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Colors}" SelectedItem="{Binding NamedColor}"
+                              PlaceholderText="{x:Static r:Strings.Scale_CustomColor}" Margin="0,0,4,0" ItemTemplate="{StaticResource NamedColorTemplate}" />
+                    <TextBox Grid.Column="1" Text="{Binding Hex}" MaxLength="7" ToolTip.Tip="{x:Static r:Strings.Scale_Hex}" />
+                  </Grid>
+                  <!-- Color de fuente -->
+                  <Grid Grid.Column="3" ColumnDefinitions="*,84" Margin="0,0,6,0">
+                    <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding TextColors}" SelectedItem="{Binding NamedTextColor}"
+                              PlaceholderText="{x:Static r:Strings.Scale_CustomColor}" Margin="0,0,4,0" ItemTemplate="{StaticResource NamedColorTemplate}" />
+                    <TextBox Grid.Column="1" Text="{Binding TextHex}" MaxLength="7" ToolTip.Tip="{x:Static r:Strings.Scale_Hex}" />
+                  </Grid>
+                  <StackPanel Grid.Column="4" Margin="0,0,6,0" VerticalAlignment="Center" Spacing="2">
+                    <Border Background="{Binding Preview}" CornerRadius="2" Padding="7,3" HorizontalAlignment="Left">
+                      <TextBlock Text="{Binding Name}" Foreground="{Binding PreviewText}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                    </Border>
+                    <TextBlock IsVisible="{Binding LowContrast}" FontSize="11" Foreground="{DynamicResource ErrorBrush}"
+                               Text="{x:Static r:Strings.Scale_LowContrast}" ToolTip.Tip="{x:Static r:Strings.Scale_LowContrastTip}" />
+                  </StackPanel>
                   <Button Grid.Column="5" Content="✕" ToolTip.Tip="{x:Static r:Strings.Scale_RemoveLevel}"
                           Command="{Binding Owner.RemoveLevelCommand}" CommandParameter="{Binding}" />
                 </Grid>

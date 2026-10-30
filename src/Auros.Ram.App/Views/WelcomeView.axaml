@@ -4,57 +4,102 @@
              xmlns:r="using:Auros.Ram.App.Resources"
              x:Class="Auros.Ram.App.Views.WelcomeView"
              x:DataType="vm:MainWindowViewModel">
+  <UserControl.Styles>
+    <Style Selector="Button.entry">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+      <Setter Property="Padding" Value="16,11" />
+    </Style>
+  </UserControl.Styles>
+
   <ScrollViewer>
-    <StackPanel MaxWidth="720" Margin="32,48" Spacing="24" HorizontalAlignment="Center">
-      <StackPanel Spacing="6">
-        <TextBlock Text="auros.ram" FontSize="34" FontWeight="Bold" />
-        <TextBlock Classes="muted" FontSize="15" Text="{x:Static r:Strings.Welcome_Subtitle}" TextWrapping="Wrap" />
+    <Grid ColumnDefinitions="Auto,64,Auto" Margin="56,56,40,40" HorizontalAlignment="Center" VerticalAlignment="Top">
+      <!-- Columna izquierda: qué es y qué se puede hacer -->
+      <StackPanel Width="380" Spacing="28">
+        <StackPanel Spacing="10">
+          <TextBlock Classes="display" Text="auros.ram" />
+          <TextBlock Classes="muted" FontSize="16" LineHeight="24" Text="{x:Static r:Strings.Welcome_Subtitle}" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <StackPanel Spacing="8">
+          <Button Classes="accent entry" Command="{Binding NewCommand}">
+            <StackPanel Spacing="1">
+              <TextBlock Text="{x:Static r:Strings.Welcome_New}" FontWeight="SemiBold" FontSize="15" />
+              <TextBlock Text="{x:Static r:Strings.Welcome_NewHint}" FontSize="12" Opacity="0.85" />
+            </StackPanel>
+          </Button>
+          <Button Classes="entry" Command="{Binding OpenCommand}">
+            <StackPanel Spacing="1">
+              <TextBlock Text="{x:Static r:Strings.Welcome_Open}" FontWeight="SemiBold" FontSize="15" />
+              <TextBlock Classes="muted" Text="{x:Static r:Strings.Welcome_OpenHint}" FontSize="12" />
+            </StackPanel>
+          </Button>
+          <Button Classes="entry" Command="{Binding ImportJsonCommand}">
+            <StackPanel Spacing="1">
+              <TextBlock Text="{x:Static r:Strings.Welcome_Import}" FontWeight="SemiBold" FontSize="15" />
+              <TextBlock Classes="muted" Text="{x:Static r:Strings.Welcome_ImportHint}" FontSize="12" />
+            </StackPanel>
+          </Button>
+        </StackPanel>
+
+        <StackPanel Spacing="6" IsVisible="{Binding HasRecent}">
+          <TextBlock Classes="h2" Text="{x:Static r:Strings.Welcome_Recent}" />
+          <Border BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,1,0,0">
+            <ItemsControl ItemsSource="{Binding Recent}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:RecentItem">
+                  <Border BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1">
+                    <Button Background="Transparent" BorderThickness="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="4,8"
+                            Command="{Binding $parent[UserControl].((vm:MainWindowViewModel)DataContext).OpenRecentCommand}"
+                            CommandParameter="{Binding}">
+                      <StackPanel>
+                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                        <TextBlock Classes="muted" FontSize="12" Text="{Binding Folder}" TextTrimming="CharacterEllipsis" />
+                      </StackPanel>
+                    </Button>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </Border>
+        </StackPanel>
+
+        <TextBlock Classes="muted" FontSize="12" LineHeight="18" TextWrapping="Wrap" Text="{x:Static r:Strings.Welcome_SecurityNote}" />
       </StackPanel>
 
-      <WrapPanel Orientation="Horizontal">
-        <Button Classes="accent" Margin="0,0,12,12" Padding="20,12" Command="{Binding NewCommand}">
-          <StackPanel Spacing="2">
-            <TextBlock Text="{x:Static r:Strings.Welcome_New}" FontWeight="SemiBold" FontSize="15" />
-            <TextBlock Text="{x:Static r:Strings.Welcome_NewHint}" FontSize="12" Opacity="0.85" />
-          </StackPanel>
-        </Button>
-        <Button Margin="0,0,12,12" Padding="20,12" Command="{Binding OpenCommand}">
-          <StackPanel Spacing="2">
-            <TextBlock Text="{x:Static r:Strings.Welcome_Open}" FontWeight="SemiBold" FontSize="15" />
-            <TextBlock Text="{x:Static r:Strings.Welcome_OpenHint}" FontSize="12" Opacity="0.85" />
-          </StackPanel>
-        </Button>
-        <Button Margin="0,0,12,12" Padding="20,12" Command="{Binding ImportJsonCommand}">
-          <StackPanel Spacing="2">
-            <TextBlock Text="{x:Static r:Strings.Welcome_Import}" FontWeight="SemiBold" FontSize="15" />
-            <TextBlock Text="{x:Static r:Strings.Welcome_ImportHint}" FontSize="12" Opacity="0.85" />
-          </StackPanel>
-        </Button>
-      </WrapPanel>
-
-      <Border Classes="card" IsVisible="{Binding HasRecent}">
-        <StackPanel Spacing="8">
-          <TextBlock Classes="h2" Text="{x:Static r:Strings.Welcome_Recent}" />
-          <ItemsControl ItemsSource="{Binding Recent}">
+      <!-- Columna derecha: el mapa de calor estándar (5 × 5), calculado con las mismas reglas que la matriz real.
+           Muestra de un vistazo para qué sirve la aplicación. -->
+      <StackPanel Grid.Column="2" Width="460" Spacing="12" Margin="0,6,0,0">
+        <Grid ColumnDefinitions="Auto,*" RowDefinitions="*,Auto">
+          <LayoutTransformControl VerticalAlignment="Center" Margin="0,0,8,0">
+            <LayoutTransformControl.LayoutTransform>
+              <RotateTransform Angle="-90" />
+            </LayoutTransformControl.LayoutTransform>
+            <TextBlock Classes="muted" FontSize="12" Text="{x:Static r:Strings.Matrix_AxisImpact}" />
+          </LayoutTransformControl>
+          <ItemsControl Grid.Column="1" ItemsSource="{Binding SampleHeatMap}">
             <ItemsControl.ItemTemplate>
-              <DataTemplate x:DataType="vm:RecentItem">
-                <Button Background="Transparent" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="8,6"
-                        Command="{Binding $parent[UserControl].((vm:MainWindowViewModel)DataContext).OpenRecentCommand}"
-                        CommandParameter="{Binding}">
-                  <StackPanel>
-                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
-                    <TextBlock Classes="muted" FontSize="12" Text="{Binding Folder}" TextTrimming="CharacterEllipsis" />
-                  </StackPanel>
-                </Button>
+              <DataTemplate x:DataType="vm:SketchRow">
+                <ItemsControl ItemsSource="{Binding Cells}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><UniformGrid Rows="1" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:LevelChip">
+                      <Border Height="64" Margin="2" CornerRadius="2" Background="{Binding Background}" ToolTip.Tip="{Binding Name}">
+                        <TextBlock Text="{Binding Abbrev}" Foreground="{Binding Foreground}" FontSize="12" FontWeight="SemiBold"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
-        </StackPanel>
-      </Border>
-
-      <Border Background="{DynamicResource WarningBackBrush}" CornerRadius="6" Padding="14">
-        <TextBlock TextWrapping="Wrap" Text="{x:Static r:Strings.Welcome_SecurityNote}" />
-      </Border>
-    </StackPanel>
+          <TextBlock Grid.Row="1" Grid.Column="1" Classes="muted" FontSize="12" Margin="0,6,0,0" HorizontalAlignment="Center" Text="{x:Static r:Strings.Matrix_AxisProbability}" />
+        </Grid>
+        <TextBlock Classes="muted" FontSize="13" LineHeight="20" TextWrapping="Wrap" Text="{x:Static r:Strings.Welcome_DiagramCaption}" />
+      </StackPanel>
+    </Grid>
   </ScrollViewer>
 </UserControl>
