@@ -95,7 +95,7 @@ Clic para abrir la ficha</value></data>
   <data name="New_DefaultFileName" xml:space="preserve"><value>Matriz de riesgo</value></data>
   <data name="New_ErrorTitle" xml:space="preserve"><value>No se puede usar ese archivo</value></data>
   <data name="New_FileIsOpen" xml:space="preserve"><value>Ese archivo ya está abierto en otra pestaña. Elija otro nombre o cierre la pestaña.</value></data>
-  <data name="New_Intro" xml:space="preserve"><value>Cada matriz es un archivo cifrado con su propia contraseña. A continuación elegirá dónde guardarlo.</value></data>
+  <data name="New_Intro" xml:space="preserve"><value>Cada matriz es un archivo propio. Puede protegerlo con una contraseña, que lo cifra; por ahora es opcional. A continuación elegirá dónde guardarlo.</value></data>
   <data name="New_NameRequired" xml:space="preserve"><value>Escriba el nombre del proyecto.</value></data>
   <data name="New_PasswordTitle" xml:space="preserve"><value>Contraseña del archivo nuevo</value></data>
   <data name="New_SaveTitle" xml:space="preserve"><value>Guardar la matriz nueva</value></data>
@@ -124,13 +124,16 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Password_New" xml:space="preserve"><value>Contraseña nueva</value></data>
   <data name="Password_NoRecoveryText" xml:space="preserve"><value>La contraseña cifra el archivo. Ni auros.ram ni su fabricante pueden recuperarla: si se olvida, el archivo no se puede abrir nunca más.</value></data>
   <data name="Password_NoRecoveryTitle" xml:space="preserve"><value>No hay forma de recuperar la contraseña</value></data>
+  <data name="Password_NoneWarning" xml:space="preserve"><value>Sin contraseña el archivo no se cifra: cualquier persona que tenga auros.ram y el archivo puede abrirlo.</value></data>
+  <data name="Password_OptionalHint" xml:space="preserve"><value>Opcional: deje ambos campos en blanco para que el archivo no tenga contraseña.</value></data>
   <data name="Password_Required" xml:space="preserve"><value>Escriba la contraseña.</value></data>
+  <data name="Password_SetTitle" xml:space="preserve"><value>Agregar contraseña</value></data>
   <data name="Password_TooShort" xml:space="preserve"><value>La contraseña debe tener al menos 12 caracteres.</value></data>
   <data name="Password_Wrong" xml:space="preserve"><value>La contraseña no es correcta.</value></data>
   <data name="Prefs_Autosave" xml:space="preserve"><value>Autoguardado de recuperación (minutos)</value></data>
   <data name="Prefs_AutosaveHint" xml:space="preserve"><value>Cada cuánto se guarda una copia cifrada de los cambios sin guardar, para recuperarlos tras un cierre inesperado.</value></data>
   <data name="Prefs_Lock" xml:space="preserve"><value>Bloqueo por inactividad (minutos)</value></data>
-  <data name="Prefs_LockHint" xml:space="preserve"><value>Tras este tiempo sin usar la aplicación, los archivos abiertos se bloquean y piden la contraseña.</value></data>
+  <data name="Prefs_LockHint" xml:space="preserve"><value>Tras este tiempo sin usar la aplicación, los archivos abiertos que tienen contraseña se bloquean y la piden de nuevo.</value></data>
   <data name="Print_OpenFailed" xml:space="preserve"><value>No se pudo abrir el visor de PDF del sistema. El archivo quedó guardado en:
 {0}
 Ábralo e imprímalo desde allí.</value></data>
@@ -222,7 +225,7 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Scales_PurposeRisk" xml:space="preserve"><value>Gravedad de la observación — color de cada riesgo (semáforo).</value></data>
   <data name="Scales_PurposeValue" xml:space="preserve"><value>Beneficio de implementar la mejora — eje X de la matriz.</value></data>
   <data name="Scales_SaveTemplate" xml:space="preserve"><value>Guardar como plantilla…</value></data>
-  <data name="Scales_SaveTemplateTip" xml:space="preserve"><value>Guarda todas las escalas de este archivo en una plantilla cifrada (.rmt)</value></data>
+  <data name="Scales_SaveTemplateTip" xml:space="preserve"><value>Guarda todas las escalas de este archivo en una plantilla (.rmt)</value></data>
   <data name="Section_Matrix" xml:space="preserve"><value>Matriz de priorización</value></data>
   <data name="Section_Project" xml:space="preserve"><value>Proyecto</value></data>
   <data name="Section_Reports" xml:space="preserve"><value>Informes</value></data>
@@ -231,7 +234,8 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Status_Autosaved" xml:space="preserve"><value>Copia de recuperación guardada a las {0}</value></data>
   <data name="Status_Exported" xml:space="preserve"><value>Exportado: {0}</value></data>
   <data name="Status_Exporting" xml:space="preserve"><value>Exportando…</value></data>
-  <data name="Status_PasswordChanged" xml:space="preserve"><value>Contraseña cambiada y archivo cifrado de nuevo</value></data>
+  <data name="Status_PasswordChanged" xml:space="preserve"><value>Contraseña guardada y archivo cifrado de nuevo</value></data>
+  <data name="Status_PasswordRemoved" xml:space="preserve"><value>Contraseña quitada: el archivo ya no está cifrado</value></data>
   <data name="Status_Saved" xml:space="preserve"><value>Guardado a las {0}</value></data>
   <data name="Status_Saving" xml:space="preserve"><value>Guardando…</value></data>
   <data name="Status_TemplateSaved" xml:space="preserve"><value>Plantilla guardada</value></data>
@@ -248,6 +252,6 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Welcome_Open" xml:space="preserve"><value>Abrir matriz…</value></data>
   <data name="Welcome_OpenHint" xml:space="preserve"><value>Un archivo .rmx existente</value></data>
   <data name="Welcome_Recent" xml:space="preserve"><value>Archivos recientes</value></data>
-  <data name="Welcome_SecurityNote" xml:space="preserve"><value>Cada matriz se guarda en un archivo cifrado (AES-256) protegido con su propia contraseña. La contraseña nunca se guarda y no se puede recuperar: anótela en un lugar seguro.</value></data>
+  <data name="Welcome_SecurityNote" xml:space="preserve"><value>Cada matriz se guarda en su propio archivo. Si le pone contraseña, el archivo se cifra (AES-256); la contraseña nunca se guarda y no se puede recuperar: anótela en un lugar seguro.</value></data>
   <data name="Welcome_Subtitle" xml:space="preserve"><value>Matrices de riesgo: clasifique cada riesgo por gravedad, valor agregado y dificultad, y priorice con la matriz.</value></data>
 </root>

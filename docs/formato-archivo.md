@@ -18,7 +18,7 @@ independiente del sistema operativo (RNF-11, RNF-53). Implementación: `src/Auro
 | 0 | 8 | Firma ASCII `AUROSRAM` |
 | 8 | 2 | Versión del contenedor (`1`) |
 | 10 | 1 | Tipo: `1` matriz, `2` plantilla |
-| 11 | 1 | Derivación de clave: `1` Argon2id, `2` PBKDF2-HMAC-SHA512 |
+| 11 | 1 | Derivación de clave: `0` sin contraseña, `1` Argon2id, `2` PBKDF2-HMAC-SHA512 |
 | 12 | 4 | Iteraciones (Argon2id: pasadas; PBKDF2: ≥ 256.000) |
 | 16 | 4 | Memoria Argon2id en KiB |
 | 20 | 4 | Paralelismo Argon2id |
@@ -40,6 +40,15 @@ Ningún dato de negocio queda en la cabecera (RNF-13).
   AES-256-CBC con HMAC-SHA512 por página.
 - La contraseña nunca se guarda. En memoria se conserva solo la clave derivada, que se borra al
   cerrar el archivo (`FileKey.Dispose`).
+
+## Archivos sin contraseña (temporal)
+
+Por ahora la contraseña es opcional. Si se deja en blanco, la cabecera lleva derivación `0`
+(iteraciones, memoria y paralelismo en cero; la sal aleatoria se conserva para identificar el
+archivo de recuperación) y la base se guarda como SQLite **sin cifrar**: no se pide contraseña al
+abrir y el archivo no se bloquea por inactividad. *Cambiar contraseña* permite agregarle una a un
+archivo existente o quitarla. Los archivos de trabajo y recuperación siguen el mismo criterio que
+el archivo original.
 
 ## Apertura
 

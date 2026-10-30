@@ -96,7 +96,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     public void LockAll()
     {
-        foreach (var doc in Documents.Where(d => !d.IsLocked))
+        // Un archivo sin contraseña no se puede desbloquear con una, así que no se bloquea.
+        foreach (var doc in Documents.Where(d => !d.IsLocked && d.Key.IsProtected))
         {
             doc.Lock();
         }
@@ -191,9 +192,10 @@ public sealed partial class MainWindowViewModel : ObservableObject
             return;
         }
 
+        RmxHeader header;
         try
         {
-            RmxFile.ReadHeader(full);
+            header = RmxFile.ReadHeader(full);
         }
         catch (RmxFileException ex)
         {
@@ -203,25 +205,39 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
         RmxOpenResult? result = null;
         RmxFileException? failure = null;
-        var vm = new PasswordDialogViewModel(PasswordMode.Enter, Strings.Open_PasswordTitle, Path.GetFileName(full));
-        vm.Submit = async d =>
+        if (header.IsProtected)
+        {
+            var vm = new PasswordDialogViewModel(PasswordMode.Enter, Strings.Open_PasswordTitle, Path.GetFileName(full));
+            vm.Submit = async d =>
+            {
+                try
+                {
+                    result = await Task.Run(() => RmxFile.Open(full, d.Current));
+                    return null;
+                }
+                catch (RmxFileException ex) when (ex.Kind == RmxErrorKind.WrongPassword)
+                {
+                    return ex.Message;
+                }
+                catch (RmxFileException ex)
+                {
+                    failure = ex;
+                    return null;
+                }
+            };
+            await _ui.AskPasswordAsync(vm);
+        }
+        else
         {
             try
             {
-                result = await Task.Run(() => RmxFile.Open(full, d.Current));
-                return null;
-            }
-            catch (RmxFileException ex) when (ex.Kind == RmxErrorKind.WrongPassword)
-            {
-                return ex.Message;
+                result = await Task.Run(() => RmxFile.Open(full, null));
             }
             catch (RmxFileException ex)
             {
                 failure = ex;
-                return null;
             }
-        };
-        await _ui.AskPasswordAsync(vm);
+        }
 
         if (failure is not null)
         {
@@ -276,25 +292,40 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
         IReadOnlyList<Scale>? scales = null;
         RmxFileException? failure = null;
-        var vm = new PasswordDialogViewModel(PasswordMode.Enter, Strings.Template_PasswordOpenTitle, Path.GetFileName(path));
-        vm.Submit = async d =>
+        try
         {
-            try
+            if (!RmxFile.ReadHeader(path).IsProtected)
             {
-                scales = await Task.Run(() => RmxFile.OpenTemplate(path, d.Current));
-                return null;
+                scales = await Task.Run(() => RmxFile.OpenTemplate(path, null));
             }
-            catch (RmxFileException ex) when (ex.Kind == RmxErrorKind.WrongPassword)
+        }
+        catch (RmxFileException ex)
+        {
+            failure = ex;
+        }
+
+        if (scales is null && failure is null)
+        {
+            var vm = new PasswordDialogViewModel(PasswordMode.Enter, Strings.Template_PasswordOpenTitle, Path.GetFileName(path));
+            vm.Submit = async d =>
             {
-                return ex.Message;
-            }
-            catch (RmxFileException ex)
-            {
-                failure = ex;
-                return null;
-            }
-        };
-        await _ui.AskPasswordAsync(vm);
+                try
+                {
+                    scales = await Task.Run(() => RmxFile.OpenTemplate(path, d.Current));
+                    return null;
+                }
+                catch (RmxFileException ex) when (ex.Kind == RmxErrorKind.WrongPassword)
+                {
+                    return ex.Message;
+                }
+                catch (RmxFileException ex)
+                {
+                    failure = ex;
+                    return null;
+                }
+            };
+            await _ui.AskPasswordAsync(vm);
+        }
         if (failure is not null)
         {
             await _ui.AlertAsync(Strings.Template_ErrorTitle, failure.Message);
@@ -303,7 +334,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         return scales;
     }
 
-    /// <summary>Elige ubicación y contraseña de un archivo nuevo y lo guarda cifrado (RNF-34).</summary>
+    /// <summary>Elige ubicación y contraseña (opcional por ahora) de un archivo nuevo y lo guarda (RNF-34).</summary>
     private async Task CreateFileAsync(RiskMatrixDocument doc, string suggestedName)
     {
         var path = await _ui.PickSaveFileAsync(Strings.New_SaveTitle, suggestedName, FileKind.Matrix);
@@ -323,7 +354,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         var vm = new PasswordDialogViewModel(PasswordMode.Create, Strings.New_PasswordTitle, Path.GetFileName(path));
         vm.Submit = async d =>
         {
-            var candidate = await Task.Run(() => FileKey.CreateNew(d.NewPassword));
+            var candidate = await Task.Run(() => FileKey.Create(d.NewPassword));
             try
             {
                 await Task.Run(() => RmxFile.Save(doc, path, candidate));

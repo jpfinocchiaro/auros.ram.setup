@@ -187,6 +187,62 @@ public class FileFormatTests
     }
 
     [Fact]
+    public void Files_without_password_open_without_asking_and_can_gain_or_lose_one()
+    {
+        using var dir = new TempDir();
+        var path = dir.File("m.rmx");
+        var doc = Sample.Document(2);
+        using (var key = FileKey.Create(""))
+        {
+            Assert.False(key.IsProtected);
+            Assert.True(key.Matches("cualquier cosa"));
+            RmxFile.Save(doc, path, key);
+        }
+
+        Assert.False(RmxFile.ReadHeader(path).IsProtected);
+        var opened = RmxFile.Open(path, null);
+        using (var key = opened.Key)
+        {
+            Assert.Equal(2, opened.Document.Risks.Count);
+            Assert.False(key.IsProtected);
+
+            // La recuperación funciona igual que con contraseña.
+            File.SetLastWriteTimeUtc(path, DateTime.UtcNow.AddMinutes(-1));
+            RecoveryStore.Save(opened.Document, path, key);
+            Assert.Equal(2, RecoveryStore.TryLoad(path, key)!.Risks.Count);
+            RecoveryStore.Delete(path);
+
+            // Agregar contraseña: el archivo pasa a estar cifrado.
+            using var protectedKey = FileKey.Create(Password);
+            RmxFile.Save(opened.Document, path, protectedKey);
+        }
+
+        Assert.True(RmxFile.ReadHeader(path).IsProtected);
+        Assert.Equal(RmxErrorKind.WrongPassword, Assert.Throws<RmxFileException>(() => RmxFile.Open(path, null)).Kind);
+        Assert.DoesNotContain("CREATE TABLE", Encoding.Latin1.GetString(File.ReadAllBytes(path)), StringComparison.Ordinal);
+
+        // Quitar la contraseña.
+        var again = RmxFile.Open(path, Password);
+        using (again.Key)
+        using (var none = FileKey.CreateUnprotected())
+        {
+            RmxFile.Save(again.Document, path, none);
+        }
+
+        Assert.Equal(2, RmxFile.Open(path, "ignorada").Document.Risks.Count);
+    }
+
+    [Fact]
+    public void Templates_without_password_RF06()
+    {
+        using var dir = new TempDir();
+        var path = dir.File("t.rmt");
+        using var key = FileKey.CreateUnprotected();
+        RmxFile.SaveTemplate(Sample.Document(0).Scales, path, key);
+        Assert.Equal(3, RmxFile.OpenTemplate(path, null).Count);
+    }
+
+    [Fact]
     public void Pbkdf2_files_can_be_opened_RNF32()
     {
         using var dir = new TempDir();

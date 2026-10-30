@@ -28,6 +28,7 @@ public sealed class RmxOpenResult(RiskMatrixDocument document, FileKey key, RmxH
 /// Abre y guarda archivos de matriz y de plantilla (RNF-11 a RNF-14, RNF-24, RNF-26, RNF-30, RNF-37).
 /// La base SQLCipher solo existe en disco cifrada: en el archivo final y, mientras se arma o se lee,
 /// en un archivo de trabajo en la carpeta de datos del usuario que se borra al terminar.
+/// Excepción: un archivo creado sin contraseña (<see cref="KdfAlgorithm.None"/>) guarda la base sin cifrar.
 /// </summary>
 public static class RmxFile
 {
@@ -91,11 +92,17 @@ public static class RmxFile
     /// <summary>
     /// Verifica, descifra y carga el archivo. Si es de un esquema anterior, guarda una copia del original
     /// y lo migra en el lugar (RNF-14, RNF-27). Un error nunca modifica el archivo (RNF-30).
+    /// Si el archivo no tiene contraseña, <paramref name="password"/> se ignora.
     /// </summary>
-    public static RmxOpenResult Open(string path, string password, RmxFileKind expected = RmxFileKind.Matrix)
+    public static RmxOpenResult Open(string path, string? password, RmxFileKind expected = RmxFileKind.Matrix)
     {
         var (header, payload) = ReadVerified(path, expected);
-        var key = FileKey.Derive(password, header.Kdf);
+        if (header.IsProtected && string.IsNullOrEmpty(password))
+        {
+            throw new RmxFileException(RmxErrorKind.WrongPassword);
+        }
+
+        var key = FileKey.Derive(password ?? "", header.Kdf);
         try
         {
             var doc = Load(payload, key, out var fromVersion);
@@ -137,7 +144,7 @@ public static class RmxFile
         Save(doc, path, key, RmxFileKind.Template);
     }
 
-    public static IReadOnlyList<Scale> OpenTemplate(string path, string password)
+    public static IReadOnlyList<Scale> OpenTemplate(string path, string? password)
     {
         var result = Open(path, password, RmxFileKind.Template);
         result.Key.Dispose();
@@ -195,7 +202,7 @@ public static class RmxFile
                 throw new RmxFileException(RmxErrorKind.WrongPassword, ex);
             }
 
-            VerifyIntegrity(c);
+            VerifyIntegrity(c, key.IsProtected);
             fromVersion = Schema.GetVersion(c);
             if (fromVersion < Schema.CurrentVersion)
             {
@@ -222,11 +229,12 @@ public static class RmxFile
         }
     }
 
-    private static void VerifyIntegrity(SqliteConnection c)
+    private static void VerifyIntegrity(SqliteConnection c, bool encrypted)
     {
         // HMAC de cada página (SQLCipher) y consistencia estructural (SQLite). RNF-26.
-        using (var cmd = c.CreateCommand())
+        if (encrypted)
         {
+            using var cmd = c.CreateCommand();
             cmd.CommandText = "PRAGMA cipher_integrity_check;";
             using var r = cmd.ExecuteReader();
             if (r.Read())
@@ -254,7 +262,12 @@ public static class RmxFile
         {
             c.Open();
             // Clave en bruto: la derivación lenta ya se hizo con Argon2id/PBKDF2 (RNF-32).
-            Sql.Execute(c, $"PRAGMA key = \"x'{Convert.ToHexString(key.Key)}'\";");
+            // Sin contraseña no se da clave y SQLCipher trabaja como SQLite común.
+            if (key.IsProtected)
+            {
+                Sql.Execute(c, $"PRAGMA key = \"x'{Convert.ToHexString(key.Key)}'\";");
+            }
+
             Sql.Execute(c, "PRAGMA foreign_keys = ON;");
             return c;
         }

@@ -9,10 +9,10 @@ public enum PasswordMode
     /// <summary>Abrir o desbloquear: una sola contraseña.</summary>
     Enter,
 
-    /// <summary>Archivo o plantilla nueva: contraseña + confirmación + advertencia (RNF-34, RNF-35).</summary>
+    /// <summary>Archivo o plantilla nueva: contraseña + confirmación + advertencia (RNF-34, RNF-35). Vacía = sin contraseña.</summary>
     Create,
 
-    /// <summary>Cambio de contraseña: actual + nueva + confirmación.</summary>
+    /// <summary>Cambio de contraseña: actual + nueva + confirmación. Nueva vacía = quitar la contraseña.</summary>
     Change,
 }
 
@@ -42,7 +42,7 @@ public sealed partial class PasswordDialogViewModel : ObservableObject
     private string _current = "";
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(StrengthText), nameof(StrengthValue), nameof(StrengthBrush))]
+    [NotifyPropertyChangedFor(nameof(StrengthText), nameof(StrengthValue), nameof(StrengthBrush), nameof(WithoutPassword), nameof(ShowNoRecovery))]
     private string _newPassword = "";
 
     [ObservableProperty]
@@ -57,11 +57,17 @@ public sealed partial class PasswordDialogViewModel : ObservableObject
     [ObservableProperty]
     private bool _isBusy;
 
+    /// <summary>Por ahora la contraseña es opcional: si se deja en blanco el archivo no se cifra.</summary>
+    public bool WithoutPassword => NeedsNew && NewPassword.Length == 0;
+
+    /// <summary>La advertencia de no recuperación solo aplica si se eligió una contraseña.</summary>
+    public bool ShowNoRecovery => IsCreate && NewPassword.Length > 0;
+
     public string StrengthText => NewPassword.Length == 0
         ? Strings.Password_MinLength
         : PasswordPolicy.Describe(PasswordPolicy.Evaluate(NewPassword));
 
-    public double StrengthValue => ((int)PasswordPolicy.Evaluate(NewPassword) + 1) * 20;
+    public double StrengthValue => NewPassword.Length == 0 ? 0 : ((int)PasswordPolicy.Evaluate(NewPassword) + 1) * 20;
 
     public Avalonia.Media.IBrush StrengthBrush => PasswordPolicy.Evaluate(NewPassword) switch
     {
@@ -84,6 +90,11 @@ public sealed partial class PasswordDialogViewModel : ObservableObject
         if (Mode == PasswordMode.Change && string.IsNullOrEmpty(Current))
         {
             return Strings.Password_CurrentRequired;
+        }
+
+        if (NewPassword.Length == 0 && Confirmation.Length == 0)
+        {
+            return null;
         }
 
         if (!PasswordPolicy.IsAcceptable(NewPassword))

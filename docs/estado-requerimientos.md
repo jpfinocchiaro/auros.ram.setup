@@ -29,7 +29,7 @@
 | RNF-19, 21, 22 | ✅ | Probado con 5.000 riesgos: guardado y apertura < 2 s; guardado en segundo plano |
 | RNF-20 | 🟡 | 5.000 riesgos probados; controles e historial no existen todavía en el modelo (F6) |
 | RNF-24 a RNF-30 | ✅ | Escritura atómica, autoguardado cifrado con recuperación, integridad, copia antes de migrar, 100 niveles de deshacer, log sin datos de negocio |
-| RNF-31 a RNF-37 | ✅ | AES-256 (SQLCipher 4) + Argon2id; sin recuperación de contraseña; mínimo 12 caracteres con indicador; cambio de contraseña con recifrado; bloqueo por inactividad |
+| RNF-31 a RNF-37 | 🟡 | AES-256 (SQLCipher 4) + Argon2id; sin recuperación de contraseña; mínimo 12 caracteres con indicador; cambio de contraseña con recifrado; bloqueo por inactividad. **Por decisión del cliente, la contraseña es opcional por ahora**: un archivo sin contraseña no se cifra ni se bloquea (ver `docs/formato-archivo.md`) |
 | RNF-38 | ✅ | Advertencia antes de exportar; PDF con contraseña opcional |
 | RNF-39 | ✅ | La aplicación no hace ninguna conexión de red |
 | RNF-40, RNF-41 | 🟡 | Versiones fijadas (gestión central, dependencia transitiva vulnerable corregida). Firma de código ⏳ (requiere certificados) |

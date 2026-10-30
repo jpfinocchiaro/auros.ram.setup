@@ -245,18 +245,23 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
         }
     }
 
-    /// <summary>RNF-35: cambiar la contraseña vuelve a cifrar el archivo completo con una sal nueva.</summary>
+    /// <summary>
+    /// RNF-35: cambiar la contraseña vuelve a cifrar el archivo completo con una sal nueva.
+    /// También permite agregar una contraseña a un archivo que no tenía, o quitarla.
+    /// </summary>
     public async Task ChangePasswordAsync()
     {
-        var vm = new PasswordDialogViewModel(PasswordMode.Change, Strings.Password_ChangeTitle, FileName);
+        var vm = Key.IsProtected
+            ? new PasswordDialogViewModel(PasswordMode.Change, Strings.Password_ChangeTitle, FileName)
+            : new PasswordDialogViewModel(PasswordMode.Create, Strings.Password_SetTitle, FileName);
         vm.Submit = async d =>
         {
-            if (!await Task.Run(() => Key.Matches(d.Current)))
+            if (Key.IsProtected && !await Task.Run(() => Key.Matches(d.Current)))
             {
                 return Strings.Password_CurrentWrong;
             }
 
-            var newKey = await Task.Run(() => FileKey.CreateNew(d.NewPassword));
+            var newKey = await Task.Run(() => FileKey.Create(d.NewPassword));
             var snapshot = Document.Snapshot();
             var state = Document.History.StateId;
             await _saveGate.WaitAsync();
@@ -279,7 +284,7 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
             old.Dispose();
             RecoveryStore.Delete(Path);
             Document.MarkSaved(state);
-            Status = Strings.Status_PasswordChanged;
+            Status = Key.IsProtected ? Strings.Status_PasswordChanged : Strings.Status_PasswordRemoved;
             return null;
         };
         await Ui.AskPasswordAsync(vm);
@@ -334,7 +339,7 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
         {
             try
             {
-                using var key = await Task.Run(() => FileKey.CreateNew(d.NewPassword));
+                using var key = await Task.Run(() => FileKey.Create(d.NewPassword));
                 await Task.Run(() => RmxFile.SaveTemplate(scales, path, key));
                 return null;
             }

@@ -16,7 +16,7 @@ public enum RmxFileKind : byte
 ///   0   8  firma "AUROSRAM"
 ///   8   2  versión del contenedor
 ///  10   1  tipo de archivo (1 matriz, 2 plantilla)
-///  11   1  algoritmo de derivación (1 Argon2id, 2 PBKDF2-SHA512)
+///  11   1  algoritmo de derivación (0 sin contraseña, 1 Argon2id, 2 PBKDF2-SHA512)
 ///  12   4  iteraciones
 ///  16   4  memoria KiB
 ///  20   4  paralelismo
@@ -26,7 +26,7 @@ public enum RmxFileKind : byte
 ///  76   8  largo del contenido cifrado
 ///  84  32  SHA-256 del contenido cifrado
 /// 116  32  SHA-256 de los bytes 0..115
-/// 148      contenido: base SQLCipher (todo cifrado)
+/// 148      contenido: base SQLCipher (todo cifrado; SQLite sin cifrar si no hay contraseña)
 /// </code>
 /// </summary>
 public sealed record RmxHeader(
@@ -40,6 +40,9 @@ public sealed record RmxHeader(
     public const int Size = 148;
     public const ushort ContainerVersion = 1;
     private static readonly byte[] Magic = "AUROSRAM"u8.ToArray();
+
+    /// <summary>False si el archivo se guardó sin contraseña.</summary>
+    public bool IsProtected => Kdf.IsProtected;
 
     public byte[] ToBytes()
     {

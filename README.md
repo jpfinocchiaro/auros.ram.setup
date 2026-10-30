@@ -1,7 +1,7 @@
 # auros.ram — Risk Assessment Matrix
 
 Aplicación de escritorio (Windows, macOS, Linux) para crear y administrar matrices de riesgo.
-Cada matriz es un archivo `.rmx` cifrado con su propia contraseña.
+Cada matriz es un archivo `.rmx`, cifrado con su propia contraseña (por ahora opcional: sin contraseña no se cifra).
 
 Especificación: *Especificación de requerimientos — auros.ram* (códigos RF-xx / RNF-xx, citados en el código).
 
