@@ -1,3 +1,4 @@
+using Auros.Ram.Core.Model;
 using Auros.Ram.App.ViewModels;
 
 namespace Auros.Ram.App.Services;
@@ -20,7 +21,8 @@ public enum SaveChoice
     Cancel,
 }
 
-public sealed record NewMatrixRequest(string Name, string Company, bool FromTemplate);
+/// <param name="Preset">Escalas estándar a usar; null = cargarlas desde una plantilla.</param>
+public sealed record NewMatrixRequest(string Name, string Company, ScalePreset? Preset);
 
 /// <summary>Respuesta a la advertencia de exportación en claro (RNF-38).</summary>
 public sealed record ExportConfirmation(string? PdfPassword);

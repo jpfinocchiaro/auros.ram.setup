@@ -126,8 +126,12 @@ public sealed partial class MainWindowViewModel : ObservableObject
             return;
         }
 
-        IReadOnlyList<Scale>? scales = null;
-        if (request.FromTemplate)
+        IReadOnlyList<Scale>? scales;
+        if (request.Preset is { } preset)
+        {
+            scales = DefaultScales.Create(preset);
+        }
+        else
         {
             scales = await LoadTemplateAsync();
             if (scales is null)

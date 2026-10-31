@@ -91,6 +91,7 @@ public class UiSmokeTests
         ShowDialog(new NewMatrixWindow(new NewMatrixViewModel()), "11-nueva-matriz");
         ShowDialog(new ExportConfirmWindow(new ExportConfirmViewModel(true) { ProtectPdf = true }), "12-exportar");
         ShowDialog(new AboutWindow(), "13-acerca-de");
+        ShowDialog(new SplashWindow(), "15-inicio");
         ShowDialog(new MessageWindow("Cambios sin guardar", "¿Guardar los cambios?", ["Cancelar", "No guardar", "Guardar"], 2), "14-mensaje");
 
         // "Value is null" son nulos transitorios (sin documento activo, plantillas aún sin árbol visual).

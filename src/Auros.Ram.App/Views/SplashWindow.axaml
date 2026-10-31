@@ -1,0 +1,20 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Auros.Ram.App.Views.SplashWindow"
+        Title="auros.ram"
+        Width="560" Height="330" CanResize="False"
+        SystemDecorations="None" WindowStartupLocation="CenterScreen"
+        Background="White" ShowInTaskbar="True">
+  <!-- Pantalla de inicio: la portada de la marca sobre blanco, como el original. Se muestra unos instantes al abrir. -->
+  <Border BorderBrush="#E3E6EA" BorderThickness="1">
+    <Grid RowDefinitions="*,Auto,Auto">
+      <Image Source="/Assets/Brand/splash.png" Width="440" Stretch="Uniform"
+             HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,24,0,0" />
+      <TextBlock x:Name="VersionText" Grid.Row="1" HorizontalAlignment="Center" Margin="0,0,0,18"
+                 FontSize="12" Foreground="#5E6A75" />
+      <!-- Barra fina con el naranja del logo mientras se prepara la ventana principal. -->
+      <ProgressBar Grid.Row="2" IsIndeterminate="True" Height="3" MinHeight="3" CornerRadius="0"
+                   Foreground="#FF5F00" Background="Transparent" />
+    </Grid>
+  </Border>
+</Window>

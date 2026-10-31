@@ -101,6 +101,7 @@
     <!-- Escala tipográfica: 12 / 14 / 16 / 20 / 28. Semibold para jerarquía, nunca mayúsculas. -->
     <Style Selector="Window">
       <Setter Property="Foreground" Value="{DynamicResource InkBrush}" />
+      <Setter Property="Icon" Value="/Assets/Brand/auros_ram.ico" />
     </Style>
     <Style Selector="TextBlock.display">
       <Setter Property="FontSize" Value="28" />

@@ -21,8 +21,9 @@
     </StackPanel>
     <StackPanel Spacing="4">
       <TextBlock Classes="label" Text="{x:Static r:Strings.New_Scales}" />
-      <RadioButton GroupName="scales" IsChecked="{Binding UseStandardScales}" Content="{x:Static r:Strings.New_StandardScales}" />
-      <RadioButton GroupName="scales" IsChecked="{Binding !UseStandardScales}" Content="{x:Static r:Strings.New_TemplateScales}" />
+      <RadioButton GroupName="scales" IsChecked="{Binding UseStandard}" Content="{x:Static r:Strings.New_StandardScales}" />
+      <RadioButton GroupName="scales" IsChecked="{Binding UseSimple}" Content="{x:Static r:Strings.New_SimpleScales}" />
+      <RadioButton GroupName="scales" IsChecked="{Binding UseTemplate}" Content="{x:Static r:Strings.New_TemplateScales}" />
     </StackPanel>
     <TextBlock Classes="error" Text="{Binding Error}" IsVisible="{Binding Error, Converter={x:Static ObjectConverters.IsNotNull}}" />
     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">

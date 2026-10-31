@@ -1,3 +1,4 @@
+using Auros.Ram.Core.Model;
 using System.Globalization;
 using Auros.Ram.App.Resources;
 using Auros.Ram.App.ViewModels;
@@ -79,7 +80,7 @@ public sealed class UiService(Window owner) : IUiService
     {
         var vm = new NewMatrixViewModel();
         var ok = await new NewMatrixWindow(vm).ShowDialog<bool>(Top());
-        return ok ? new NewMatrixRequest(vm.Name, vm.Company, !vm.UseStandardScales) : null;
+        return ok ? new NewMatrixRequest(vm.Name, vm.Company, vm.UseTemplate ? null : vm.UseSimple ? ScalePreset.Simple3x3 : ScalePreset.Standard5x5) : null;
     }
 
     public async Task<ExportConfirmation?> ConfirmExportAsync(bool isPdf)

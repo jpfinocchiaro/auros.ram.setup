@@ -6,7 +6,7 @@
 
 | Código | Estado | Dónde / nota |
 |---|---|---|
-| F1, RF-01 a RF-05 | ✅ | **Por decisión del cliente, dos dimensiones: Impacto y Probabilidad de ocurrencia**; el nivel de riesgo sale de un **mapa de calor** editable (Escalas). `RiskMatrixDocument`, `Validation`, `HeatMap`; confirmación al quitar o eliminar. Cada nivel tiene **color de fondo y color de fuente**, con aviso de contraste bajo |
+| F1, RF-01 a RF-05 | ✅ | **Por decisión del cliente, dos dimensiones: Impacto y Probabilidad de ocurrencia**; el nivel de riesgo sale de un **mapa de calor** editable (Escalas). Al crear una matriz se elige entre la estándar de 5 × 5 y una simple de 3 × 3 (Bajo, Medio, Alto). `RiskMatrixDocument`, `Validation`, `HeatMap`; confirmación al quitar o eliminar. Cada nivel tiene **color de fondo y color de fuente**, con aviso de contraste bajo |
 | RF-06 | ✅ | Escalas → *Guardar como plantilla* (`.rmt` cifrado); Nueva matriz → *desde plantilla* |
 | RF-07 a RF-09 | ✅ | Ficha del proyecto: **una matriz corresponde a una sola empresa** (por decisión del cliente no existe la consultora); logo de la empresa; escalas bloqueadas cuando hay riesgos |
 | RF-10 a RF-12 | ✅ | Editor con botones de color y justificación por dimensión, y el nivel de riesgo resultante a la vista; búsqueda, filtros por nivel de riesgo, impacto y probabilidad, y orden |

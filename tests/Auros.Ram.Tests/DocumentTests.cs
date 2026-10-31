@@ -46,6 +46,27 @@ public class DocumentTests
     }
 
     [Fact]
+    public void Simple_3x3_preset_has_low_medium_high_and_classic_heat_map()
+    {
+        var doc = RiskMatrixDocument.CreateNew(scales: DefaultScales.Create(ScalePreset.Simple3x3));
+        foreach (var type in new[] { ScaleType.Risk, ScaleType.Impact, ScaleType.Probability })
+        {
+            Assert.Equal(["Bajo", "Medio", "Alto"], doc.ProjectScale(type)!.OrderedLevels.Select(l => l.Name));
+        }
+
+        var m = PriorityMatrix.Build(doc);
+        string LevelAt(int impact, int probability) => m.LevelAt(2 - impact, probability)!.Name;
+
+        // Bajo: 1·1, 1·2; Medio: 1·3, 2·2; Alto: 2·3, 3·3.
+        Assert.Equal("Bajo", LevelAt(0, 0));
+        Assert.Equal("Bajo", LevelAt(0, 1));
+        Assert.Equal("Medio", LevelAt(0, 2));
+        Assert.Equal("Medio", LevelAt(1, 1));
+        Assert.Equal("Alto", LevelAt(1, 2));
+        Assert.Equal("Alto", LevelAt(2, 2));
+    }
+
+    [Fact]
     public void Risk_level_comes_from_heat_map_and_follows_its_edits()
     {
         var doc = Sample.Document(0);

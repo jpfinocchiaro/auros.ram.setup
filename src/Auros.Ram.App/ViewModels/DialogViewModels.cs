@@ -124,8 +124,15 @@ public sealed partial class NewMatrixViewModel : ObservableObject
     [ObservableProperty]
     private string _company = "";
 
+    // Origen de las escalas: estándar 5 × 5, simple 3 × 3 o una plantilla (botones de opción excluyentes).
     [ObservableProperty]
-    private bool _useStandardScales = true;
+    private bool _useStandard = true;
+
+    [ObservableProperty]
+    private bool _useSimple;
+
+    [ObservableProperty]
+    private bool _useTemplate;
 
     [ObservableProperty]
     private string? _error;

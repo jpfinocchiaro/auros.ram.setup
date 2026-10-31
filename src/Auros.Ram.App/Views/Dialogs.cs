@@ -177,6 +177,16 @@ public partial class PreferencesWindow : Window
     private void OnCancel(object? sender, RoutedEventArgs e) => Close(false);
 }
 
+/// <summary>Pantalla de inicio breve con la portada de la marca.</summary>
+public partial class SplashWindow : Window
+{
+    public SplashWindow()
+    {
+        InitializeComponent();
+        VersionText.Text = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.About_Version, AppInfo.Version);
+    }
+}
+
 public partial class AboutWindow : Window
 {
     public AboutWindow()
