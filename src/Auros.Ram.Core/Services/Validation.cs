@@ -1,6 +1,7 @@
 using System.Globalization;
 using Auros.Ram.Core.Model;
 using Auros.Ram.Core.Resources;
+using Auros.Ram.Core.Text;
 
 namespace Auros.Ram.Core.Services;
 
@@ -125,18 +126,20 @@ internal static class Validation
             throw new DomainException(Format(Messages.Error_RiskTitleTooLong, Limits.RiskTitleMax), nameof(Risk.Title));
         }
 
-        if (string.IsNullOrWhiteSpace(risk.ShortDescription))
+        // Los límites y la obligatoriedad se miden sobre el texto visible, sin las marcas de formato.
+        var shortPlain = RichText.ToPlain(risk.ShortDescription);
+        if (string.IsNullOrWhiteSpace(shortPlain))
         {
             throw new DomainException(Messages.Error_RiskShortRequired, nameof(Risk.ShortDescription));
         }
 
-        if (risk.ShortDescription.Length > Limits.RiskShortDescriptionMax)
+        if (shortPlain.Length > Limits.RiskShortDescriptionMax)
         {
             throw new DomainException(
                 Format(Messages.Error_RiskShortTooLong, Limits.RiskShortDescriptionMax), nameof(Risk.ShortDescription));
         }
 
-        if (string.IsNullOrWhiteSpace(risk.LongDescription))
+        if (string.IsNullOrWhiteSpace(RichText.ToPlain(risk.LongDescription)))
         {
             throw new DomainException(Messages.Error_RiskLongRequired, nameof(Risk.LongDescription));
         }

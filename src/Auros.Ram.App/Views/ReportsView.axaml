@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Auros.Ram.App.ViewModels"
              xmlns:r="using:Auros.Ram.App.Resources"
+             xmlns:views="using:Auros.Ram.App.Views"
              x:Class="Auros.Ram.App.Views.ReportsView"
              x:DataType="vm:ReportsViewModel">
   <TabControl Classes="sub" Margin="24,8,24,0" Padding="0,8,0,0">
@@ -29,7 +30,7 @@
                   <Grid ColumnDefinitions="44,2*,3*,120,120,120" Margin="0,4">
                     <TextBlock Text="{Binding Number}" FontWeight="SemiBold" />
                     <TextBlock Grid.Column="1" Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,12,0" />
-                    <TextBlock Grid.Column="2" Text="{Binding ShortDescription}" TextWrapping="Wrap" Margin="0,0,12,0" />
+                    <views:RichTextBlock Grid.Column="2" Markup="{Binding ShortDescription}" Margin="0,0,12,0" />
                     <ContentControl Grid.Column="3" Content="{Binding RiskLevel}" VerticalAlignment="Top" />
                     <ContentControl Grid.Column="4" Content="{Binding ImpactLevel}" VerticalAlignment="Top" />
                     <ContentControl Grid.Column="5" Content="{Binding ProbabilityLevel}" VerticalAlignment="Top" />
@@ -85,9 +86,9 @@
                   </ItemsControl.ItemTemplate>
                 </ItemsControl>
                 <TextBlock Classes="h2" Text="{x:Static r:Strings.Risk_Short}" />
-                <SelectableTextBlock Text="{Binding ShortDescription}" TextWrapping="Wrap" />
+                <views:RichTextBlock Markup="{Binding ShortDescription}" />
                 <TextBlock Classes="h2" Text="{x:Static r:Strings.Risk_Long}" />
-                <SelectableTextBlock Text="{Binding LongDescription}" TextWrapping="Wrap" />
+                <views:RichTextBlock Markup="{Binding LongDescription}" />
               </StackPanel>
             </ScrollViewer>
           </Border>

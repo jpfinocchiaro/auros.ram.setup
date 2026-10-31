@@ -118,7 +118,8 @@ public sealed partial class RiskEditorViewModel : ObservableObject
     private string? _error;
 
     public string TitleCounter => $"{Title.Length}/{Limits.RiskTitleMax}";
-    public string ShortCounter => $"{ShortDescription.Length}/{Limits.RiskShortDescriptionMax}";
+    /// <summary>Caracteres visibles (sin las marcas de formato), que es lo que cuenta el límite.</summary>
+    public string ShortCounter => $"{Auros.Ram.Core.Text.RichText.ToPlain(ShortDescription).Length}/{Limits.RiskShortDescriptionMax}";
 
     /// <summary>Se dispara cuando el riesgo quedó guardado en el documento.</summary>
     public event EventHandler? Committed;

@@ -1,6 +1,7 @@
 using Auros.Ram.Core;
 using Auros.Ram.Core.Model;
 using Auros.Ram.Core.Services;
+using Auros.Ram.Core.Text;
 using Auros.Ram.Export.Resources;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Tables;
@@ -200,7 +201,7 @@ public static class PdfExport
             var row = table.AddRow();
             row.Cells[0].AddParagraph(x.Number.ToString(Fmt.Culture));
             row.Cells[1].AddParagraph(x.Risk.Title).Format.Font.Bold = true;
-            row.Cells[2].AddParagraph(x.Risk.ShortDescription);
+            AddRich(row.Cells[2].AddParagraph, x.Risk.ShortDescription, 9);
             LevelCell(row.Cells[3], x.RiskLevel, center: true);
             LevelCell(row.Cells[4], x.ImpactLevel, center: true);
             LevelCell(row.Cells[5], x.ProbabilityLevel, center: true);
@@ -322,9 +323,39 @@ public static class PdfExport
         heading.Format.Font.Bold = true;
         heading.Format.SpaceBefore = Unit.FromPoint(10);
         heading.Format.SpaceAfter = Unit.FromPoint(3);
-        foreach (var line in text.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n'))
+        AddRich(section.AddParagraph, text, 9);
+    }
+
+    /// <summary>Texto con formato (negrita, itálica, subrayado, tamaños y listas), un párrafo por línea.</summary>
+    private static void AddRich(Func<Paragraph> newParagraph, string markup, double baseSize)
+    {
+        foreach (var block in RichText.Parse(markup))
         {
-            section.AddParagraph(line).Format.SpaceAfter = Unit.FromPoint(2);
+            var p = newParagraph();
+            p.Format.SpaceAfter = Unit.FromPoint(2);
+            var prefix = RichText.Prefix(block);
+            if (prefix.Length > 0)
+            {
+                p.Format.LeftIndent = Unit.FromCentimeter(0.6);
+                p.Format.FirstLineIndent = Unit.FromCentimeter(-0.4);
+                p.AddText(prefix);
+            }
+
+            foreach (var run in block.Runs)
+            {
+                var t = p.AddFormattedText(run.Text);
+                t.Bold = run.Bold;
+                t.Italic = run.Italic;
+                if (run.Underline)
+                {
+                    t.Underline = Underline.Single;
+                }
+
+                if (run.Size != RichSize.Normal)
+                {
+                    t.Size = Unit.FromPoint(baseSize * (run.Size == RichSize.Large ? 1.3 : 0.85));
+                }
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 using Auros.Ram.Core;
 using Auros.Ram.Core.Model;
 using Auros.Ram.Core.Services;
+using Auros.Ram.Core.Text;
 using Auros.Ram.Export.Resources;
 using ClosedXML.Excel;
 
@@ -63,11 +64,11 @@ public static class XlsxExport
         {
             ws.Cell(row, 1).Value = x.Number;
             ws.Cell(row, 2).Value = x.Risk.Title;
-            ws.Cell(row, 3).Value = x.Risk.ShortDescription;
+            Rich(ws.Cell(row, 3), x.Risk.ShortDescription);
             Colored(ws.Cell(row, 4), x.RiskLevel);
             Colored(ws.Cell(row, 5), x.ImpactLevel);
             Colored(ws.Cell(row, 6), x.ProbabilityLevel);
-            ws.Cell(row, 7).Value = x.Risk.LongDescription;
+            Rich(ws.Cell(row, 7), x.Risk.LongDescription);
             ws.Cell(row, 8).Value = x.Risk.ImpactJustification;
             ws.Cell(row, 9).Value = x.Risk.ProbabilityJustification;
             row++;
@@ -190,6 +191,41 @@ public static class XlsxExport
         cell.Value = level.Name;
         Fill(cell, level);
         cell.Style.Font.Bold = true;
+    }
+
+    /// <summary>Celda con texto enriquecido: negrita, itálica, subrayado, tamaños y listas (una línea por ítem).</summary>
+    private static void Rich(IXLCell cell, string markup)
+    {
+        var rich = cell.CreateRichText();
+        var blocks = RichText.Parse(markup);
+        for (var i = 0; i < blocks.Count; i++)
+        {
+            if (i > 0)
+            {
+                rich.AddNewLine();
+            }
+
+            var prefix = RichText.Prefix(blocks[i]);
+            if (prefix.Length > 0)
+            {
+                rich.AddText(prefix);
+            }
+
+            foreach (var run in blocks[i].Runs)
+            {
+                var t = rich.AddText(run.Text);
+                t.SetBold(run.Bold).SetItalic(run.Italic);
+                if (run.Underline)
+                {
+                    t.SetUnderline(XLFontUnderlineValues.Single);
+                }
+
+                if (run.Size != RichSize.Normal)
+                {
+                    t.SetFontSize(run.Size == RichSize.Large ? 14 : 9);
+                }
+            }
+        }
     }
 
     private static void Fill(IXLCell cell, Level level)

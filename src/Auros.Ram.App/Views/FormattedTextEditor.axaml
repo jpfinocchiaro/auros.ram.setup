@@ -1,0 +1,60 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rtb="using:AvRichTextBox"
+             xmlns:r="using:Auros.Ram.App.Resources"
+             x:Class="Auros.Ram.App.Views.FormattedTextEditor">
+  <!-- Editor de descripción con formato directo: el texto se ve con su formato mientras se escribe. -->
+  <UserControl.Styles>
+    <Style Selector="Button.fmt">
+      <Setter Property="MinWidth" Value="32" />
+      <Setter Property="Height" Value="28" />
+      <Setter Property="Padding" Value="8,0" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Focusable" Value="False" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+  </UserControl.Styles>
+
+  <Border BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="3" Background="{DynamicResource SurfaceBrush}">
+    <DockPanel>
+      <Border DockPanel.Dock="Top" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1" Padding="4,2">
+        <StackPanel Orientation="Horizontal" Spacing="2">
+          <Button Classes="fmt" Click="OnBold" ToolTip.Tip="{x:Static r:Strings.Format_BoldTip}">
+            <TextBlock Text="B" FontWeight="Bold" />
+          </Button>
+          <Button Classes="fmt" Click="OnItalic" ToolTip.Tip="{x:Static r:Strings.Format_ItalicTip}">
+            <TextBlock Text="I" FontStyle="Italic" FontFamily="Georgia, serif" />
+          </Button>
+          <Button Classes="fmt" Click="OnUnderline" ToolTip.Tip="{x:Static r:Strings.Format_UnderlineTip}">
+            <TextBlock Text="S" TextDecorations="Underline" />
+          </Button>
+          <Border Width="1" Margin="6,4" Background="{DynamicResource BorderSubtleBrush}" />
+          <Button Classes="fmt" ToolTip.Tip="{x:Static r:Strings.Format_SizeTip}">
+            <StackPanel Orientation="Horizontal" Spacing="4">
+              <TextBlock Text="{x:Static r:Strings.Format_Size}" />
+              <TextBlock Text="▾" FontSize="10" VerticalAlignment="Center" />
+            </StackPanel>
+            <Button.Flyout>
+              <MenuFlyout>
+                <MenuItem Header="{x:Static r:Strings.Format_SizeSmall}" Click="OnSmall" />
+                <MenuItem Header="{x:Static r:Strings.Format_SizeNormal}" Click="OnNormal" />
+                <MenuItem Header="{x:Static r:Strings.Format_SizeLarge}" Click="OnLarge" />
+              </MenuFlyout>
+            </Button.Flyout>
+          </Button>
+          <Border Width="1" Margin="6,4" Background="{DynamicResource BorderSubtleBrush}" />
+          <Button x:Name="BulletsButton" Classes="fmt" Click="OnBullets" ToolTip.Tip="{x:Static r:Strings.Format_BulletsTip}">
+            <TextBlock Text="• ≡" />
+          </Button>
+          <Button Classes="fmt" Click="OnNumbers" ToolTip.Tip="{x:Static r:Strings.Format_NumbersTip}">
+            <TextBlock Text="1. ≡" />
+          </Button>
+        </StackPanel>
+      </Border>
+
+      <rtb:RichTextBox x:Name="Editor" Padding="8,6" FontSize="14" />
+    </DockPanel>
+  </Border>
+</UserControl>

@@ -36,7 +36,7 @@ Contenido completo de una matriz, para integraciones y migraciones. Implementaci
     {
       "id": "guid",
       "title": "…",                  // 1–200
-      "shortDescription": "…",       // 1–500
+      "shortDescription": "…",       // 1–500 caracteres visibles (sin contar las marcas de formato)
       "longDescription": "…",        // obligatoria
       "impactLevelId": "guid",       // nivel de la escala de Impacto del proyecto
       "probabilityLevelId": "guid",  // nivel de la escala de Probabilidad del proyecto
@@ -61,3 +61,20 @@ contraseña nueva (opcional).
 
 Los JSON de las versiones 1 y 2 (valor agregado y dificultad) fueron de prueba y se rechazan con un
 mensaje claro.
+
+## Formato de las descripciones
+
+`shortDescription` y `longDescription` guardan el texto con marcas simples (ver
+`src/Auros.Ram.Core/Text/RichText.cs`):
+
+| Marca | Resultado |
+|---|---|
+| `**texto**` | negrita |
+| `*texto*` | itálica |
+| `__texto__` | subrayado |
+| `{g}texto{/g}` / `{p}texto{/p}` | letra grande / chica |
+| línea que empieza con `- ` | ítem con viñeta |
+| línea que empieza con `1. `, `2. `… | ítem numerado |
+
+Una marca solo cuenta si se cierra en la misma línea; si no, queda como texto. El CSV y la búsqueda
+usan el texto sin marcas; los informes en pantalla, el PDF y el Excel muestran el formato.

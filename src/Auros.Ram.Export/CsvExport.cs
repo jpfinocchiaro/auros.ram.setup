@@ -1,6 +1,7 @@
 using System.Text;
 using Auros.Ram.Core;
 using Auros.Ram.Core.Services;
+using Auros.Ram.Core.Text;
 using Auros.Ram.Export.Resources;
 
 namespace Auros.Ram.Export;
@@ -22,7 +23,7 @@ public static class CsvExport
         foreach (var row in Reports.Summary(doc))
         {
             var r = row.Risk;
-            Line(sb, row.Number.ToString(Fmt.Culture), r.Title, r.ShortDescription, r.LongDescription,
+            Line(sb, row.Number.ToString(Fmt.Culture), r.Title, RichText.ToPlain(r.ShortDescription), RichText.ToPlain(r.LongDescription),
                 row.RiskLevel.Name, row.ImpactLevel.Name, row.ProbabilityLevel.Name,
                 r.ImpactJustification, r.ProbabilityJustification);
         }

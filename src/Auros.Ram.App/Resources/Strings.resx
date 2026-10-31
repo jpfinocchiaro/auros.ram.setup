@@ -51,6 +51,16 @@
   <data name="FileType_Pdf" xml:space="preserve"><value>Documento PDF</value></data>
   <data name="FileType_Template" xml:space="preserve"><value>Plantilla de escalas auros.ram</value></data>
   <data name="FileType_Xlsx" xml:space="preserve"><value>Libro de Excel</value></data>
+  <data name="Format_BoldTip" xml:space="preserve"><value>Negrita (Ctrl+B)</value></data>
+  <data name="Format_BulletsTip" xml:space="preserve"><value>Lista con viñetas (las líneas seleccionadas)</value></data>
+  <data name="Format_ItalicTip" xml:space="preserve"><value>Itálica (Ctrl+I)</value></data>
+  <data name="Format_NumbersTip" xml:space="preserve"><value>Lista numerada (las líneas seleccionadas)</value></data>
+  <data name="Format_Size" xml:space="preserve"><value>Tamaño</value></data>
+  <data name="Format_SizeLarge" xml:space="preserve"><value>Grande</value></data>
+  <data name="Format_SizeNormal" xml:space="preserve"><value>Normal</value></data>
+  <data name="Format_SizeSmall" xml:space="preserve"><value>Chico</value></data>
+  <data name="Format_SizeTip" xml:space="preserve"><value>Tamaño de la letra del texto seleccionado</value></data>
+  <data name="Format_UnderlineTip" xml:space="preserve"><value>Subrayado (Ctrl+U)</value></data>
   <data name="HeatMap_CellTip" xml:space="preserve"><value>Impacto «{0}» × probabilidad «{1}». Clic para elegir el nivel de riesgo.</value></data>
   <data name="HeatMap_Intro" xml:space="preserve"><value>El nivel de riesgo de cada combinación de impacto y probabilidad. Haga clic en una celda para cambiarlo: los riesgos de esa celda cambian de nivel con ella.</value></data>
   <data name="HeatMap_Reset" xml:space="preserve"><value>Restablecer</value></data>

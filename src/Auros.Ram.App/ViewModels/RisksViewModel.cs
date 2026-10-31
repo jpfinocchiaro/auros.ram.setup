@@ -11,7 +11,8 @@ namespace Auros.Ram.App.ViewModels;
 public sealed record RiskRow(Risk Risk, LevelChip? RiskLevel, LevelChip? ImpactLevel, LevelChip? ProbabilityLevel)
 {
     public string Title => Risk.Title;
-    public string ShortDescription => Risk.ShortDescription;
+    /// <summary>Sin marcas de formato: en la lista se muestra como texto simple de dos líneas.</summary>
+    public string ShortDescription => Auros.Ram.Core.Text.RichText.ToPlain(Risk.ShortDescription);
 }
 
 /// <summary>Lista de riesgos con búsqueda, filtros y orden (RF-10, RF-12).</summary>

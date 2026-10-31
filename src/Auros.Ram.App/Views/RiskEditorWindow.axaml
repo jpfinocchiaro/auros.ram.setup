@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:Auros.Ram.App.ViewModels"
         xmlns:r="using:Auros.Ram.App.Resources"
+        xmlns:views="using:Auros.Ram.App.Views"
         x:Class="Auros.Ram.App.Views.RiskEditorWindow"
         x:DataType="vm:RiskEditorViewModel"
         Title="{Binding WindowTitle}"
@@ -31,11 +32,12 @@
             <TextBlock DockPanel.Dock="Right" Classes="muted" FontSize="12" Text="{Binding ShortCounter}" />
             <TextBlock Classes="label" Text="{x:Static r:Strings.Risk_ShortHint}" />
           </DockPanel>
-          <TextBox Text="{Binding ShortDescription}" MaxLength="{Binding ShortMax}" AcceptsReturn="True" TextWrapping="Wrap" Height="64" />
+          <!-- Descripciones con formato directo: barra de botones sobre el texto. -->
+          <views:FormattedTextEditor Text="{Binding ShortDescription}" EditorHeight="90" />
         </StackPanel>
         <StackPanel>
           <TextBlock Classes="label" Text="{x:Static r:Strings.Risk_LongHint}" />
-          <TextBox Text="{Binding LongDescription}" AcceptsReturn="True" TextWrapping="Wrap" Height="130" />
+          <views:FormattedTextEditor Text="{Binding LongDescription}" EditorHeight="190" />
         </StackPanel>
 
         <!-- RF-10: cada nivel se elige con botones de color, con su justificación debajo -->

@@ -163,6 +163,107 @@ public class UiSmokeTests
         Assert.False(docVm.Project.HasChanges);
     }
 
+    [AvaloniaFact]
+    public void Formatted_editor_loads_saves_and_applies_format_in_place()
+    {
+        // Los saltos de línea del archivo fuente dependen de cómo lo dejó git; el editor guarda siempre "\n".
+        var markup = """
+            Texto con **negrita**, *itálica* y __subrayado__.
+            {g}Grande{/g} y {p}chica{/p}
+            - uno
+            - dos
+            1. primero
+            """.ReplaceLineEndings("\n");
+        var editor = new FormattedTextEditor { Text = markup, EditorHeight = 200 };
+        var window = new Window { Content = editor, Width = 600, Height = 300 };
+        window.Show();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        // Ida y vuelta sin cambios: lo que se carga en el editor es lo que se guarda.
+        Assert.Equal(5, editor.Box.FlowDocument.Blocks.Count);
+        editor.Publish();
+        Assert.Equal(markup, editor.Text);
+
+        // Negrita aplicada directamente sobre el texto seleccionado ("Texto").
+        editor.Box.FlowDocument.Select(0, 5);
+        editor.Box.FlowDocument.Selection.ApplyFormatting(Avalonia.Controls.Documents.TextElement.FontWeightProperty, Avalonia.Media.FontWeight.Bold);
+        editor.Publish();
+        Assert.StartsWith("**Texto** con **negrita**", editor.Text, StringComparison.Ordinal);
+
+        // Cambiar el texto desde afuera (otro riesgo) recarga el editor.
+        editor.Text = "Otro *riesgo*";
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Assert.Single(editor.Box.FlowDocument.Blocks);
+        Assert.Equal("Otro *riesgo*", Auros.Ram.App.Views.RichDocument.Save(editor.Box.FlowDocument));
+        window.Close();
+    }
+
+    [AvaloniaFact]
+    public void Two_formatted_editors_keep_their_own_text()
+    {
+        // La descripción corta y la larga están en la misma ventana: cada editor debe tener su propio documento.
+        var shortEditor = new FormattedTextEditor { Text = "Resumen **corto**" };
+        var longEditor = new FormattedTextEditor { Text = "Detalle *largo*\n- con lista" };
+        var window = new Window { Content = new StackPanel { Children = { shortEditor, longEditor } }, Width = 600, Height = 400 };
+        window.Show();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        Assert.NotSame(shortEditor.Box.FlowDocument, longEditor.Box.FlowDocument);
+        shortEditor.Publish();
+        longEditor.Publish();
+        Assert.Equal("Resumen **corto**", shortEditor.Text);
+        Assert.Equal("Detalle *largo*\n- con lista", longEditor.Text);
+
+        // Solo titila el cursor del editor donde se está escribiendo.
+        longEditor.Box.Focus();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Assert.True(shortEditor.CaretHidden);
+        Assert.False(longEditor.CaretHidden);
+
+        // Y sigue oculto después de reacomodarse la ventana (la capa del cursor rehace su recorte).
+        window.Width = 700;
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Assert.True(shortEditor.CaretHidden);
+        window.Close();
+    }
+
+    [AvaloniaFact]
+    public void Formatted_editor_lists_keep_the_caret_after_the_bullet()
+    {
+        var editor = new FormattedTextEditor { Text = "Hola" };
+        var window = new Window { Content = editor, Width = 600, Height = 300 };
+        window.Show();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        editor.Box.Focus();
+        editor.Box.FlowDocument.Select(4, 0);
+
+        // Viñeta con el cursor al final: lo que se escribe sigue al texto, no queda antes de la viñeta.
+        editor.FindControl<Button>("BulletsButton")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+        Assert.Equal("- Hola", editor.Text);
+        window.KeyTextInput(" uno");
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        editor.Publish();
+        Assert.Equal("- Hola uno", editor.Text);
+
+        // Enter sigue la lista; Enter sobre un ítem vacío la termina.
+        window.KeyPress(Avalonia.Input.Key.Enter, Avalonia.Input.RawInputModifiers.None, Avalonia.Input.PhysicalKey.Enter, null);
+        window.KeyRelease(Avalonia.Input.Key.Enter, Avalonia.Input.RawInputModifiers.None, Avalonia.Input.PhysicalKey.Enter, null);
+        window.KeyTextInput("dos");
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        editor.Publish();
+        Assert.Equal("- Hola uno\n- dos", editor.Text);
+
+        window.KeyPress(Avalonia.Input.Key.Enter, Avalonia.Input.RawInputModifiers.None, Avalonia.Input.PhysicalKey.Enter, null);
+        window.KeyRelease(Avalonia.Input.Key.Enter, Avalonia.Input.RawInputModifiers.None, Avalonia.Input.PhysicalKey.Enter, null);
+        window.KeyPress(Avalonia.Input.Key.Enter, Avalonia.Input.RawInputModifiers.None, Avalonia.Input.PhysicalKey.Enter, null);
+        window.KeyRelease(Avalonia.Input.Key.Enter, Avalonia.Input.RawInputModifiers.None, Avalonia.Input.PhysicalKey.Enter, null);
+        window.KeyTextInput("fin");
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        editor.Publish();
+        Assert.Equal("- Hola uno\n- dos\nfin", editor.Text);
+        window.Close();
+    }
+
     private static void ShowDialog(Window dialog, string name)
     {
         dialog.Show();
@@ -206,7 +307,16 @@ public class UiSmokeTests
             {
                 Title = title,
                 ShortDescription = $"Resumen ejecutivo: {title.ToLowerInvariant()}.",
-                LongDescription = "Detalle del hallazgo, análisis del impacto y recomendación de mejora.",
+                LongDescription = """
+                    {g}Hallazgo{/g}
+                    Se detectaron **cuentas activas** de personas que ya no trabajan en la empresa.
+                    *Análisis:* el acceso permite __modificar datos de clientes__.
+                    Recomendación:
+                    - Revisar las bajas cada mes
+                    - Automatizar el bloqueo
+                    1. Inventario
+                    2. Depuración
+                    """,
                 ImpactLevelId = doc.ProjectScale(ScaleType.Impact)!.OrderedLevels[i].Id,
                 ProbabilityLevelId = doc.ProjectScale(ScaleType.Probability)!.OrderedLevels[p].Id,
                 ImpactJustification = i >= 3 ? "Expone información sensible de clientes." : "",

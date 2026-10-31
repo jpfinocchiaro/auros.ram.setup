@@ -1,4 +1,5 @@
 using Auros.Ram.Core.Model;
+using Auros.Ram.Core.Text;
 
 namespace Auros.Ram.Core.Services;
 
@@ -50,7 +51,7 @@ public static class RiskQuery
         {
             var text = filter.Text.Trim();
             query = query.Where(x =>
-                Contains(x.Title, text) || Contains(x.ShortDescription, text) || Contains(x.LongDescription, text));
+                Contains(x.Title, text) || Contains(RichText.ToPlain(x.ShortDescription), text) || Contains(RichText.ToPlain(x.LongDescription), text));
         }
 
         var orders = LevelOrders(doc);

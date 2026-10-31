@@ -63,6 +63,17 @@ public class ExportTests
 
         Directory.CreateDirectory(target);
         var doc = Sample.Document(9);
+        var formatted = doc.Risks[0].Clone();
+        formatted.ShortDescription = "Resumen con **negrita** e *itálica*.";
+        formatted.LongDescription = """
+            {g}Hallazgo{/g}
+            Texto con __subrayado__ y {p}letra chica{/p}.
+            - Viñeta uno
+            - Viñeta dos
+            1. Paso uno
+            2. Paso dos
+            """;
+        doc.UpdateRisk(formatted);
         PdfExport.Write(doc, Path.Combine(target, "informe.pdf"), PdfReports.All, appVersion: "0.1.0");
         XlsxExport.Write(doc, Path.Combine(target, "matriz.xlsx"));
     }

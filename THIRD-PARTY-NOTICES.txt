@@ -12,6 +12,12 @@ Avalonia UI (Avalonia, Desktop, Fluent)  MIT           The AvaloniaUI Project
 IBM Plex Sans (fuente)                   OFL 1.1       IBM Corp.
 SkiaSharp / HarfBuzzSharp                MIT           Microsoft Corporation / Xamarin Inc.
 CommunityToolkit.Mvvm                    MIT           .NET Foundation and Contributors
+Simplecto.Avalonia.RichTextBox (editor)  MIT           cuikp (Simplectoplasm)
+RtfDomParser (incluido en el editor)     MIT           RtfDomParser contributors
+ReactiveUI / Avalonia.ReactiveUI         MIT           .NET Foundation and Contributors
+System.Reactive / DynamicData            MIT           .NET Foundation and Contributors / Roland Pheasant
+HtmlAgilityPack                          MIT           ZZZ Projects Inc.
+Tmds.DBus.Protocol                       MIT           Tom Deseyn
 SQLitePCLRaw                             Apache 2.0    Zumero, LLC (Eric Sink)
 SQLCipher                                BSD-3-Clause  Zetetic LLC
 SQLite                                   Dominio público  D. Richard Hipp y colaboradores

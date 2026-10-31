@@ -29,6 +29,7 @@
     <PackageReference Include="Avalonia.Desktop" />
     <PackageReference Include="Avalonia.Themes.Fluent" />
     <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Simplecto.Avalonia.RichTextBox" />
   </ItemGroup>
 
   <ItemGroup>
