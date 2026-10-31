@@ -28,6 +28,20 @@
       </StackPanel>
       <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{x:Static r:Strings.Prefs_AbbreviationsHint}" />
     </StackPanel>
+    <!-- Fechas de evaluación: qué fechas anteriores se permiten (si se permiten, el editor solo advierte). -->
+    <StackPanel Spacing="4">
+      <TextBlock Classes="label" TextWrapping="Wrap" Text="{x:Static r:Strings.Prefs_Dates}" />
+      <CheckBox IsChecked="{Binding AllowPastDateOnCreate}">
+        <TextBlock TextWrapping="Wrap" Text="{x:Static r:Strings.Prefs_DatePastOnCreate}" />
+      </CheckBox>
+      <CheckBox IsChecked="{Binding AllowDateBeforeRecorded}">
+        <TextBlock TextWrapping="Wrap" Text="{x:Static r:Strings.Prefs_DateBeforeRecorded}" />
+      </CheckBox>
+      <CheckBox IsChecked="{Binding AllowPastDateOnEdit}">
+        <TextBlock TextWrapping="Wrap" Text="{x:Static r:Strings.Prefs_DatePastOnEdit}" />
+      </CheckBox>
+      <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{x:Static r:Strings.Prefs_DatesHint}" />
+    </StackPanel>
     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
       <Button Content="{x:Static r:Strings.Common_Cancel}" IsCancel="True" Click="OnCancel" />
       <Button Classes="accent" Content="{x:Static r:Strings.Common_Save}" IsDefault="True" Click="OnAccept" />

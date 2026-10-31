@@ -78,7 +78,7 @@
   <data name="Matrix_Legend" xml:space="preserve"><value>Nivel de riesgo</value></data>
   <data name="Matrix_Tooltip" xml:space="preserve"><value>{0}
 Nivel de riesgo: {1}
-Clic para abrir la ficha</value></data>
+Clic: editar · Clic derecho: nueva evaluación</value></data>
   <data name="Menu_About" xml:space="preserve"><value>Acerca de auros.ram</value></data>
   <data name="Menu_ChangePassword" xml:space="preserve"><value>Cambiar contraseña…</value></data>
   <data name="Menu_Close" xml:space="preserve"><value>Cerrar</value></data>
@@ -277,4 +277,60 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Welcome_Recent" xml:space="preserve"><value>Archivos recientes</value></data>
   <data name="Welcome_SecurityNote" xml:space="preserve"><value>Cada matriz se guarda en su propio archivo. Si le pone contraseña, el archivo se cifra (AES-256); la contraseña nunca se guarda y no se puede recuperar: anótela en un lugar seguro.</value></data>
   <data name="Welcome_Subtitle" xml:space="preserve"><value>Clasifique cada riesgo por su impacto y su probabilidad de ocurrencia, y vea en un mapa de calor cuáles atender primero.</value></data>
+  <data name="History_FirstAssessment" xml:space="preserve"><value>Primera evaluación</value></data>
+  <data name="History_NewAssessment" xml:space="preserve"><value>Nueva evaluación</value></data>
+  <data name="History_FirstHint" xml:space="preserve"><value>Fecha desde la que el riesgo tiene este impacto y esta probabilidad. Los cambios posteriores quedan en el historial.</value></data>
+  <data name="History_NewHint" xml:space="preserve"><value>Fecha en que se evaluó el riesgo con este impacto y esta probabilidad; queda en el historial (si ya hay una evaluación ese día, la reemplaza).</value></data>
+  <data name="History_Date" xml:space="preserve"><value>Fecha de la evaluación</value></data>
+  <data name="History_Note" xml:space="preserve"><value>Comentario</value></data>
+  <data name="History_NoteHint" xml:space="preserve"><value>Opcional: por qué cambió (p. ej., se aplicó un control)</value></data>
+  <data name="History_Title" xml:space="preserve"><value>Historial de evaluaciones</value></data>
+  <data name="History_RemoveTip" xml:space="preserve"><value>Quitar esta evaluación (cargada por error)</value></data>
+  <data name="Matrix_AsOf" xml:space="preserve"><value>Ver al</value></data>
+  <data name="Matrix_Today" xml:space="preserve"><value>Hoy</value></data>
+  <data name="Matrix_Path" xml:space="preserve"><value>Recorrido de</value></data>
+  <data name="Matrix_PathNone" xml:space="preserve"><value>(ningún riesgo)</value></data>
+  <data name="Matrix_AsOfSubtitle" xml:space="preserve"><value>al {0}</value></data>
+  <data name="Evolution_Tab" xml:space="preserve"><value>Evolución de los riesgos</value></data>
+  <data name="Evolution_From" xml:space="preserve"><value>Desde</value></data>
+  <data name="Evolution_FromHint" xml:space="preserve"><value>Primera evaluación</value></data>
+  <data name="Evolution_To" xml:space="preserve"><value>hasta</value></data>
+  <data name="Evolution_Start" xml:space="preserve"><value>Al inicio (nivel · impacto · probabilidad)</value></data>
+  <data name="Evolution_End" xml:space="preserve"><value>Al final (nivel · impacto · probabilidad)</value></data>
+  <data name="Evolution_Trend" xml:space="preserve"><value>Tendencia</value></data>
+  <data name="Evolution_Changes" xml:space="preserve"><value>Cambios en el período</value></data>
+  <data name="Evolution_NotAssessed" xml:space="preserve"><value>No estaba evaluado</value></data>
+  <data name="Evolution_NoChanges" xml:space="preserve"><value>Sin cambios en el período</value></data>
+  <data name="Evolution_Summary" xml:space="preserve"><value>Empeoraron: {0} · Mejoraron: {1} · Nuevos: {2} · Sin cambios: {3}</value></data>
+  <data name="Export_SuffixEvolution" xml:space="preserve"><value>Evolución</value></data>
+  <data name="Evolution_Change" xml:space="preserve"><value>impacto {0} · probabilidad {1} → {2}</value></data>
+  <data name="History_ColDate" xml:space="preserve"><value>Fecha</value></data>
+  <data name="Menu_ExportPdfEvolution" xml:space="preserve"><value>PDF — Evolución de los riesgos…</value></data>
+  <data name="History_WarnPast" xml:space="preserve"><value>La fecha es anterior a hoy.</value></data>
+  <data name="History_WarnPastNotAllowed" xml:space="preserve"><value>La configuración no permite una fecha anterior a hoy: no se podrá guardar (se puede habilitar en Preferencias).</value></data>
+  <data name="History_WarnBeforeRecorded" xml:space="preserve"><value>Es anterior a la última evaluación registrada ({0}): se intercala en el historial y el estado actual sigue siendo el de la evaluación más reciente.</value></data>
+  <data name="History_WarnBeforeRecordedNotAllowed" xml:space="preserve"><value>Es anterior a la última evaluación registrada ({0}) y la configuración no lo permite: no se podrá guardar (se puede habilitar en Preferencias).</value></data>
+  <data name="History_WarnFuture" xml:space="preserve"><value>La fecha no puede ser posterior a hoy.</value></data>
+  <data name="History_DateEditHint" xml:space="preserve"><value>Para corregir la fecha de una evaluación, elegí otra en su fila. El cambio se aplica en el momento y se puede deshacer (Edición → Deshacer).</value></data>
+  <data name="History_DateEditTip" xml:space="preserve"><value>Corregir la fecha de esta evaluación</value></data>
+  <data name="Prefs_Dates" xml:space="preserve"><value>Fechas de evaluación de los riesgos: permitir usar</value></data>
+  <data name="Prefs_DatePastOnCreate" xml:space="preserve"><value>en el alta, una fecha anterior a hoy</value></data>
+  <data name="Prefs_DateBeforeRecorded" xml:space="preserve"><value>en la modificación, una fecha anterior a una evaluación ya registrada (se intercala en el historial)</value></data>
+  <data name="Prefs_DatePastOnEdit" xml:space="preserve"><value>en la modificación o al corregir una evaluación, una fecha anterior a hoy</value></data>
+  <data name="Prefs_DatesHint" xml:space="preserve"><value>Si se permite, el editor solo advierte que la fecha es anterior. Una fecha posterior a hoy nunca se acepta.</value></data>
+  <data name="Risk_EditTitle" xml:space="preserve"><value>Editar riesgo «{0}»</value></data>
+  <data name="Risk_ReassessTitle" xml:space="preserve"><value>Nueva evaluación de «{0}»</value></data>
+  <data name="Mode_NewTitle" xml:space="preserve"><value>Nuevo riesgo</value></data>
+  <data name="Mode_NewHint" xml:space="preserve"><value>Datos del riesgo y su primera evaluación (impacto y probabilidad en una fecha).</value></data>
+  <data name="Mode_EditTitle" xml:space="preserve"><value>Editar riesgo</value></data>
+  <data name="Mode_EditHint" xml:space="preserve"><value>Corrige los datos del riesgo. No agrega evaluaciones al historial: para registrar que el riesgo cambió en el tiempo, usá «Nueva evaluación».</value></data>
+  <data name="Mode_ReassessTitle" xml:space="preserve"><value>Nueva evaluación</value></data>
+  <data name="Mode_ReassessHint" xml:space="preserve"><value>Registra el impacto y la probabilidad del riesgo en una fecha. Queda en el historial; las evaluaciones anteriores no cambian.</value></data>
+  <data name="Mode_RiskLabel" xml:space="preserve"><value>Riesgo</value></data>
+  <data name="Mode_CorrectionHint" xml:space="preserve"><value>Cambiaste el impacto o la probabilidad: al guardar se corrige la evaluación vigente (del {0}), sin agregar otra al historial. Si el riesgo cambió en el tiempo, registralo como nueva evaluación.</value></data>
+  <data name="Mode_SwitchToReassess" xml:space="preserve"><value>Registrar como nueva evaluación</value></data>
+  <data name="Risks_Edit" xml:space="preserve"><value>✎ Editar</value></data>
+  <data name="Risks_EditTip" xml:space="preserve"><value>Corrige los datos del riesgo (no agrega evaluaciones al historial)</value></data>
+  <data name="Risks_Reassess" xml:space="preserve"><value>⟳ Nueva evaluación</value></data>
+  <data name="Risks_ReassessTip" xml:space="preserve"><value>Registra el impacto y la probabilidad del riesgo en una fecha (queda en el historial)</value></data>
 </root>

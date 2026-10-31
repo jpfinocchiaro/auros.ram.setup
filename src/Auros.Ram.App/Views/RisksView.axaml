@@ -26,7 +26,12 @@
 
     <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8">
-        <Button Content="{x:Static r:Strings.Common_Edit}" Command="{Binding EditCommand}" CommandParameter="{Binding Selected}"
+        <!-- Editar corrige los datos; Nueva evaluación registra un nuevo estado del riesgo con su fecha. -->
+        <Button Content="{x:Static r:Strings.Risks_Edit}" Command="{Binding EditCommand}" CommandParameter="{Binding Selected}"
+                ToolTip.Tip="{x:Static r:Strings.Risks_EditTip}"
+                IsEnabled="{Binding Selected, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        <Button Content="{x:Static r:Strings.Risks_Reassess}" Command="{Binding ReassessCommand}" CommandParameter="{Binding Selected}"
+                ToolTip.Tip="{x:Static r:Strings.Risks_ReassessTip}"
                 IsEnabled="{Binding Selected, Converter={x:Static ObjectConverters.IsNotNull}}" />
         <Button Content="{x:Static r:Strings.Common_Delete}" Command="{Binding DeleteCommand}" CommandParameter="{Binding Selected}"
                 IsEnabled="{Binding Selected, Converter={x:Static ObjectConverters.IsNotNull}}" />
@@ -48,7 +53,15 @@
                    Background="Transparent">
             <ListBox.ItemTemplate>
               <DataTemplate x:DataType="vm:RiskRow">
-                <Grid ColumnDefinitions="Auto,*,130,130,130" Margin="0,4">
+                <Grid ColumnDefinitions="Auto,*,130,130,130" Margin="0,4" Background="Transparent">
+                  <Grid.ContextMenu>
+                    <ContextMenu>
+                      <MenuItem Header="{x:Static r:Strings.Risks_Edit}"
+                                Command="{Binding $parent[UserControl].((vm:RisksViewModel)DataContext).EditCommand}" CommandParameter="{Binding}" />
+                      <MenuItem Header="{x:Static r:Strings.Risks_Reassess}"
+                                Command="{Binding $parent[UserControl].((vm:RisksViewModel)DataContext).ReassessCommand}" CommandParameter="{Binding}" />
+                    </ContextMenu>
+                  </Grid.ContextMenu>
                   <!-- Barra del color del nivel de riesgo: se lee la gravedad de la lista de un vistazo. -->
                   <Border Width="4" CornerRadius="1" Margin="0,0,12,0" Background="{Binding RiskLevel.Background, FallbackValue=Transparent}" />
                   <StackPanel Grid.Column="1" Spacing="2" Margin="0,0,12,0">

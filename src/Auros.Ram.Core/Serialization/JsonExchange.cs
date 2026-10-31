@@ -9,13 +9,14 @@ namespace Auros.Ram.Core.Serialization;
 /// <summary>
 /// RNF-63: exportación e importación del contenido completo en JSON.
 /// El esquema está documentado en docs/formato-json.md y se versiona con <see cref="FormatVersion"/>.
-/// Versión 3: riesgos clasificados por impacto y probabilidad, con mapa de calor. Las versiones 1 y 2
-/// (valor agregado y dificultad) fueron de prueba y ya no se importan.
+/// Versión 3: riesgos clasificados por impacto y probabilidad, con mapa de calor. Versión 4: historial de
+/// evaluaciones de cada riesgo (un JSON de la versión 3 se importa con una sola evaluación por riesgo).
+/// Las versiones 1 y 2 (valor agregado y dificultad) fueron de prueba y ya no se importan.
 /// </summary>
 public static class JsonExchange
 {
     public const string FormatId = "auros.ram/matrix";
-    public const int FormatVersion = 3;
+    public const int FormatVersion = 4;
     public const int OldestSupportedVersion = 3;
 
     private static readonly JsonSerializerOptions Options = new()
@@ -70,6 +71,15 @@ public static class JsonExchange
                 ProbabilityJustification = r.ProbabilityJustification,
                 CreatedUtc = r.CreatedUtc,
                 ModifiedUtc = r.ModifiedUtc,
+                Assessments = [.. r.Assessments.Select(a => new AssessmentDto
+                {
+                    Id = a.Id,
+                    Date = a.Date,
+                    ImpactLevelId = a.ImpactLevelId,
+                    ProbabilityLevelId = a.ProbabilityLevelId,
+                    Note = a.Note,
+                    RecordedUtc = a.RecordedUtc,
+                })],
             })],
         };
         return JsonSerializer.Serialize(dto, Options);
@@ -139,7 +149,7 @@ public static class JsonExchange
             [.. (p.HeatMap ?? []).Select(c => new HeatCell(c.ImpactLevelId, c.ProbabilityLevelId, c.RiskLevelId))],
             doc.ProjectScale(ScaleType.Risk), doc.ProjectScale(ScaleType.Impact), doc.ProjectScale(ScaleType.Probability));
 
-        var risks = (dto.Risks ?? []).Select(r => new Risk
+        var risks = (dto.Risks ?? []).Select(r => WithHistory(r, new Risk
         {
             Id = r.Id,
             Title = r.Title ?? "",
@@ -151,7 +161,7 @@ public static class JsonExchange
             ProbabilityJustification = r.ProbabilityJustification ?? "",
             CreatedUtc = r.CreatedUtc ?? DateTime.UtcNow,
             ModifiedUtc = r.ModifiedUtc ?? DateTime.UtcNow,
-        }).ToList();
+        })).ToList();
 
         foreach (var risk in risks)
         {
@@ -166,6 +176,22 @@ public static class JsonExchange
         }
 
         return new RiskMatrixDocument(project, scales, risks);
+    }
+
+    /// <summary>
+    /// El historial del riesgo; sin historial (JSON de la versión 3), una sola evaluación con su estado actual
+    /// en la fecha en que se creó.
+    /// </summary>
+    private static Risk WithHistory(RiskDto dto, Risk risk)
+    {
+        risk.Assessments = dto.Assessments is { Count: > 0 } list
+            ? [.. list.Select(a => new RiskAssessment(
+                a.Id == Guid.Empty ? Guid.NewGuid() : a.Id, a.Date, a.ImpactLevelId, a.ProbabilityLevelId,
+                a.Note ?? "", a.RecordedUtc ?? risk.ModifiedUtc))]
+            : [new RiskAssessment(Guid.NewGuid(), DateOnly.FromDateTime(risk.CreatedUtc.ToLocalTime()),
+                risk.ImpactLevelId, risk.ProbabilityLevelId, "", risk.CreatedUtc)];
+        RiskMatrixDocument.WithCurrentFromHistory(risk);
+        return risk;
     }
 
     // DTOs: el contrato del JSON es independiente del modelo interno.
@@ -228,5 +254,16 @@ public static class JsonExchange
         public string? ProbabilityJustification { get; set; }
         public DateTime? CreatedUtc { get; set; }
         public DateTime? ModifiedUtc { get; set; }
+        public List<AssessmentDto>? Assessments { get; set; }
+    }
+
+    private sealed class AssessmentDto
+    {
+        public Guid Id { get; set; }
+        public DateOnly Date { get; set; }
+        public Guid ImpactLevelId { get; set; }
+        public Guid ProbabilityLevelId { get; set; }
+        public string? Note { get; set; }
+        public DateTime? RecordedUtc { get; set; }
     }
 }

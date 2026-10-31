@@ -2,6 +2,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Auros.Ram.App.ViewModels"
              xmlns:r="using:Auros.Ram.App.Resources"
+             xmlns:views="using:Auros.Ram.App.Views"
+             xmlns:sys="using:System"
              x:Class="Auros.Ram.App.Views.MatrixView"
              x:DataType="vm:MatrixViewModel">
   <!-- La matriz es la pieza central de la aplicación: un mapa de calor de impacto × probabilidad con ejes.
@@ -47,6 +49,19 @@
           <StackPanel Spacing="2">
             <TextBlock Classes="display" Text="{x:Static r:Strings.Section_Matrix}" />
             <TextBlock Classes="muted" FontSize="14" Text="{Binding Subtitle}" />
+            <!-- Evolución: la matriz a una fecha y el recorrido de un riesgo por las celdas. -->
+            <WrapPanel Margin="0,10,0,0">
+              <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,24,4">
+                <TextBlock Classes="muted" FontSize="13" VerticalAlignment="Center" Text="{x:Static r:Strings.Matrix_AsOf}" />
+                <CalendarDatePicker x:Name="AsOfPicker" SelectedDate="{Binding AsOfDate}" Width="150"
+                                    Watermark="{x:Static r:Strings.Matrix_Today}" DisplayDateEnd="{x:Static sys:DateTime.Today}" />
+                <Button Content="{x:Static r:Strings.Matrix_Today}" Command="{Binding ShowTodayCommand}" IsVisible="{Binding IsHistorical}" />
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,0,4">
+                <TextBlock Classes="muted" FontSize="13" VerticalAlignment="Center" Text="{x:Static r:Strings.Matrix_Path}" />
+                <ComboBox x:Name="PathPicker" ItemsSource="{Binding PathRisks}" SelectedItem="{Binding PathRisk}" Width="280" />
+              </StackPanel>
+            </WrapPanel>
           </StackPanel>
         </DockPanel>
       </Border>
@@ -89,6 +104,7 @@
         </LayoutTransformControl>
 
         <StackPanel Grid.Column="1">
+          <Grid>
           <ItemsControl ItemsSource="{Binding Rows}">
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="vm:MatrixRow">
@@ -118,6 +134,14 @@
                                 <DataTemplate x:DataType="vm:MatrixItem">
                                   <Button Classes="tile" Foreground="{Binding $parent[Border].(TextElement.Foreground)}" ToolTip.Tip="{Binding Tooltip}"
                                           Command="{Binding $parent[UserControl].((vm:MatrixViewModel)DataContext).OpenCommand}" CommandParameter="{Binding}">
+                                    <Button.ContextMenu>
+                                      <ContextMenu>
+                                        <MenuItem Header="{x:Static r:Strings.Risks_Edit}" CommandParameter="{Binding}"
+                                                  Command="{Binding $parent[UserControl].((vm:MatrixViewModel)DataContext).OpenCommand}" />
+                                        <MenuItem Header="{x:Static r:Strings.Risks_Reassess}" CommandParameter="{Binding}"
+                                                  Command="{Binding $parent[UserControl].((vm:MatrixViewModel)DataContext).ReassessCommand}" />
+                                      </ContextMenu>
+                                    </Button.ContextMenu>
                                     <TextBlock Margin="6,0" Text="{Binding Title, StringFormat='• {0}'}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                                   </Button>
                                 </DataTemplate>
@@ -132,6 +156,10 @@
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
+          <!-- Recorrido del riesgo elegido, encima de las celdas (desde el borde del rótulo de las filas). -->
+          <views:MatrixPathOverlay Margin="135,0,0,0" IsHitTestVisible="False" Markers="{Binding PathMarkers}"
+                                   RowCount="{Binding RowCount}" ColumnCount="{Binding ColumnCount}" />
+          </Grid>
 
           <!-- Eje X: probabilidad, de menor a mayor hacia la derecha -->
           <DockPanel>

@@ -108,6 +108,29 @@ internal static class DocumentStore
             }
         }
 
+        using (var cmd = Command(c, tx, """
+            INSERT INTO risk_assessment (id, risk_id, date, impact_level_id, probability_level_id, note, recorded_utc)
+            VALUES ($id, $risk, $date, $il, $pl, $note, $recorded);
+            """))
+        {
+            var names = new[] { "$id", "$risk", "$date", "$il", "$pl", "$note", "$recorded" };
+            var prm = names.Select(n => cmd.Parameters.Add(n, SqliteType.Text)).ToArray();
+            foreach (var r in doc.Risks)
+            {
+                foreach (var a in r.Assessments)
+                {
+                    prm[0].Value = a.Id.ToString();
+                    prm[1].Value = r.Id.ToString();
+                    prm[2].Value = a.Date.ToString(DateFormat, CultureInfo.InvariantCulture);
+                    prm[3].Value = a.ImpactLevelId.ToString();
+                    prm[4].Value = a.ProbabilityLevelId.ToString();
+                    prm[5].Value = a.Note;
+                    prm[6].Value = a.RecordedUtc.ToString("o", CultureInfo.InvariantCulture);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
         using (var cmd = Command(c, tx, "INSERT OR REPLACE INTO meta (key, value) VALUES ('app_version', $v);"))
         {
             cmd.Parameters.AddWithValue("$v", AppInfo.Version);
@@ -207,6 +230,40 @@ internal static class DocumentStore
                     ModifiedUtc = DateTime.Parse(r.GetString(9), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind),
                 });
             }
+        }
+
+        var history = new Dictionary<Guid, List<RiskAssessment>>();
+        using (var cmd = Command(c, null, """
+            SELECT id, risk_id, date, impact_level_id, probability_level_id, note, recorded_utc
+            FROM risk_assessment ORDER BY date, recorded_utc;
+            """))
+        using (var r = cmd.ExecuteReader())
+        {
+            while (r.Read())
+            {
+                var riskId = Guid.Parse(r.GetString(1));
+                if (!history.TryGetValue(riskId, out var list))
+                {
+                    history[riskId] = list = [];
+                }
+
+                list.Add(new RiskAssessment(
+                    Guid.Parse(r.GetString(0)),
+                    DateOnly.ParseExact(r.GetString(2), DateFormat, CultureInfo.InvariantCulture),
+                    Guid.Parse(r.GetString(3)),
+                    Guid.Parse(r.GetString(4)),
+                    r.GetString(5),
+                    DateTime.Parse(r.GetString(6), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind)));
+            }
+        }
+
+        foreach (var risk in risks)
+        {
+            // Un riesgo sin historial (no debería pasar) empieza con su estado actual.
+            risk.Assessments = history.TryGetValue(risk.Id, out var list)
+                ? list
+                : [new RiskAssessment(Guid.NewGuid(), DateOnly.FromDateTime(risk.CreatedUtc), risk.ImpactLevelId, risk.ProbabilityLevelId, "", risk.CreatedUtc)];
+            RiskMatrixDocument.WithCurrentFromHistory(risk);
         }
 
         return new RiskMatrixDocument(project, scales, risks);

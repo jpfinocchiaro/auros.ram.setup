@@ -89,4 +89,19 @@
   <data name="Undo_RemoveRisk" xml:space="preserve"><value>Eliminar riesgo «{0}»</value></data>
   <data name="Undo_RemoveScale" xml:space="preserve"><value>Eliminar escala «{0}»</value></data>
   <data name="Undo_ResetHeatMap" xml:space="preserve"><value>Restablecer mapa de calor</value></data>
+  <data name="Error_AssessmentNotFound" xml:space="preserve"><value>La evaluación ya no existe en el historial del riesgo.</value></data>
+  <data name="Error_LastAssessment" xml:space="preserve"><value>No se puede quitar la única evaluación del riesgo.</value></data>
+  <data name="Error_AssessmentInFuture" xml:space="preserve"><value>La fecha de la evaluación no puede ser posterior a hoy.</value></data>
+  <data name="Error_AssessmentBeforeLast" xml:space="preserve"><value>La configuración no permite una fecha anterior a una evaluación ya registrada del riesgo (la más reciente es del {0}). Se puede habilitar en Preferencias.</value></data>
+  <data name="Error_AssessmentLevelInvalid" xml:space="preserve"><value>Una evaluación del historial usa un nivel que no está en las escalas del proyecto.</value></data>
+  <data name="Undo_RemoveAssessment" xml:space="preserve"><value>Quitar evaluación de «{0}»</value></data>
+  <data name="Trend_Worse" xml:space="preserve"><value>Empeoró</value></data>
+  <data name="Trend_Better" xml:space="preserve"><value>Mejoró</value></data>
+  <data name="Trend_Same" xml:space="preserve"><value>Sin cambios</value></data>
+  <data name="Trend_New" xml:space="preserve"><value>Nuevo</value></data>
+  <data name="Error_AssessmentPastOnCreate" xml:space="preserve"><value>La configuración no permite dar de alta un riesgo con una fecha de evaluación anterior a hoy. Se puede habilitar en Preferencias.</value></data>
+  <data name="Error_AssessmentPastOnEdit" xml:space="preserve"><value>La configuración no permite registrar o corregir una evaluación con una fecha anterior a hoy. Se puede habilitar en Preferencias.</value></data>
+  <data name="Error_AssessmentDateTaken" xml:space="preserve"><value>Ya hay una evaluación del {0} en el historial del riesgo.</value></data>
+  <data name="Undo_EditAssessmentDate" xml:space="preserve"><value>Corregir fecha de evaluación de «{0}»</value></data>
+  <data name="Undo_AddAssessment" xml:space="preserve"><value>Nueva evaluación de «{0}»</value></data>
 </root>

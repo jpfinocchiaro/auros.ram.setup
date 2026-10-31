@@ -41,4 +41,17 @@
   <data name="Title_Detail" xml:space="preserve"><value>Ficha detallada por riesgo</value></data>
   <data name="Title_Matrix" xml:space="preserve"><value>Matriz de riesgo</value></data>
   <data name="Title_Summary" xml:space="preserve"><value>Ficha resumen de riesgos</value></data>
+  <data name="Sheet_History" xml:space="preserve"><value>Historial</value></data>
+  <data name="Title_Evolution" xml:space="preserve"><value>Evolución de los riesgos</value></data>
+  <data name="Label_Period" xml:space="preserve"><value>Período: {0} al {1}</value></data>
+  <data name="Label_History" xml:space="preserve"><value>Historial de evaluaciones</value></data>
+  <data name="Col_Date" xml:space="preserve"><value>Fecha</value></data>
+  <data name="Col_Note" xml:space="preserve"><value>Comentario</value></data>
+  <data name="Col_Trend" xml:space="preserve"><value>Tendencia</value></data>
+  <data name="Col_Start" xml:space="preserve"><value>Al inicio</value></data>
+  <data name="Col_End" xml:space="preserve"><value>Al final</value></data>
+  <data name="Col_Changes" xml:space="preserve"><value>Cambios en el período</value></data>
+  <data name="Label_NoChanges" xml:space="preserve"><value>Sin cambios en el período</value></data>
+  <data name="Label_NotAssessed" xml:space="preserve"><value>Sin evaluar</value></data>
+  <data name="Label_Change" xml:space="preserve"><value>impacto {0} · probabilidad {1} → {2}</value></data>
 </root>

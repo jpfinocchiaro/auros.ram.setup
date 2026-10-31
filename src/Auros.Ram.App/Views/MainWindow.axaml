@@ -36,6 +36,7 @@
           <MenuItem Header="{x:Static r:Strings.Menu_ExportPdfMatrix}" Command="{Binding ExportCommand}" CommandParameter="PdfMatrix" />
           <MenuItem Header="{x:Static r:Strings.Menu_ExportPdfSummary}" Command="{Binding ExportCommand}" CommandParameter="PdfSummary" />
           <MenuItem Header="{x:Static r:Strings.Menu_ExportPdfDetail}" Command="{Binding ExportCommand}" CommandParameter="PdfDetail" />
+          <MenuItem Header="{x:Static r:Strings.Menu_ExportPdfEvolution}" Command="{Binding ExportCommand}" CommandParameter="PdfEvolution" />
           <Separator />
           <MenuItem Header="{x:Static r:Strings.Menu_ExportCsvRisks}" Command="{Binding ExportCommand}" CommandParameter="CsvRisks" />
           <MenuItem Header="{x:Static r:Strings.Menu_ExportCsvMatrix}" Command="{Binding ExportCommand}" CommandParameter="CsvMatrix" />

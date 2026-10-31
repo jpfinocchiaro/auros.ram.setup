@@ -3,6 +3,7 @@ using Auros.Ram.App.ViewModels;
 using Auros.Ram.Persistence;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 
 namespace Auros.Ram.App.Views;
 
@@ -14,7 +15,11 @@ public partial class RiskEditorWindow : Window
     {
         DataContext = vm;
         vm.Committed += (_, _) => Close();
-        Opened += (_, _) => TitleBox.Focus();
+
+        // El editor de descripciones toma el foco por su cuenta al terminar de cargarse: se devuelve al título
+        // (o a la fecha, en una nueva evaluación) cuando la ventana queda inactiva, después de esa carga.
+        Opened += (_, _) => Dispatcher.UIThread.Post(
+            () => (vm.CanEditTexts ? (Control)TitleBox : AssessmentDatePicker).Focus(), DispatcherPriority.ApplicationIdle);
     }
 
     private void OnCancel(object? sender, RoutedEventArgs e) => Close();

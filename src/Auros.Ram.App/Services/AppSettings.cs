@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Auros.Ram.Core.Model;
 using Auros.Ram.Persistence;
 
 namespace Auros.Ram.App.Services;
@@ -17,6 +18,17 @@ public sealed class AppSettings
 
     /// <summary>Abreviaturas de los niveles ([ALT], [MED], [BAJ]) en la matriz de riesgo.</summary>
     public bool ShowLevelAbbreviations { get; set; } = true;
+
+    /// <summary>Fechas de evaluación: anterior a hoy al dar de alta un riesgo.</summary>
+    public bool AllowPastDateOnCreate { get; set; } = true;
+
+    /// <summary>Fechas de evaluación: al modificar un riesgo, anterior a una evaluación ya registrada (se intercala).</summary>
+    public bool AllowDateBeforeRecorded { get; set; } = true;
+
+    /// <summary>Fechas de evaluación: anterior a hoy al modificar un riesgo o corregir una evaluación.</summary>
+    public bool AllowPastDateOnEdit { get; set; } = true;
+
+    public AssessmentDatePolicy DatePolicy => new(AllowPastDateOnCreate, AllowDateBeforeRecorded, AllowPastDateOnEdit);
 
     public static AppSettings Load()
     {

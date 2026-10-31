@@ -19,6 +19,7 @@ public enum ExportKind
     PdfSummary,
     PdfDetail,
     PdfAll,
+    PdfEvolution,
     CsvRisks,
     CsvMatrix,
     Json,
@@ -44,6 +45,8 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
     {
         _path = System.IO.Path.GetFullPath(path);
         Document = document;
+        // Las reglas de fechas de evaluación vienen de las Preferencias, no del archivo.
+        Document.DatePolicy = DisplayOptions.Current.DatePolicy;
         Key = key;
         Ui = ui;
         Project = new ProjectViewModel(this);
@@ -108,6 +111,15 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
         catch (DomainException ex)
         {
             _ = Ui.AlertAsync(Strings.Common_CannotDo, ex.Message);
+        }
+    }
+
+    /// <summary>Nueva evaluación de un riesgo existente (ventana en modo "Nueva evaluación").</summary>
+    public async Task ReassessRiskAsync(Guid riskId)
+    {
+        if (Document.FindRisk(riskId) is { } risk)
+        {
+            await Ui.EditRiskAsync(new RiskEditorViewModel(Document, risk, mode: RiskEditorMode.Reassess));
         }
     }
 
@@ -368,7 +380,7 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
 
     public async Task ExportAsync(ExportKind kind)
     {
-        var isPdf = kind is ExportKind.PdfMatrix or ExportKind.PdfSummary or ExportKind.PdfDetail or ExportKind.PdfAll or ExportKind.Print;
+        var isPdf = kind is ExportKind.PdfMatrix or ExportKind.PdfSummary or ExportKind.PdfDetail or ExportKind.PdfAll or ExportKind.PdfEvolution or ExportKind.Print;
         if (await Ui.ConfirmExportAsync(isPdf) is not { } confirmation)
         {
             return;
@@ -380,6 +392,7 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
             ExportKind.PdfMatrix => (FileKind.Pdf, $" - {Strings.Export_SuffixMatrix}.pdf"),
             ExportKind.PdfSummary => (FileKind.Pdf, $" - {Strings.Export_SuffixSummary}.pdf"),
             ExportKind.PdfDetail => (FileKind.Pdf, $" - {Strings.Export_SuffixDetail}.pdf"),
+            ExportKind.PdfEvolution => (FileKind.Pdf, $" - {Strings.Export_SuffixEvolution}.pdf"),
             ExportKind.PdfAll or ExportKind.Print => (FileKind.Pdf, $" - {Strings.Export_SuffixReport}.pdf"),
             ExportKind.CsvRisks => (FileKind.Csv, $" - {Strings.Export_SuffixRisks}.csv"),
             ExportKind.CsvMatrix => (FileKind.Csv, $" - {Strings.Export_SuffixMatrix}.csv"),
@@ -395,6 +408,7 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
         }
 
         var snapshot = Document.Snapshot();
+        var period = Reports.Period;
         var password = confirmation.PdfPassword;
         IsBusy = true;
         Status = Strings.Status_Exporting;
@@ -408,6 +422,7 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
                     case ExportKind.PdfMatrix: PdfExport.Write(snapshot, target, PdfReports.Matrix, password, AppInfo.Version); break;
                     case ExportKind.PdfSummary: PdfExport.Write(snapshot, target, PdfReports.Summary, password, AppInfo.Version); break;
                     case ExportKind.PdfDetail: PdfExport.Write(snapshot, target, PdfReports.Detail, password, AppInfo.Version); break;
+                    case ExportKind.PdfEvolution: PdfExport.Write(snapshot, target, PdfReports.Evolution, password, AppInfo.Version, period); break;
                     case ExportKind.PdfAll:
                     case ExportKind.Print: PdfExport.Write(snapshot, target, PdfReports.All, password, AppInfo.Version); break;
                     case ExportKind.CsvRisks: CsvExport.WriteRisks(snapshot, target); break;

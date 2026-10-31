@@ -1,4 +1,4 @@
-# Formato de archivo `.rmx` / `.rmt` (contenedor v1, esquema v3)
+# Formato de archivo `.rmx` / `.rmt` (contenedor v1, esquema v4)
 
 Cada matriz (`.rmx`) y cada plantilla de escalas (`.rmt`) es un único archivo autocontenido,
 independiente del sistema operativo (RNF-11, RNF-53). Implementación: `src/Auros.Ram.Persistence`.
@@ -67,7 +67,7 @@ La base se arma en un archivo de trabajo cifrado, se le antepone la cabecera y s
 temporal junto al original (`.nombre.rmx.<guid>.tmp`, con *write-through*). Luego un renombrado
 reemplaza el original. En ningún momento el original queda a medio escribir.
 
-## Esquema v3
+## Esquema v4
 
 | Tabla | Contenido |
 |---|---|
@@ -76,7 +76,8 @@ reemplaza el original. En ningún momento el original queda a medio escribir.
 | `scale` | escalas (id, posición, nombre, tipo 1 Nivel de riesgo / 2 Impacto / 3 Probabilidad) |
 | `level` | niveles (id, escala, nombre, color de fondo `#RRGGBB`, color de fuente `text_color` `#RRGGBB`, orden 0–100) |
 | `heat_cell` | mapa de calor: nivel de riesgo elegido para una combinación de impacto y probabilidad (las que faltan usan el valor por omisión) |
-| `risk` | riesgos (id, posición, título, descripciones, nivel de impacto y de probabilidad, sus justificaciones, fechas UTC ISO-8601) |
+| `risk` | riesgos (id, posición, título, descripciones, nivel de impacto y de probabilidad actuales, sus justificaciones, fechas UTC ISO-8601) |
+| `risk_assessment` | historial de evaluaciones de cada riesgo (id, riesgo, fecha `yyyy-MM-dd`, nivel de impacto y de probabilidad, comentario, momento del registro UTC); la última es el estado actual |
 
 El nivel de riesgo de cada riesgo no se guarda: se calcula con el mapa de calor.
 `PRAGMA user_version` guarda la versión del esquema.
@@ -87,6 +88,7 @@ El nivel de riesgo de cada riesgo no se guarda: se calcula con el mapa de calor.
 |---|---|
 | 1, 2 | Versiones de prueba con tres dimensiones (riesgo, valor agregado, dificultad). **No se migran**: al abrirlas, la aplicación avisa que son de una versión de prueba y no toca el archivo (`Schema.OldestSupportedVersion`) |
 | 3 | Impacto y probabilidad de ocurrencia; nivel de riesgo por mapa de calor; una empresa por matriz; color de fuente por nivel |
+| 4 | Historial de evaluaciones (`risk_assessment`). Al migrar, cada riesgo empieza su historial con su estado actual fechado el día en que se creó |
 
 ## Cómo agregar una versión del esquema (RNF-69)
 

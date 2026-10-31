@@ -3,6 +3,7 @@
         xmlns:vm="using:Auros.Ram.App.ViewModels"
         xmlns:r="using:Auros.Ram.App.Resources"
         xmlns:views="using:Auros.Ram.App.Views"
+        xmlns:sys="using:System"
         x:Class="Auros.Ram.App.Views.RiskEditorWindow"
         x:DataType="vm:RiskEditorViewModel"
         Title="{Binding WindowTitle}"
@@ -18,16 +19,35 @@
       </StackPanel>
     </StackPanel>
 
+    <!-- Qué se está haciendo: alta, edición (corrige datos) o nueva evaluación (registra un estado con fecha).
+         Cada modo con su color en el borde izquierdo, para no confundirlos. -->
+    <Border DockPanel.Dock="Top" Classes="modeBanner" Classes.edit="{Binding IsEdit}" Classes.reassess="{Binding IsReassess}"
+            Background="{DynamicResource SurfaceBrush}" BorderThickness="6,0,0,0" CornerRadius="3" Padding="14,10" Margin="0,0,0,14">
+      <StackPanel Spacing="2">
+        <TextBlock Classes="h2" Text="{Binding ModeTitle}" />
+        <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{Binding ModeHint}" />
+      </StackPanel>
+    </Border>
+
     <ScrollViewer>
       <StackPanel Spacing="14" Margin="0,0,12,0">
-        <StackPanel>
+        <!-- Nueva evaluación: el riesgo se ve (título y resumen), sus textos no se editan aquí. -->
+        <Border Classes="card" Padding="12" IsVisible="{Binding IsReassess}">
+          <StackPanel Spacing="4">
+            <TextBlock Classes="label" Text="{x:Static r:Strings.Mode_RiskLabel}" />
+            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="16" TextWrapping="Wrap" />
+            <views:RichTextBlock Markup="{Binding ShortDescription}" />
+          </StackPanel>
+        </Border>
+
+        <StackPanel IsVisible="{Binding CanEditTexts}">
           <DockPanel>
             <TextBlock DockPanel.Dock="Right" Classes="muted" FontSize="12" Text="{Binding TitleCounter}" />
             <TextBlock Classes="label" Text="{x:Static r:Strings.Risk_Title}" />
           </DockPanel>
           <TextBox x:Name="TitleBox" Text="{Binding Title}" MaxLength="{Binding TitleMax}" />
         </StackPanel>
-        <StackPanel>
+        <StackPanel IsVisible="{Binding CanEditTexts}">
           <DockPanel>
             <TextBlock DockPanel.Dock="Right" Classes="muted" FontSize="12" Text="{Binding ShortCounter}" />
             <TextBlock Classes="label" Text="{x:Static r:Strings.Risk_ShortHint}" />
@@ -35,7 +55,7 @@
           <!-- Descripciones con formato directo: barra de botones sobre el texto. -->
           <views:FormattedTextEditor Text="{Binding ShortDescription}" EditorHeight="90" />
         </StackPanel>
-        <StackPanel>
+        <StackPanel IsVisible="{Binding CanEditTexts}">
           <TextBlock Classes="label" Text="{x:Static r:Strings.Risk_LongHint}" />
           <views:FormattedTextEditor Text="{Binding LongDescription}" EditorHeight="190" />
         </StackPanel>
@@ -77,6 +97,15 @@
           </ItemsControl.ItemTemplate>
         </ItemsControl>
 
+        <!-- Edición con otro impacto o probabilidad: se corrige la evaluación vigente; se ofrece registrarlo como nueva evaluación. -->
+        <Border Background="{DynamicResource WarningBackBrush}" CornerRadius="4" Padding="12,8" IsVisible="{Binding IsCorrecting}">
+          <DockPanel>
+            <Button DockPanel.Dock="Right" Margin="12,0,0,0" VerticalAlignment="Center"
+                    Content="{x:Static r:Strings.Mode_SwitchToReassess}" Command="{Binding SwitchToReassessCommand}" />
+            <TextBlock Text="{Binding CorrectionHint}" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="13" />
+          </DockPanel>
+        </Border>
+
         <!-- El nivel de riesgo no se elige: resulta del impacto y la probabilidad (mapa de calor). -->
         <Border Classes="card" Padding="12">
           <DockPanel>
@@ -87,11 +116,81 @@
             </StackPanel>
           </DockPanel>
         </Border>
+
+        <!-- Evaluación: al dar de alta y al cambiar impacto o probabilidad, con su fecha (editable) y un comentario. -->
+        <Border Classes="card" Padding="12" IsVisible="{Binding ShowAssessment}" BorderBrush="{DynamicResource BrandBlueBrush}" BorderThickness="1">
+          <StackPanel Spacing="8">
+            <TextBlock Text="{Binding AssessmentTitle}" FontWeight="SemiBold" />
+            <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{Binding AssessmentHint}" />
+            <Grid ColumnDefinitions="Auto,12,*">
+              <StackPanel Spacing="2">
+                <TextBlock Classes="label" Text="{x:Static r:Strings.History_Date}" />
+                <CalendarDatePicker x:Name="AssessmentDatePicker" SelectedDate="{Binding AssessmentDate}" Width="160"
+                                    DisplayDateEnd="{x:Static sys:DateTime.Today}" />
+              </StackPanel>
+              <StackPanel Grid.Column="2" Spacing="2">
+                <TextBlock Classes="label" Text="{x:Static r:Strings.History_Note}" />
+                <TextBox Text="{Binding AssessmentNote}" Watermark="{x:Static r:Strings.History_NoteHint}" />
+              </StackPanel>
+            </Grid>
+            <!-- Fecha anterior a hoy o a otra evaluación: advertencia (o aviso de que la configuración no lo permite). -->
+            <Border Background="{DynamicResource WarningBackBrush}" CornerRadius="4" Padding="10,6"
+                    IsVisible="{Binding DateWarning, Converter={x:Static ObjectConverters.IsNotNull}}">
+              <TextBlock Text="{Binding DateWarning}" TextWrapping="Wrap" FontSize="12" />
+            </Border>
+          </StackPanel>
+        </Border>
+
+        <!-- Historial: evolución del nivel de riesgo en el tiempo y cada evaluación registrada. -->
+        <Border Classes="card" Padding="12" IsVisible="{Binding HasHistory}">
+          <StackPanel Spacing="8">
+            <TextBlock Text="{x:Static r:Strings.History_Title}" FontWeight="SemiBold" />
+            <views:EvolutionChart Height="150" Points="{Binding ChartPoints}" LevelNames="{Binding ChartLevels}" />
+            <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{x:Static r:Strings.History_DateEditHint}" />
+            <Grid ColumnDefinitions="150,130,130,130,*,36" Margin="0,4,0,0">
+              <TextBlock Classes="label" Text="{x:Static r:Strings.History_ColDate}" />
+              <TextBlock Grid.Column="1" Classes="label" Text="{x:Static r:Strings.ScaleType_Impact}" />
+              <TextBlock Grid.Column="2" Classes="label" Text="{x:Static r:Strings.Risks_ProbabilityShort}" />
+              <TextBlock Grid.Column="3" Classes="label" Text="{x:Static r:Strings.ScaleType_Risk}" />
+              <TextBlock Grid.Column="4" Classes="label" Text="{x:Static r:Strings.History_Note}" />
+            </Grid>
+            <ItemsControl ItemsSource="{Binding History}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:HistoryEntry">
+                  <Grid ColumnDefinitions="150,130,130,130,*,36" Margin="0,0,0,6">
+                    <!-- La fecha de cada evaluación se puede corregir (según lo que permitan las Preferencias). -->
+                    <CalendarDatePicker SelectedDate="{Binding Date}" Width="140" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                        DisplayDateEnd="{x:Static sys:DateTime.Today}" ToolTip.Tip="{x:Static r:Strings.History_DateEditTip}"
+                                        FontWeight="{Binding IsCurrent, Converter={x:Static vm:Converters.BoldIf}}" />
+                    <ContentControl Grid.Column="1" Content="{Binding Impact}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <ContentControl Grid.Column="2" Content="{Binding Probability}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <ContentControl Grid.Column="3" Content="{Binding RiskLevel}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <TextBlock Grid.Column="4" Text="{Binding Note}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                    <Button Grid.Column="5" Content="✕" Padding="8,2" VerticalAlignment="Center" IsVisible="{Binding CanRemove}"
+                            ToolTip.Tip="{x:Static r:Strings.History_RemoveTip}"
+                            Command="{Binding $parent[Window].((vm:RiskEditorViewModel)DataContext).RemoveAssessmentCommand}"
+                            CommandParameter="{Binding}" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
       </StackPanel>
     </ScrollViewer>
   </DockPanel>
 
   <Window.Styles>
+    <!-- Color del modo: verde petróleo (alta), gris (edición), azul (nueva evaluación). -->
+    <Style Selector="Border.modeBanner">
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+    </Style>
+    <Style Selector="Border.modeBanner.edit">
+      <Setter Property="BorderBrush" Value="{DynamicResource MutedTextBrush}" />
+    </Style>
+    <Style Selector="Border.modeBanner.reassess">
+      <Setter Property="BorderBrush" Value="{DynamicResource BrandBlueBrush}" />
+    </Style>
     <!-- El nivel elegido se marca con borde grueso y ✓, no solo con color (RNF-46). -->
     <Style Selector="ToggleButton.levelOption">
       <Setter Property="BorderBrush" Value="Transparent" />

@@ -204,4 +204,16 @@ public sealed partial class PreferencesViewModel : ObservableObject
         get => !ShowAbbreviations;
         set => ShowAbbreviations = !value;
     }
+
+    /// <summary>Fechas de evaluación anteriores a hoy al dar de alta un riesgo.</summary>
+    [ObservableProperty]
+    private bool _allowPastDateOnCreate = true;
+
+    /// <summary>Al modificar un riesgo, fechas anteriores a una evaluación ya registrada.</summary>
+    [ObservableProperty]
+    private bool _allowDateBeforeRecorded = true;
+
+    /// <summary>Fechas anteriores a hoy al modificar un riesgo o corregir una evaluación.</summary>
+    [ObservableProperty]
+    private bool _allowPastDateOnEdit = true;
 }

@@ -10,6 +10,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Avalonia.VisualTree;
 
 namespace Auros.Ram.App.Views;
 
@@ -27,7 +28,6 @@ public partial class FormattedTextEditor : UserControl
 
     private bool _syncing;
     private bool _loaded;
-    private bool _ownBlocks;
     private Rectangle? _caret;
 
     public FormattedTextEditor()
@@ -35,7 +35,18 @@ public partial class FormattedTextEditor : UserControl
         InitializeComponent();
         Editor.Height = EditorHeight;
 
-        Editor.FlowDocument = new FlowDocument();
+        // En la biblioteca, la lista de párrafos por omisión es una sola colección compartida por todos los
+        // documentos: cada editor tiene la suya desde el comienzo (si no, la descripción corta y la larga mostrarían
+        // el mismo texto, y dos editores vacíos a la vez hacían fallar la carga). Arranca con un párrafo vacío,
+        // que la biblioteca necesita para iniciarse; el contenido real se carga al mostrarse.
+        // El párrafo se agrega después de asignar la lista: la biblioteca actualiza su índice interno de párrafos
+        // solo cuando la lista cambia, y sin él falla al iniciarse.
+        var document = new FlowDocument();
+        document.SetValue(FlowDocument.BlocksProperty, new ObservableCollection<Block>());
+        var empty = new AvRichTextBox.Paragraph();
+        empty.Inlines.Add(new EditableRun(""));
+        document.Blocks.Add(empty);
+        Editor.FlowDocument = document;
 
         // El contenido se carga cuando el editor ya está en pantalla (la carga necesita su árbol visual).
         Editor.Loaded += (_, _) =>
@@ -49,6 +60,73 @@ public partial class FormattedTextEditor : UserControl
         Editor.AddHandler(TextInputEvent, (_, _) => Publish(), RoutingStrategies.Bubble, handledEventsToo: true);
         Editor.AddHandler(PointerReleasedEvent, (_, _) => Publish(), RoutingStrategies.Bubble, handledEventsToo: true);
         Editor.LostFocus += (_, _) => Publish();
+
+        // La biblioteca toma el foco por su cuenta al terminar de cargar un documento: al abrir la ventana del riesgo,
+        // lo que se escribía en el título terminaba en una descripción. Solo se acepta el foco que pide el usuario
+        // (clic o Tab) o esta clase; el que toma la biblioteca vuelve al control que lo tenía.
+        Editor.AddHandler(PointerPressedEvent, (_, _) => _focusAllowed = true, RoutingStrategies.Tunnel, handledEventsToo: true);
+        AddHandler(GotFocusEvent, OnGotFocus, RoutingStrategies.Bubble, handledEventsToo: true);
+    }
+
+    private bool _focusAllowed;
+
+    /// <summary>
+    /// Último control que recibió el foco por decisión del usuario (fuera de los editores, o dentro de uno con
+    /// permiso): a él vuelve el foco que toma la biblioteca.
+    /// </summary>
+    private static WeakReference<IInputElement>? s_lastLegit;
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        TopLevel.GetTopLevel(this)?.AddHandler(GotFocusEvent, TrackFocus, RoutingStrategies.Bubble, handledEventsToo: true);
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        TopLevel.GetTopLevel(this)?.RemoveHandler(GotFocusEvent, TrackFocus);
+        base.OnDetachedFromVisualTree(e);
+    }
+
+    // Se ejecuta después de OnGotFocus (el evento sube del editor a la ventana): el foco bloqueado no se registra.
+    private static void TrackFocus(object? sender, GotFocusEventArgs e)
+    {
+        if (e.Source is Visual v && e.Source is IInputElement input &&
+            v.FindAncestorOfType<FormattedTextEditor>(includeSelf: true) is not { _focusAllowed: false })
+        {
+            s_lastLegit = new WeakReference<IInputElement>(input);
+        }
+    }
+
+    private void OnGotFocus(object? sender, GotFocusEventArgs e)
+    {
+        // El permiso dura mientras el foco siga dentro del editor (la biblioteca lo pasa entre sus partes).
+        _focusAllowed |= e.NavigationMethod is NavigationMethod.Tab or NavigationMethod.Directional or NavigationMethod.Pointer;
+        if (_focusAllowed)
+        {
+            return;
+        }
+
+        if (s_lastLegit?.TryGetTarget(out var previous) == true && previous is Visual visual && TopLevel.GetTopLevel(visual) is not null &&
+            visual.FindAncestorOfType<FormattedTextEditor>(includeSelf: true) != this &&
+            TopLevel.GetTopLevel(visual) == TopLevel.GetTopLevel(this))
+        {
+            // Se revisa al ejecutarse: si mientras tanto el usuario entró al editor (o salió), no se toca el foco.
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                if (IsKeyboardFocusWithin && !_focusAllowed)
+                {
+                    previous.Focus();
+                }
+            });
+        }
+    }
+
+    /// <summary>Pone el foco en el texto (como un clic del usuario).</summary>
+    public void FocusText()
+    {
+        _focusAllowed = true;
+        Editor.Focus();
     }
 
     public string? Text
@@ -76,6 +154,10 @@ public partial class FormattedTextEditor : UserControl
         else if (change.Property == IsKeyboardFocusWithinProperty)
         {
             UpdateCaret();
+            if (!IsKeyboardFocusWithin)
+            {
+                _focusAllowed = false;
+            }
         }
         else if (change.Property == TextProperty && !_syncing && Editor?.FlowDocument is not null &&
                  (Text ?? "") != RichDocument.Save(Editor.FlowDocument))
@@ -89,15 +171,6 @@ public partial class FormattedTextEditor : UserControl
         if (Editor.FlowDocument is null)
         {
             return;
-        }
-
-        // En la biblioteca, la lista de párrafos por omisión es una sola colección compartida por todos los
-        // documentos: sin una propia, la descripción corta y la larga mostrarían (y guardarían) el mismo texto.
-        // Se reemplaza recién acá, con el editor ya iniciado (al iniciarse espera al menos un párrafo).
-        if (!_ownBlocks)
-        {
-            Editor.FlowDocument.SetValue(FlowDocument.BlocksProperty, new ObservableCollection<Block>());
-            _ownBlocks = true;
         }
 
         RichDocument.Load(Editor, Text);
@@ -293,7 +366,7 @@ public partial class FormattedTextEditor : UserControl
         // La biblioteca declara el valor como no nulo, pero null es lo que quita el subrayado.
         selection.ApplyFormatting(property, value!);
         Publish();
-        Editor.Focus();
+        FocusText();
     }
 
     /// <summary>Convierte los párrafos seleccionados en lista (o los devuelve a párrafo si ya lo eran).</summary>
@@ -328,6 +401,6 @@ public partial class FormattedTextEditor : UserControl
         }
 
         ApplyLines(lines, caretParagraph, caretOffset);
-        Editor.Focus();
+        FocusText();
     }
 }

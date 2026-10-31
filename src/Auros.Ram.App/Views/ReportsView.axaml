@@ -3,6 +3,7 @@
              xmlns:vm="using:Auros.Ram.App.ViewModels"
              xmlns:r="using:Auros.Ram.App.Resources"
              xmlns:views="using:Auros.Ram.App.Views"
+             xmlns:sys="using:System"
              x:Class="Auros.Ram.App.Views.ReportsView"
              x:DataType="vm:ReportsViewModel">
   <TabControl Classes="sub" Margin="24,8,24,0" Padding="0,8,0,0">
@@ -34,6 +35,61 @@
                     <ContentControl Grid.Column="3" Content="{Binding RiskLevel}" VerticalAlignment="Top" />
                     <ContentControl Grid.Column="4" Content="{Binding ImpactLevel}" VerticalAlignment="Top" />
                     <ContentControl Grid.Column="5" Content="{Binding ProbabilityLevel}" VerticalAlignment="Top" />
+                  </Grid>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </DockPanel>
+        </Border>
+      </DockPanel>
+    </TabItem>
+
+    <!-- Evolución de los riesgos entre dos fechas: cómo empezaron, cómo terminaron y qué cambios hubo. -->
+    <TabItem Header="{x:Static r:Strings.Evolution_Tab}">
+      <DockPanel>
+        <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+          <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,4">
+            <TextBlock VerticalAlignment="Center" Classes="muted" Text="{x:Static r:Strings.Evolution_From}" />
+            <CalendarDatePicker SelectedDate="{Binding FromDate}" Width="150" Watermark="{x:Static r:Strings.Evolution_FromHint}"
+                                DisplayDateEnd="{x:Static sys:DateTime.Today}" />
+            <TextBlock VerticalAlignment="Center" Classes="muted" Text="{x:Static r:Strings.Evolution_To}" />
+            <CalendarDatePicker SelectedDate="{Binding ToDate}" Width="150" Watermark="{x:Static r:Strings.Matrix_Today}"
+                                DisplayDateEnd="{x:Static sys:DateTime.Today}" />
+          </StackPanel>
+          <Button Content="{x:Static r:Strings.Reports_ExportPdf}" Margin="0,0,8,4"
+                  Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="PdfEvolution" />
+          <Button Content="{x:Static r:Strings.Matrix_ExportXlsx}" Margin="0,0,8,4"
+                  Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="Xlsx" />
+        </WrapPanel>
+        <TextBlock DockPanel.Dock="Top" Classes="muted" Margin="0,0,0,8" Text="{Binding EvolutionSummary}" />
+        <Border Classes="card" Padding="0">
+          <DockPanel>
+            <Grid DockPanel.Dock="Top" ColumnDefinitions="2*,330,330,130,3*" Margin="12,8">
+              <TextBlock Classes="label" Text="{x:Static r:Strings.Risks_ColRisk}" />
+              <TextBlock Grid.Column="1" Classes="label" Text="{x:Static r:Strings.Evolution_Start}" />
+              <TextBlock Grid.Column="2" Classes="label" Text="{x:Static r:Strings.Evolution_End}" />
+              <TextBlock Grid.Column="3" Classes="label" Text="{x:Static r:Strings.Evolution_Trend}" />
+              <TextBlock Grid.Column="4" Classes="label" Text="{x:Static r:Strings.Evolution_Changes}" />
+            </Grid>
+            <ListBox ItemsSource="{Binding Evolution}" Background="Transparent">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:EvolutionItem">
+                  <Grid ColumnDefinitions="2*,330,330,130,3*" Margin="0,4">
+                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,12,0" />
+                    <!-- Nivel · Impacto · Probabilidad al inicio (o "no evaluado" si es nuevo) -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" IsVisible="{Binding HasStart}" VerticalAlignment="Top">
+                      <ContentControl Content="{Binding StartLevel}" />
+                      <ContentControl Content="{Binding StartImpact}" />
+                      <ContentControl Content="{Binding StartProbability}" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="1" Classes="muted" FontStyle="Italic" IsVisible="{Binding IsNew}" Text="{x:Static r:Strings.Evolution_NotAssessed}" />
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Top">
+                      <ContentControl Content="{Binding EndLevel}" />
+                      <ContentControl Content="{Binding EndImpact}" />
+                      <ContentControl Content="{Binding EndProbability}" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="3" Text="{Binding TrendText}" FontWeight="SemiBold" Foreground="{Binding TrendBrush}" />
+                    <TextBlock Grid.Column="4" Text="{Binding Changes}" TextWrapping="Wrap" FontSize="13" />
                   </Grid>
                 </DataTemplate>
               </ListBox.ItemTemplate>

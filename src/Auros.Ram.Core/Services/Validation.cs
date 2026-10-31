@@ -161,6 +161,14 @@ internal static class Validation
                 throw new DomainException(Format(Messages.Error_RiskLevelNotInScale, label, scale.Name), LevelField(type));
             }
         }
+
+        // Las evaluaciones del historial también usan niveles de las escalas del proyecto.
+        var impact = doc.ProjectScale(ScaleType.Impact);
+        var probability = doc.ProjectScale(ScaleType.Probability);
+        if (risk.Assessments.Any(a => impact?.FindLevel(a.ImpactLevelId) is null || probability?.FindLevel(a.ProbabilityLevelId) is null))
+        {
+            throw new DomainException(Messages.Error_AssessmentLevelInvalid);
+        }
     }
 
     public static string ScaleTypeName(ScaleType type) => type.DisplayName();

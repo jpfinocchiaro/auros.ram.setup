@@ -13,4 +13,7 @@ public sealed partial class DisplayOptions : ObservableObject
     /// <summary>Muestra en la matriz de riesgo la abreviatura del nivel de cada celda ([ALT], [MED], [BAJ]).</summary>
     [ObservableProperty]
     private bool _showLevelAbbreviations = true;
+
+    /// <summary>Qué fechas de evaluación se aceptan (Preferencias); se aplica a todos los archivos abiertos.</summary>
+    public Auros.Ram.Core.Model.AssessmentDatePolicy DatePolicy { get; set; } = Auros.Ram.Core.Model.AssessmentDatePolicy.AllowAll;
 }

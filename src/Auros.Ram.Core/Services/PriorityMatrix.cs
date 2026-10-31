@@ -38,7 +38,11 @@ public sealed class PriorityMatrix
     /// <summary>Nivel de riesgo de la celda según el mapa de calor.</summary>
     public Level? LevelAt(int row, int column) => _levels[row, column];
 
-    public static PriorityMatrix Build(RiskMatrixDocument doc)
+    /// <param name="asOf">
+    /// Fecha a la que se mira la matriz: cada riesgo se ubica según su evaluación vigente ese día y los que todavía
+    /// no estaban evaluados no aparecen. Si se omite, el estado actual.
+    /// </param>
+    public static PriorityMatrix Build(RiskMatrixDocument doc, DateOnly? asOf = null)
     {
         // RN-08: solo las escalas asignadas al proyecto.
         var columns = doc.ProjectScale(ScaleType.Probability)?.OrderedLevels ?? [];
@@ -60,7 +64,18 @@ public sealed class PriorityMatrix
 
         foreach (var risk in doc.Risks)
         {
-            if (rowIndex.TryGetValue(risk.ImpactLevelId, out var r) && colIndex.TryGetValue(risk.ProbabilityLevelId, out var c))
+            var (impact, probability) = (risk.ImpactLevelId, risk.ProbabilityLevelId);
+            if (asOf is { } date && risk.Assessments.Count > 0)
+            {
+                if (risk.AssessmentAt(date) is not { } state)
+                {
+                    continue;
+                }
+
+                (impact, probability) = (state.ImpactLevelId, state.ProbabilityLevelId);
+            }
+
+            if (rowIndex.TryGetValue(impact, out var r) && colIndex.TryGetValue(probability, out var c))
             {
                 buckets[r, c].Add(risk);
             }

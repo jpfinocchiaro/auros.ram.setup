@@ -1,4 +1,4 @@
-# Exportación JSON (RNF-63) — `formatVersion` 3
+# Exportación JSON (RNF-63) — `formatVersion` 4
 
 Contenido completo de una matriz, para integraciones y migraciones. Implementación:
 `src/Auros.Ram.Core/Serialization/JsonExchange.cs`. **El JSON no está cifrado.**
@@ -6,7 +6,7 @@ Contenido completo de una matriz, para integraciones y migraciones. Implementaci
 ```jsonc
 {
   "format": "auros.ram/matrix",      // identificador fijo
-  "formatVersion": 3,                // se rechaza si es mayor que la soportada o anterior a 3
+  "formatVersion": 4,                // se rechaza si es mayor que la soportada o anterior a 3
   "exportedUtc": "2026-10-30T12:00:00Z",
   "project": {
     "name": "Relevamiento 2026",     // obligatorio
@@ -38,12 +38,22 @@ Contenido completo de una matriz, para integraciones y migraciones. Implementaci
       "title": "…",                  // 1–200
       "shortDescription": "…",       // 1–500 caracteres visibles (sin contar las marcas de formato)
       "longDescription": "…",        // obligatoria
-      "impactLevelId": "guid",       // nivel de la escala de Impacto del proyecto
-      "probabilityLevelId": "guid",  // nivel de la escala de Probabilidad del proyecto
+      "impactLevelId": "guid",       // estado actual: el de la última evaluación del historial
+      "probabilityLevelId": "guid",
       "impactJustification": "",
       "probabilityJustification": "",
       "createdUtc": "…",
-      "modifiedUtc": "…"
+      "modifiedUtc": "…",
+      "assessments": [               // historial de evaluaciones, de la más antigua a la más reciente
+        {
+          "id": "guid",
+          "date": "2026-09-20",      // desde cuándo rige este impacto y esta probabilidad
+          "impactLevelId": "guid",   // niveles de las escalas del proyecto
+          "probabilityLevelId": "guid",
+          "note": "Se aplicó un control",
+          "recordedUtc": "…"         // cuándo se registró (ordena dos evaluaciones del mismo día)
+        }
+      ]
     }
   ]
 }
@@ -58,6 +68,9 @@ y los tres niveles por omisión (Bajo, Medio, Alto) da: producto 1–6 bajo, 8�
 Al importar se aplican las mismas validaciones que en la edición (RF-02, RF-03, RF-08, RF-11).
 Un error indica el riesgo o campo que falla. La importación crea un archivo `.rmx` nuevo, con una
 contraseña nueva (opcional).
+
+Un JSON de la versión 3 (sin `assessments`) se importa con una sola evaluación por riesgo: su estado
+actual, fechado el día en que se creó.
 
 Los JSON de las versiones 1 y 2 (valor agregado y dificultad) fueron de prueba y se rechazan con un
 mensaje claro.

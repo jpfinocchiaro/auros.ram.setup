@@ -97,6 +97,26 @@ public sealed class ProjectInfo
     public ProjectInfo Clone() => (ProjectInfo)MemberwiseClone();
 }
 
+/// <summary>
+/// Una evaluación del riesgo: su impacto y su probabilidad a partir de una fecha. El historial de evaluaciones
+/// permite ver cómo evolucionó el riesgo; la última es su estado actual.
+/// </summary>
+/// <param name="Note">Comentario opcional del cambio (por qué se reevaluó).</param>
+/// <param name="RecordedUtc">Cuándo se registró (ordena dos evaluaciones del mismo día).</param>
+public sealed record RiskAssessment(Guid Id, DateOnly Date, Guid ImpactLevelId, Guid ProbabilityLevelId, string Note, DateTime RecordedUtc);
+
+/// <summary>
+/// Qué fechas se aceptan para las evaluaciones (Preferencias). Una fecha futura nunca se acepta; las anteriores a
+/// hoy, si se permiten, solo se advierten en la edición.
+/// </summary>
+/// <param name="AllowPastOnCreate">Al dar de alta un riesgo, una fecha anterior a hoy.</param>
+/// <param name="AllowBeforeRecorded">Al modificar un riesgo, una fecha anterior a la de una evaluación ya registrada (se intercala en el historial).</param>
+/// <param name="AllowPastOnEdit">Al modificar un riesgo o corregir una evaluación, una fecha anterior a hoy.</param>
+public sealed record AssessmentDatePolicy(bool AllowPastOnCreate, bool AllowBeforeRecorded, bool AllowPastOnEdit)
+{
+    public static AssessmentDatePolicy AllowAll { get; } = new(true, true, true);
+}
+
 /// <summary>Un riesgo clasificado por su impacto y su probabilidad de ocurrencia (F3).</summary>
 public sealed class Risk
 {
@@ -113,6 +133,15 @@ public sealed class Risk
 
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
     public DateTime ModifiedUtc { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// Historial de evaluaciones, de la más antigua a la más reciente. <see cref="ImpactLevelId"/> y
+    /// <see cref="ProbabilityLevelId"/> son siempre los de la última. Como el mapa de calor, se reemplaza, nunca se modifica.
+    /// </summary>
+    public IReadOnlyList<RiskAssessment> Assessments { get; set; } = [];
+
+    /// <summary>La evaluación vigente en una fecha (la última hasta ese día), o null si el riesgo todavía no estaba evaluado.</summary>
+    public RiskAssessment? AssessmentAt(DateOnly date) => Assessments.LastOrDefault(a => a.Date <= date);
 
     public Guid LevelIdFor(ScaleType type) => type switch
     {

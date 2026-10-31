@@ -16,7 +16,8 @@ public enum PdfReports
     Matrix = 1,
     Summary = 2,
     Detail = 4,
-    All = Matrix | Summary | Detail,
+    Evolution = 8,
+    All = Matrix | Summary | Detail | Evolution,
 }
 
 /// <summary>
@@ -27,7 +28,10 @@ public static class PdfExport
     private static readonly Color Border = new(200, 200, 200);
     private static readonly Color HeaderFill = new(232, 234, 237);
 
-    public static void Write(RiskMatrixDocument doc, string path, PdfReports reports, string? password = null, string appVersion = "")
+    /// <param name="period">Período del informe de evolución; si se omite, toda la historia hasta hoy.</param>
+    public static void Write(
+        RiskMatrixDocument doc, string path, PdfReports reports, string? password = null, string appVersion = "",
+        (DateOnly From, DateOnly To)? period = null)
     {
         SystemFontResolver.EnsureInstalled();
         var document = new Document();
@@ -50,6 +54,11 @@ public static class PdfExport
         if (reports.HasFlag(PdfReports.Detail))
         {
             DetailSection(document, doc, appVersion);
+        }
+
+        if (reports.HasFlag(PdfReports.Evolution))
+        {
+            EvolutionSection(document, doc, appVersion, period ?? RiskHistory.DefaultPeriod(doc));
         }
 
         var renderer = new PdfDocumentRenderer { Document = document };
@@ -253,7 +262,156 @@ public static class PdfExport
 
             Block(section, ExportText.Col_Short, x.Risk.ShortDescription);
             Block(section, ExportText.Col_Long, x.Risk.LongDescription);
+            HistoryTable(section, doc, x.Risk);
         }
+    }
+
+    /// <summary>Historial de evaluaciones del riesgo, de la más antigua a la más reciente.</summary>
+    private static void HistoryTable(Section section, RiskMatrixDocument doc, Risk risk)
+    {
+        var heading = section.AddParagraph(ExportText.Label_History);
+        heading.Format.Font.Bold = true;
+        heading.Format.SpaceBefore = Unit.FromPoint(10);
+        heading.Format.SpaceAfter = Unit.FromPoint(3);
+
+        var table = section.AddTable();
+        table.Borders.Color = Border;
+        table.Borders.Width = 0.5;
+        double[] widths = [2.4, 2.9, 2.9, 2.9, 6.9];
+        foreach (var w in widths)
+        {
+            table.AddColumn(Unit.FromCentimeter(w));
+        }
+
+        var head = table.AddRow();
+        head.HeadingFormat = true;
+        head.Shading.Color = HeaderFill;
+        head.Format.Font.Bold = true;
+        string[] titles = [ExportText.Col_Date, ExportText.Col_Impact, ExportText.Col_Probability, ExportText.Col_Risk, ExportText.Col_Note];
+        for (var i = 0; i < titles.Length; i++)
+        {
+            head.Cells[i].AddParagraph(titles[i]);
+        }
+
+        foreach (var step in RiskHistory.Steps(doc, risk))
+        {
+            var row = table.AddRow();
+            row.Cells[0].AddParagraph(step.Assessment.Date.ToString("d", Fmt.Culture));
+            LevelCell(row.Cells[1], step.Impact, center: true);
+            LevelCell(row.Cells[2], step.Probability, center: true);
+            if (step.RiskLevel is { } level)
+            {
+                LevelCell(row.Cells[3], level, center: true);
+            }
+
+            row.Cells[4].AddParagraph(step.Assessment.Note);
+        }
+    }
+
+    // ---- Evolución de los riesgos ------------------------------------------
+
+    private static void EvolutionSection(Document document, RiskMatrixDocument doc, string appVersion, (DateOnly From, DateOnly To) period)
+    {
+        var section = NewSection(document, Orientation.Landscape, appVersion);
+        Banner(section, doc, ExportText.Title_Evolution);
+        var (from, to) = period.To < period.From ? (period.To, period.From) : period;
+        var range = section.AddParagraph(Fmt.Format(ExportText.Label_Period, from.ToString("d", Fmt.Culture), to.ToString("d", Fmt.Culture)));
+        range.Format.Alignment = ParagraphAlignment.Center;
+        range.Format.SpaceAfter = Unit.FromPoint(6);
+
+        var table = section.AddTable();
+        table.Borders.Color = Border;
+        table.Borders.Width = 0.5;
+        double[] widths = [5.2, 2.2, 2.2, 2.2, 2.2, 2.2, 2.2, 2.3, 6.0];
+        foreach (var w in widths)
+        {
+            table.AddColumn(Unit.FromCentimeter(w));
+        }
+
+        // Dos filas de encabezado: el estado al inicio y al final, cada uno con nivel, impacto y probabilidad.
+        var group = table.AddRow();
+        group.HeadingFormat = true;
+        group.Shading.Color = HeaderFill;
+        group.Format.Font.Bold = true;
+        group.Cells[0].MergeDown = 1;
+        group.Cells[0].AddParagraph(ExportText.Col_Title);
+        group.Cells[1].MergeRight = 2;
+        group.Cells[1].AddParagraph(ExportText.Col_Start).Format.Alignment = ParagraphAlignment.Center;
+        group.Cells[4].MergeRight = 2;
+        group.Cells[4].AddParagraph(ExportText.Col_End).Format.Alignment = ParagraphAlignment.Center;
+        group.Cells[7].MergeDown = 1;
+        group.Cells[7].AddParagraph(ExportText.Col_Trend);
+        group.Cells[8].MergeDown = 1;
+        group.Cells[8].AddParagraph(ExportText.Col_Changes);
+        var head = table.AddRow();
+        head.HeadingFormat = true;
+        head.Shading.Color = HeaderFill;
+        head.Format.Font.Bold = true;
+        for (var i = 0; i < 2; i++)
+        {
+            head.Cells[1 + (i * 3)].AddParagraph(ExportText.Col_Risk);
+            head.Cells[2 + (i * 3)].AddParagraph(ExportText.Col_Impact);
+            head.Cells[3 + (i * 3)].AddParagraph(ExportText.Col_Probability);
+        }
+
+        foreach (var x in RiskHistory.Evolution(doc, from, to))
+        {
+            var row = table.AddRow();
+            row.Cells[0].AddParagraph(x.Risk.Title).Format.Font.Bold = true;
+            if (x.From is { } start)
+            {
+                StateCells(row, 1, start);
+            }
+            else
+            {
+                row.Cells[1].MergeRight = 2;
+                var p = row.Cells[1].AddParagraph(ExportText.Label_NotAssessed);
+                p.Format.Alignment = ParagraphAlignment.Center;
+                p.Format.Font.Italic = true;
+            }
+
+            StateCells(row, 4, x.To);
+            var trend = row.Cells[7].AddParagraph(x.Trend.DisplayName());
+            trend.Format.Font.Bold = true;
+            trend.Format.Font.Color = x.Trend switch
+            {
+                RiskTrend.Worse => new Color(192, 32, 32),
+                RiskTrend.Better => new Color(24, 128, 56),
+                RiskTrend.New => new Color(47, 114, 224),
+                _ => Colors.Gray,
+            };
+
+            var changes = row.Cells[8];
+            if (x.Changes.Count == 0)
+            {
+                changes.AddParagraph(ExportText.Label_NoChanges).Format.Font.Italic = true;
+            }
+
+            foreach (var c in x.Changes)
+            {
+                var line = changes.AddParagraph();
+                line.Format.Font.Size = 8;
+                line.AddFormattedText(c.Assessment.Date.ToString("d", Fmt.Culture) + ": ", new Font { Bold = true });
+                line.AddText(Fmt.Format(ExportText.Label_Change, c.Impact.Name, c.Probability.Name, c.RiskLevel?.Name ?? "—"));
+                if (!string.IsNullOrWhiteSpace(c.Assessment.Note))
+                {
+                    line.AddFormattedText($" — {c.Assessment.Note}", new Font { Italic = true });
+                }
+            }
+
+            row.KeepWith = 0;
+        }
+    }
+
+    private static void StateCells(Row row, int first, HistoryStep step)
+    {
+        if (step.RiskLevel is { } level)
+        {
+            LevelCell(row.Cells[first], level, center: true);
+        }
+
+        LevelCell(row.Cells[first + 1], step.Impact, center: true);
+        LevelCell(row.Cells[first + 2], step.Probability, center: true);
     }
 
     // ---- Comunes -----------------------------------------------------------

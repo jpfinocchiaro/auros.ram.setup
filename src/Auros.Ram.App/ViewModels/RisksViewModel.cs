@@ -124,6 +124,10 @@ public sealed partial class RisksViewModel : ObservableObject
     [RelayCommand]
     private Task Edit(RiskRow? row) => (row ?? Selected) is { } r ? _owner.EditRiskAsync(r.Risk.Id) : Task.CompletedTask;
 
+    /// <summary>Nueva evaluación del riesgo: su impacto y su probabilidad en una fecha (queda en el historial).</summary>
+    [RelayCommand]
+    private Task Reassess(RiskRow? row) => (row ?? Selected) is { } r ? _owner.ReassessRiskAsync(r.Risk.Id) : Task.CompletedTask;
+
     [RelayCommand]
     private async Task Delete(RiskRow? row)
     {

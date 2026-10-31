@@ -108,9 +108,13 @@ public sealed class RiskMatrixDocument
 
     public Risk? FindRisk(Guid id) => _risks.Find(r => r.Id == id);
 
-    /// <summary>RF-05: un nivel está en uso si algún riesgo lo tiene o si es el nivel de riesgo que le toca a alguno.</summary>
+    /// <summary>
+    /// RF-05: un nivel está en uso si algún riesgo lo tiene (hoy o en una evaluación anterior del historial)
+    /// o si es el nivel de riesgo que le toca a alguno.
+    /// </summary>
     public bool IsLevelInUse(Guid levelId) =>
-        _risks.Exists(r => r.ImpactLevelId == levelId || r.ProbabilityLevelId == levelId || RiskLevelOf(r)?.Id == levelId);
+        _risks.Exists(r => r.ImpactLevelId == levelId || r.ProbabilityLevelId == levelId || RiskLevelOf(r)?.Id == levelId ||
+                           r.Assessments.Any(a => a.ImpactLevelId == levelId || a.ProbabilityLevelId == levelId));
 
     public bool IsScaleAssigned(Guid scaleId) =>
         Project.RiskScaleId == scaleId || Project.ImpactScaleId == scaleId || Project.ProbabilityScaleId == scaleId;
@@ -264,7 +268,15 @@ public sealed class RiskMatrixDocument
 
     // ---- Riesgos -----------------------------------------------------------
 
-    public Risk AddRisk(Risk risk)
+    /// <summary>Fecha de hoy para las evaluaciones.</summary>
+    public static DateOnly Today => DateOnly.FromDateTime(DateTime.Today);
+
+    /// <summary>Qué fechas de evaluación se aceptan (la aplicación la toma de las Preferencias).</summary>
+    public AssessmentDatePolicy DatePolicy { get; set; } = AssessmentDatePolicy.AllowAll;
+
+    /// <param name="assessedOn">Fecha de la primera evaluación (hoy si se omite).</param>
+    /// <param name="note">Comentario de la evaluación.</param>
+    public Risk AddRisk(Risk risk, DateOnly? assessedOn = null, string? note = null)
     {
         ArgumentNullException.ThrowIfNull(risk);
         var copy = Normalize(risk.Clone());
@@ -276,12 +288,29 @@ public sealed class RiskMatrixDocument
         copy.CreatedUtc = copy.ModifiedUtc = DateTime.UtcNow;
         Validation.ValidateRisk(copy, this);
 
+        // Un riesgo nuevo empieza su historial con la evaluación de hoy (o de la fecha indicada).
+        if (assessedOn is not null || copy.Assessments.Count == 0)
+        {
+            var date = assessedOn ?? Today;
+            CheckAssessmentDate(date, creating: true, []);
+            copy.Assessments = [NewAssessment(date, copy, note)];
+        }
+        else
+        {
+            WithCurrentFromHistory(copy);
+        }
+
         Apply(Validation.Format(Messages.Undo_AddRisk, copy.Title), DocumentChangeKind.Risks,
             () => _risks.Add(copy),
             () => _risks.Remove(copy));
         return copy;
     }
 
+    /// <summary>
+    /// Edita (corrige) los datos del riesgo. Si cambió su impacto o su probabilidad, se toma como un error de carga:
+    /// se corrige la evaluación vigente, sin agregar otra al historial. Un cambio en el tiempo se registra con
+    /// <see cref="AddAssessment"/>.
+    /// </summary>
     public void UpdateRisk(Risk updated)
     {
         ArgumentNullException.ThrowIfNull(updated);
@@ -297,7 +326,132 @@ public sealed class RiskMatrixDocument
         next.ModifiedUtc = DateTime.UtcNow;
         Validation.ValidateRisk(next, this);
 
+        var history = previous.Assessments;
+        next.Assessments = history;
+        if (next.ImpactLevelId != previous.ImpactLevelId || next.ProbabilityLevelId != previous.ProbabilityLevelId)
+        {
+            next.Assessments = history.Count == 0
+                ? [NewAssessment(Today, next, null)]
+                : [.. history.Take(history.Count - 1),
+                    history[^1] with { ImpactLevelId = next.ImpactLevelId, ProbabilityLevelId = next.ProbabilityLevelId }];
+        }
+
         Apply(Validation.Format(Messages.Undo_EditRisk, next.Title), DocumentChangeKind.Risks,
+            () => _risks[index] = next,
+            () => _risks[index] = previous);
+    }
+
+    /// <summary>
+    /// Nueva evaluación de un riesgo existente: registra su impacto y su probabilidad en una fecha (hoy si se omite).
+    /// Si ya hay una evaluación ese día, la reemplaza. Si la fecha es anterior a otra evaluación registrada (lo permite
+    /// <see cref="DatePolicy"/>), se intercala en el historial y el estado actual sigue siendo el de la más reciente.
+    /// Las justificaciones, si se indican, pasan a ser las del riesgo cuando la evaluación queda como la vigente.
+    /// </summary>
+    public void AddAssessment(
+        Guid riskId, Guid impactLevelId, Guid probabilityLevelId, DateOnly? date = null, string? note = null,
+        string? impactJustification = null, string? probabilityJustification = null)
+    {
+        var index = _risks.FindIndex(r => r.Id == riskId);
+        if (index < 0)
+        {
+            throw new DomainException(Messages.Error_RiskNotFound);
+        }
+
+        var previous = _risks[index];
+        var next = previous.Clone();
+        next.ImpactLevelId = impactLevelId;
+        next.ProbabilityLevelId = probabilityLevelId;
+        next.ImpactJustification = (impactJustification ?? previous.ImpactJustification).Trim();
+        next.ProbabilityJustification = (probabilityJustification ?? previous.ProbabilityJustification).Trim();
+        Validation.ValidateRisk(next, this);
+
+        var day = date ?? Today;
+        var history = previous.Assessments;
+        var sameDay = history.FirstOrDefault(a => a.Date == day);
+        CheckAssessmentDate(day, creating: false, [.. history.Where(a => a != sameDay)]);
+        var entry = NewAssessment(day, next, note);
+        next.Assessments = sameDay is null
+            ? [.. history, entry]
+            : [.. history.Select(a => a == sameDay ? entry with { Id = sameDay.Id } : a)];
+        WithCurrentFromHistory(next);
+
+        // Intercalada (no quedó como la vigente): las justificaciones del riesgo siguen siendo las del estado actual.
+        if (next.Assessments[^1].Id != (sameDay?.Id ?? entry.Id))
+        {
+            next.ImpactJustification = previous.ImpactJustification;
+            next.ProbabilityJustification = previous.ProbabilityJustification;
+        }
+
+        next.ModifiedUtc = DateTime.UtcNow;
+        Apply(Validation.Format(Messages.Undo_AddAssessment, next.Title), DocumentChangeKind.Risks,
+            () => _risks[index] = next,
+            () => _risks[index] = previous);
+    }
+
+    /// <summary>
+    /// Quita una evaluación del historial (p. ej., una cargada por error). El riesgo vuelve al estado de la última
+    /// que quede; la única evaluación de un riesgo no se puede quitar.
+    /// </summary>
+    public void RemoveAssessment(Guid riskId, Guid assessmentId)
+    {
+        var index = _risks.FindIndex(r => r.Id == riskId);
+        if (index < 0)
+        {
+            throw new DomainException(Messages.Error_RiskNotFound);
+        }
+
+        var previous = _risks[index];
+        if (previous.Assessments.All(a => a.Id != assessmentId))
+        {
+            throw new DomainException(Messages.Error_AssessmentNotFound);
+        }
+
+        if (previous.Assessments.Count <= 1)
+        {
+            throw new DomainException(Messages.Error_LastAssessment);
+        }
+
+        var next = previous.Clone();
+        next.Assessments = [.. previous.Assessments.Where(a => a.Id != assessmentId)];
+        WithCurrentFromHistory(next);
+        next.ModifiedUtc = DateTime.UtcNow;
+        Apply(Validation.Format(Messages.Undo_RemoveAssessment, next.Title), DocumentChangeKind.Risks,
+            () => _risks[index] = next,
+            () => _risks[index] = previous);
+    }
+
+    /// <summary>
+    /// Corrige la fecha de una evaluación registrada. El historial se reordena y el estado actual pasa a ser el de la
+    /// evaluación más reciente. No puede quedar otra evaluación el mismo día.
+    /// </summary>
+    public void ChangeAssessmentDate(Guid riskId, Guid assessmentId, DateOnly date)
+    {
+        var index = _risks.FindIndex(r => r.Id == riskId);
+        if (index < 0)
+        {
+            throw new DomainException(Messages.Error_RiskNotFound);
+        }
+
+        var previous = _risks[index];
+        var target = previous.Assessments.FirstOrDefault(a => a.Id == assessmentId)
+            ?? throw new DomainException(Messages.Error_AssessmentNotFound);
+        if (target.Date == date)
+        {
+            return;
+        }
+
+        var others = previous.Assessments.Where(a => a.Id != assessmentId).ToList();
+        CheckAssessmentDate(date, creating: false, others);
+        if (others.Exists(a => a.Date == date))
+        {
+            throw new DomainException(Validation.Format(Messages.Error_AssessmentDateTaken, Display(date)), nameof(RiskAssessment.Date));
+        }
+
+        var next = previous.Clone();
+        next.Assessments = [.. previous.Assessments.Select(a => a.Id == assessmentId ? a with { Date = date } : a)];
+        WithCurrentFromHistory(next);
+        next.ModifiedUtc = DateTime.UtcNow;
+        Apply(Validation.Format(Messages.Undo_EditAssessmentDate, next.Title), DocumentChangeKind.Risks,
             () => _risks[index] = next,
             () => _risks[index] = previous);
     }
@@ -341,6 +495,46 @@ public sealed class RiskMatrixDocument
         risk.ImpactJustification = risk.ImpactJustification.Trim();
         risk.ProbabilityJustification = risk.ProbabilityJustification.Trim();
         return risk;
+    }
+
+    private static RiskAssessment NewAssessment(DateOnly date, Risk risk, string? note) =>
+        new(Guid.NewGuid(), date, risk.ImpactLevelId, risk.ProbabilityLevelId, (note ?? "").Trim(), DateTime.UtcNow);
+
+    /// <summary>
+    /// Una evaluación nunca puede ser futura. Una fecha anterior a hoy, o anterior a otra evaluación ya registrada
+    /// (<paramref name="others"/>), solo se acepta si <see cref="DatePolicy"/> lo permite.
+    /// </summary>
+    private void CheckAssessmentDate(DateOnly date, bool creating, IReadOnlyCollection<RiskAssessment> others)
+    {
+        if (date > Today)
+        {
+            throw new DomainException(Messages.Error_AssessmentInFuture, nameof(RiskAssessment.Date));
+        }
+
+        if (date < Today && !(creating ? DatePolicy.AllowPastOnCreate : DatePolicy.AllowPastOnEdit))
+        {
+            throw new DomainException(
+                creating ? Messages.Error_AssessmentPastOnCreate : Messages.Error_AssessmentPastOnEdit, nameof(RiskAssessment.Date));
+        }
+
+        if (!creating && !DatePolicy.AllowBeforeRecorded && others.Count > 0 && others.Max(a => a.Date) > date)
+        {
+            throw new DomainException(
+                Validation.Format(Messages.Error_AssessmentBeforeLast, Display(others.Max(a => a.Date))), nameof(RiskAssessment.Date));
+        }
+    }
+
+    private static string Display(DateOnly date) => date.ToString("dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture);
+
+    /// <summary>Ordena el historial y deja como estado actual el de la última evaluación.</summary>
+    public static void WithCurrentFromHistory(Risk risk)
+    {
+        risk.Assessments = [.. risk.Assessments.OrderBy(a => a.Date).ThenBy(a => a.RecordedUtc)];
+        if (risk.Assessments.Count > 0)
+        {
+            risk.ImpactLevelId = risk.Assessments[^1].ImpactLevelId;
+            risk.ProbabilityLevelId = risk.Assessments[^1].ProbabilityLevelId;
+        }
     }
 
     private static Scale RenewIds(Scale scale)

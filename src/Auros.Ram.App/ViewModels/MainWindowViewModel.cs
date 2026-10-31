@@ -35,6 +35,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         _ui = ui;
         _settings = settings;
         DisplayOptions.Current.ShowLevelAbbreviations = settings.ShowLevelAbbreviations;
+        DisplayOptions.Current.DatePolicy = settings.DatePolicy;
         RefreshRecent();
 
         _autosaveTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(settings.AutosaveMinutes) };
@@ -542,6 +543,9 @@ public sealed partial class MainWindowViewModel : ObservableObject
             AutosaveMinutes = _settings.AutosaveMinutes,
             LockMinutes = _settings.LockMinutes,
             ShowAbbreviations = _settings.ShowLevelAbbreviations,
+            AllowPastDateOnCreate = _settings.AllowPastDateOnCreate,
+            AllowDateBeforeRecorded = _settings.AllowDateBeforeRecorded,
+            AllowPastDateOnEdit = _settings.AllowPastDateOnEdit,
         };
         if (await _ui.EditPreferencesAsync(vm))
         {
@@ -549,6 +553,14 @@ public sealed partial class MainWindowViewModel : ObservableObject
             _settings.LockMinutes = (int)Math.Clamp(vm.LockMinutes ?? 15, 1, 240);
             _settings.ShowLevelAbbreviations = vm.ShowAbbreviations;
             DisplayOptions.Current.ShowLevelAbbreviations = vm.ShowAbbreviations;
+            _settings.AllowPastDateOnCreate = vm.AllowPastDateOnCreate;
+            _settings.AllowDateBeforeRecorded = vm.AllowDateBeforeRecorded;
+            _settings.AllowPastDateOnEdit = vm.AllowPastDateOnEdit;
+            DisplayOptions.Current.DatePolicy = _settings.DatePolicy;
+            foreach (var doc in Documents)
+            {
+                doc.Document.DatePolicy = _settings.DatePolicy;
+            }
             _settings.Save();
             _autosaveTimer.Interval = TimeSpan.FromMinutes(_settings.AutosaveMinutes);
         }

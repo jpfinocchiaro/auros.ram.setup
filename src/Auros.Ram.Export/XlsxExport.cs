@@ -7,7 +7,7 @@ using ClosedXML.Excel;
 
 namespace Auros.Ram.Export;
 
-/// <summary>Excel con formato (RNF-61): proyecto, ficha resumen, matriz de riesgo y escalas.</summary>
+/// <summary>Excel con formato (RNF-61): proyecto, ficha resumen, matriz de riesgo, historial de evaluaciones y escalas.</summary>
 public static class XlsxExport
 {
     public static void Write(RiskMatrixDocument doc, string path)
@@ -16,6 +16,7 @@ public static class XlsxExport
         WriteProject(wb.AddWorksheet(ExportText.Sheet_Project), doc);
         WriteRisks(wb.AddWorksheet(ExportText.Sheet_Risks), doc);
         WriteMatrix(wb.AddWorksheet(ExportText.Sheet_Matrix), doc);
+        WriteHistory(wb.AddWorksheet(ExportText.Sheet_History), doc);
         WriteScales(wb.AddWorksheet(ExportText.Sheet_Scales), doc);
         wb.Worksheet(2).SetTabActive();
         wb.SaveAs(path);
@@ -177,6 +178,46 @@ public static class XlsxExport
         }
 
         ws.Columns().AdjustToContents();
+    }
+
+    /// <summary>Todas las evaluaciones de todos los riesgos, una por fila, para medir la evolución (filtros y tablas dinámicas).</summary>
+    private static void WriteHistory(IXLWorksheet ws, RiskMatrixDocument doc)
+    {
+        string[] headers = [ExportText.Col_Title, ExportText.Col_Date, ExportText.Col_Impact, ExportText.Col_Probability, ExportText.Col_Risk, ExportText.Col_Note];
+        for (var c = 0; c < headers.Length; c++)
+        {
+            Header(ws.Cell(1, c + 1), headers[c]);
+        }
+
+        var row = 2;
+        foreach (var risk in doc.Risks.OrderBy(r => r.Title, StringComparer.CurrentCultureIgnoreCase))
+        {
+            foreach (var step in RiskHistory.Steps(doc, risk))
+            {
+                ws.Cell(row, 1).Value = risk.Title;
+                ws.Cell(row, 2).Value = step.Assessment.Date.ToDateTime(TimeOnly.MinValue);
+                ws.Cell(row, 2).Style.DateFormat.Format = "dd/mm/yyyy";
+                Colored(ws.Cell(row, 3), step.Impact);
+                Colored(ws.Cell(row, 4), step.Probability);
+                if (step.RiskLevel is { } level)
+                {
+                    Colored(ws.Cell(row, 5), level);
+                }
+
+                ws.Cell(row, 6).Value = step.Assessment.Note;
+                row++;
+            }
+        }
+
+        ws.Column(1).Width = 40;
+        ws.Column(2).Width = 12;
+        ws.Columns(3, 5).Width = 18;
+        ws.Column(6).Width = 60;
+        ws.SheetView.FreezeRows(1);
+        if (row > 2)
+        {
+            ws.Range(1, 1, row - 1, headers.Length).SetAutoFilter();
+        }
     }
 
     private static void Header(IXLCell cell, string text)

@@ -33,7 +33,7 @@ public class ExportTests
         var path = dir.File("matriz.xlsx");
         XlsxExport.Write(Sample.Document(10), path);
         using var wb = new ClosedXML.Excel.XLWorkbook(path);
-        Assert.Equal(4, wb.Worksheets.Count);
+        Assert.Equal(5, wb.Worksheets.Count);   // proyecto, riesgos, matriz, historial y escalas
         Assert.Equal(11, wb.Worksheet(2).LastRowUsed()!.RowNumber());
     }
 
@@ -74,6 +74,17 @@ public class ExportTests
             2. Paso dos
             """;
         doc.UpdateRisk(formatted);
+
+        // Un riesgo con historial: evaluado hace meses, empeoró y después mejoró.
+        var today = Auros.Ram.Core.RiskMatrixDocument.Today;
+        var tracked = doc.AddRisk(Sample.NewRisk(doc, "Riesgo con historial", 2, 2), today.AddDays(-120), "Relevamiento inicial");
+        var worse = doc.FindRisk(tracked.Id)!.Clone();
+        worse.ProbabilityLevelId = Sample.Level(doc, Core.Model.ScaleType.Probability, 4).Id;
+        doc.AddAssessment(worse.Id, worse.ImpactLevelId, worse.ProbabilityLevelId, today.AddDays(-60), "Nuevos incidentes");
+        var better = doc.FindRisk(tracked.Id)!.Clone();
+        better.ImpactLevelId = Sample.Level(doc, Core.Model.ScaleType.Impact, 1).Id;
+        better.ProbabilityLevelId = Sample.Level(doc, Core.Model.ScaleType.Probability, 1).Id;
+        doc.AddAssessment(better.Id, better.ImpactLevelId, better.ProbabilityLevelId, today.AddDays(-5), "Se aplicó un control");
         PdfExport.Write(doc, Path.Combine(target, "informe.pdf"), PdfReports.All, appVersion: "0.1.0");
         XlsxExport.Write(doc, Path.Combine(target, "matriz.xlsx"));
     }

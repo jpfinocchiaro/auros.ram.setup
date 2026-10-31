@@ -64,6 +64,25 @@ internal static class Schema
                 modified_utc               TEXT NOT NULL
             );
             """),
+
+        // v4: historial de evaluaciones de cada riesgo. Los riesgos existentes empiezan su historial con su estado
+        // actual, fechado el día en que se crearon.
+        (4, """
+            CREATE TABLE IF NOT EXISTS risk_assessment (
+                id                    TEXT PRIMARY KEY,
+                risk_id               TEXT NOT NULL REFERENCES risk(id) ON DELETE CASCADE,
+                date                  TEXT NOT NULL,
+                impact_level_id       TEXT NOT NULL,
+                probability_level_id  TEXT NOT NULL,
+                note                  TEXT NOT NULL,
+                recorded_utc          TEXT NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS ix_assessment_risk ON risk_assessment(risk_id);
+            INSERT INTO risk_assessment (id, risk_id, date, impact_level_id, probability_level_id, note, recorded_utc)
+                SELECT lower(hex(randomblob(16))), id, substr(created_utc, 1, 10), impact_level_id, probability_level_id, '', created_utc
+                FROM risk
+                WHERE id NOT IN (SELECT risk_id FROM risk_assessment);
+            """),
     ];
 
     /// <summary>Archivos con un esquema anterior a este no se abren (versiones de prueba sin migración).</summary>
