@@ -13,8 +13,8 @@
   <Application.Resources>
     <ResourceDictionary>
       <FontFamily x:Key="ContentControlThemeFontFamily">fonts:Plex#IBM Plex Sans</FontFamily>
-      <!-- Azul de la marca: el de "ram" en el logo. -->
-      <SolidColorBrush x:Key="BrandBlueBrush" Color="#003CB4" />
+      <!-- Azul de la marca, en un tono más claro que el de "ram" en el logo; con letra blanca da 4,6:1 de contraste. -->
+      <SolidColorBrush x:Key="BrandBlueBrush" Color="#2F72E0" />
       <FontFamily x:Key="CondensedFontFamily">fonts:Plex#IBM Plex Sans Condensed</FontFamily>
       <x:Double x:Key="ControlContentThemeFontSize">14</x:Double>
       <CornerRadius x:Key="ControlCornerRadius">3</CornerRadius>
@@ -207,7 +207,7 @@
       <Setter Property="Width" Value="16" />
       <Setter Property="Height" Value="16" />
     </Style>
-    <!-- Sección elegida: azul de la marca (el de "ram" en el logo) con letra e ícono blancos. -->
+    <!-- Sección elegida: azul de la marca con letra e ícono blancos. -->
     <Style Selector="TabControl.rail > TabItem:selected">
       <Setter Property="Foreground" Value="White" />
       <Setter Property="FontWeight" Value="SemiBold" />
