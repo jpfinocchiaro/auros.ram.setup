@@ -318,6 +318,7 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
 
     public void Lock()
     {
+        Reports.Playback.Stop();
         IsLocked = true;
         UnlockError = null;
     }
@@ -453,6 +454,7 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
 
     public void Dispose()
     {
+        Reports.Playback.Stop();
         if (_disposed)
         {
             return;

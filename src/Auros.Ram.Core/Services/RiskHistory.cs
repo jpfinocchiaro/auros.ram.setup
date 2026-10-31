@@ -29,9 +29,63 @@ public sealed record HistoryStep(RiskAssessment Assessment, Level Impact, Level 
 /// <param name="Changes">Evaluaciones registradas dentro del período, en orden.</param>
 public sealed record EvolutionRow(Risk Risk, HistoryStep? From, HistoryStep To, RiskTrend Trend, IReadOnlyList<HistoryStep> Changes);
 
+/// <summary>Un riesgo que cambió de una "foto" a la siguiente (o apareció: <paramref name="Before"/> null).</summary>
+public sealed record SnapshotChange(Risk Risk, HistoryStep? Before, HistoryStep After);
+
+/// <summary>Una "foto" de la matriz: cómo estaba en una fecha y qué riesgos cambiaron desde la foto anterior.</summary>
+public sealed record MatrixSnapshot(DateOnly Date, PriorityMatrix Matrix, IReadOnlyList<SnapshotChange> Changes);
+
 /// <summary>Consultas sobre el historial de evaluaciones: estado a una fecha, recorrido y evolución en un período.</summary>
 public static class RiskHistory
 {
+    /// <summary>
+    /// Las "fotos" de la matriz entre dos fechas, para verla cambiar: la primera es la matriz al comienzo del período
+    /// y después una por cada fecha con evaluaciones dentro del período.
+    /// </summary>
+    public static IReadOnlyList<MatrixSnapshot> Snapshots(RiskMatrixDocument doc, DateOnly from, DateOnly to)
+    {
+        if (to < from)
+        {
+            (from, to) = (to, from);
+        }
+
+        var dates = doc.Risks.SelectMany(r => r.Assessments)
+            .Select(a => a.Date)
+            .Where(d => d > from && d <= to)
+            .Distinct()
+            .Order()
+            .Prepend(from)
+            .ToList();
+
+        var snapshots = new List<MatrixSnapshot>();
+        DateOnly? previous = null;
+        foreach (var date in dates)
+        {
+            var changes = new List<SnapshotChange>();
+            foreach (var risk in doc.Risks)
+            {
+                if (StateAt(doc, risk, date) is not { } now)
+                {
+                    continue;
+                }
+
+                var before = previous is { } p ? StateAt(doc, risk, p) : null;
+                var moved = before is null
+                    ? previous is not null
+                    : before.Impact.Id != now.Impact.Id || before.Probability.Id != now.Probability.Id;
+                if (moved)
+                {
+                    changes.Add(new SnapshotChange(risk, before, now));
+                }
+            }
+
+            snapshots.Add(new MatrixSnapshot(date, PriorityMatrix.Build(doc, date), changes));
+            previous = date;
+        }
+
+        return snapshots;
+    }
+
     /// <summary>Las evaluaciones del riesgo hasta <paramref name="until"/> (todas si se omite), con sus niveles.</summary>
     public static IReadOnlyList<HistoryStep> Steps(RiskMatrixDocument doc, Risk risk, DateOnly? until = null) =>
         [.. risk.Assessments

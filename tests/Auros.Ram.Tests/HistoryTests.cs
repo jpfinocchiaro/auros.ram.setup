@@ -80,6 +80,29 @@ public class HistoryTests
     }
 
     [Fact]
+    public void Snapshots_show_the_matrix_at_each_date_with_what_changed()
+    {
+        var (doc, risk) = Example();
+        var other = doc.AddRisk(Sample.NewRisk(doc, "b", 0, 0), new DateOnly(2026, 10, 15));
+
+        var frames = RiskHistory.Snapshots(doc, Sep20, Oct30);
+        Assert.Equal([Sep20, new DateOnly(2026, 10, 15), Oct30], frames.Select(f => f.Date));
+
+        // La primera foto es el estado al comienzo: sin cambios.
+        Assert.Empty(frames[0].Changes);
+        Assert.Contains(frames[0].Matrix[2, 2], r => r.Id == risk.Id);
+
+        // El 15/10 aparece "b"; el 30/10 "a" pasa de probabilidad alta a media.
+        var appeared = Assert.Single(frames[1].Changes);
+        Assert.Equal(other.Id, appeared.Risk.Id);
+        Assert.Null(appeared.Before);
+        var moved = Assert.Single(frames[2].Changes);
+        Assert.Equal(risk.Id, moved.Risk.Id);
+        Assert.Equal(Sample.Level(doc, ScaleType.Probability, 2).Id, moved.Before!.Probability.Id);
+        Assert.Contains(frames[2].Matrix[2, 1], r => r.Id == risk.Id);
+    }
+
+    [Fact]
     public void Future_dates_are_always_rejected()
     {
         var (doc, risk) = Example();

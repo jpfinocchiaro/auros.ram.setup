@@ -333,4 +333,20 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Risks_EditTip" xml:space="preserve"><value>Corrige los datos del riesgo (no agrega evaluaciones al historial)</value></data>
   <data name="Risks_Reassess" xml:space="preserve"><value>⟳ Nueva evaluación</value></data>
   <data name="Risks_ReassessTip" xml:space="preserve"><value>Registra el impacto y la probabilidad del riesgo en una fecha (queda en el historial)</value></data>
+  <data name="Playback_Tab" xml:space="preserve"><value>Película de la matriz</value></data>
+  <data name="Playback_Seconds" xml:space="preserve"><value>Segundos por foto</value></data>
+  <data name="Playback_Loop" xml:space="preserve"><value>Repetir</value></data>
+  <data name="Playback_Play" xml:space="preserve"><value>▶  Reproducir</value></data>
+  <data name="Playback_Pause" xml:space="preserve"><value>⏸  Pausa</value></data>
+  <data name="Playback_First" xml:space="preserve"><value>Primera foto</value></data>
+  <data name="Playback_Previous" xml:space="preserve"><value>Foto anterior</value></data>
+  <data name="Playback_Next" xml:space="preserve"><value>Foto siguiente</value></data>
+  <data name="Playback_Last" xml:space="preserve"><value>Última foto</value></data>
+  <data name="Playback_Counter" xml:space="preserve"><value>Foto {0} de {1}</value></data>
+  <data name="Playback_FrameTitle" xml:space="preserve"><value>Matriz al {0}</value></data>
+  <data name="Playback_Changes" xml:space="preserve"><value>Cambios en esta foto</value></data>
+  <data name="Playback_NoChanges" xml:space="preserve"><value>Sin cambios: es el estado al comienzo del período, o en esta fecha se reevaluaron riesgos sin cambiar de celda.</value></data>
+  <data name="Playback_Moved" xml:space="preserve"><value>{0}: {1} → {2} (impacto {3} · probabilidad {4})</value></data>
+  <data name="Playback_Appeared" xml:space="preserve"><value>{0}: nuevo, {1} (impacto {2} · probabilidad {3})</value></data>
+  <data name="Playback_Axes" xml:space="preserve"><value>Filas: impacto (el mayor arriba) · Columnas: probabilidad de ocurrencia (de menor a mayor)</value></data>
 </root>

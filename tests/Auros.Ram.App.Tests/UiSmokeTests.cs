@@ -80,6 +80,11 @@ public class UiSmokeTests
         reportTabs.SelectedIndex = 1;
         Shot(window, "18-evolucion");
         reportTabs.SelectedIndex = 2;
+        Shot(window, "26-pelicula-inicio");
+        docVm.Reports.Playback.NextCommand.Execute(null);
+        docVm.Reports.Playback.NextCommand.Execute(null);
+        Shot(window, "27-pelicula-cambio");
+        reportTabs.SelectedIndex = 3;
         Shot(window, "06-ficha-detallada");
 
         // Evolución en la matriz: el recorrido de un riesgo y la matriz a una fecha pasada.
@@ -227,6 +232,23 @@ public class UiSmokeTests
         doc.DatePolicy = AssessmentDatePolicy.AllowAll with { AllowPastOnCreate = false };
         Assert.Equal(Auros.Ram.App.Resources.Strings.History_WarnPastNotAllowed, past.DateWarning);
         doc.DatePolicy = AssessmentDatePolicy.AllowAll;
+
+        // Película de la matriz: una foto al comienzo y una por fecha con evaluaciones; se recorre y se reproduce.
+        var movie = docVm.Reports.Playback;
+        Assert.True(movie.HasFrames);
+        movie.FirstCommand.Execute(null);
+        Assert.Equal(0, movie.Index);
+        Assert.False(movie.HasChanges);
+        movie.LastCommand.Execute(null);
+        Assert.Equal(movie.LastIndex, movie.Index);
+        Assert.True(movie.HasChanges);
+        movie.Seconds = 0.5m;
+        movie.PlayPauseCommand.Execute(null);   // en la última foto: vuelve a empezar y reproduce
+        Assert.True(movie.IsPlaying);
+        Assert.Equal(0, movie.Index);
+        movie.NextCommand.Execute(null);        // navegar a mano pausa
+        Assert.False(movie.IsPlaying);
+        Assert.Equal(1, movie.Index);
 
         docVm.Project.Name = "Proyecto renombrado";
         docVm.Project.ApplyCommand.Execute(null);
