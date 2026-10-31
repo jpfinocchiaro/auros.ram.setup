@@ -12,7 +12,8 @@ public class DocumentTests
     {
         var doc = RiskMatrixDocument.CreateNew();
         Assert.Equal(3, doc.Scales.Count);
-        Assert.Equal(4, doc.ProjectScale(ScaleType.Risk)!.Levels.Count);
+        Assert.Equal(["Bajo", "Medio", "Alto"], doc.ProjectScale(ScaleType.Risk)!.OrderedLevels.Select(l => l.Name));
+        Assert.Equal([Palette.Green, Palette.Yellow, Palette.Red], doc.ProjectScale(ScaleType.Risk)!.OrderedLevels.Select(l => l.Color));
         Assert.Equal(5, doc.ProjectScale(ScaleType.Impact)!.Levels.Count);
         Assert.Equal(5, doc.ProjectScale(ScaleType.Probability)!.Levels.Count);
         Assert.Empty(doc.Project.HeatMap);
@@ -20,7 +21,7 @@ public class DocumentTests
     }
 
     [Fact]
-    public void Default_heat_map_is_the_classic_5x5()
+    public void Default_heat_map_5x5_with_three_risk_levels()
     {
         var doc = Sample.Document(0);
         var m = PriorityMatrix.Build(doc);
@@ -28,30 +29,59 @@ public class DocumentTests
         // Filas: impacto del mayor (arriba) al menor; columnas: probabilidad de menor a mayor.
         string LevelAt(int impact, int probability) => m.LevelAt(4 - impact, probability)!.Name;
 
-        Assert.Equal("Bajo", LevelAt(0, 0));        // 1 × 1
-        Assert.Equal("Bajo", LevelAt(1, 1));        // 2 × 2 = 4
-        Assert.Equal("Medio", LevelAt(0, 4));       // 1 × 5 = 5
-        Assert.Equal("Medio", LevelAt(2, 2));       // 3 × 3 = 9
-        Assert.Equal("Alto", LevelAt(1, 4));        // 2 × 5 = 10
-        Assert.Equal("Alto", LevelAt(3, 3));        // 4 × 4 = 16
-        Assert.Equal("Crítico", LevelAt(3, 4));     // 4 × 5 = 20
-        Assert.Equal("Crítico", LevelAt(4, 4));     // 5 × 5
+        // Producto impacto × probabilidad: 1–6 bajo, 8–12 medio, 15–25 alto.
+        Assert.Equal("Bajo", LevelAt(0, 0));        // 1
+        Assert.Equal("Bajo", LevelAt(0, 4));        // 5
+        Assert.Equal("Bajo", LevelAt(1, 2));        // 6
+        Assert.Equal("Medio", LevelAt(1, 3));       // 8
+        Assert.Equal("Medio", LevelAt(2, 2));       // 9
+        Assert.Equal("Medio", LevelAt(3, 2));       // 12
+        Assert.Equal("Alto", LevelAt(2, 4));        // 15
+        Assert.Equal("Alto", LevelAt(4, 4));        // 25
 
         var counts = Enumerable.Range(0, 5).SelectMany(i => Enumerable.Range(0, 5).Select(p => LevelAt(i, p)))
             .GroupBy(n => n).ToDictionary(g => g.Key, g => g.Count());
-        Assert.Equal(8, counts["Bajo"]);
+        Assert.Equal(12, counts["Bajo"]);
         Assert.Equal(7, counts["Medio"]);
-        Assert.Equal(7, counts["Alto"]);
-        Assert.Equal(3, counts["Crítico"]);
+        Assert.Equal(6, counts["Alto"]);
+    }
+
+    [Theory]
+    [InlineData(ScalePreset.Matrix3x3)]
+    [InlineData(ScalePreset.Matrix5x5)]
+    [InlineData(ScalePreset.Matrix7x7)]
+    [InlineData(ScalePreset.Matrix9x9)]
+    public void Every_preset_builds_a_square_heat_map_with_three_risk_levels(ScalePreset preset)
+    {
+        var size = (int)preset;
+        var doc = RiskMatrixDocument.CreateNew(scales: DefaultScales.Create(preset));
+        foreach (var type in new[] { ScaleType.Impact, ScaleType.Probability })
+        {
+            var levels = doc.ProjectScale(type)!.OrderedLevels;
+            Assert.Equal(size, levels.Count);
+            Assert.Equal(size, levels.Select(l => l.Name).Distinct().Count());
+            Assert.All(levels, l => Assert.True(Palette.IsValidHex(l.Color)));
+            Assert.Equal(Palette.Green, levels[0].Color);     // de verde (el menor)…
+            Assert.Equal(Palette.Yellow, levels[size / 2].Color);  // …a amarillo (el del medio)…
+            Assert.Equal(Palette.Red, levels[^1].Color);      // …y rojo (el mayor)
+        }
+
+        Assert.Equal(3, doc.ProjectScale(ScaleType.Risk)!.Levels.Count);
+        var m = PriorityMatrix.Build(doc);
+        Assert.Equal(size, m.Rows.Count);
+        Assert.Equal(size, m.Columns.Count);
+        Assert.Equal("Bajo", m.LevelAt(size - 1, 0)!.Name);   // menor impacto × menor probabilidad
+        Assert.Equal("Alto", m.LevelAt(0, size - 1)!.Name);   // mayor impacto × mayor probabilidad
     }
 
     [Fact]
     public void Simple_3x3_preset_has_low_medium_high_and_classic_heat_map()
     {
-        var doc = RiskMatrixDocument.CreateNew(scales: DefaultScales.Create(ScalePreset.Simple3x3));
+        var doc = RiskMatrixDocument.CreateNew(scales: DefaultScales.Create(ScalePreset.Matrix3x3));
         foreach (var type in new[] { ScaleType.Risk, ScaleType.Impact, ScaleType.Probability })
         {
             Assert.Equal(["Bajo", "Medio", "Alto"], doc.ProjectScale(type)!.OrderedLevels.Select(l => l.Name));
+            Assert.Equal([Palette.Green, Palette.Yellow, Palette.Red], doc.ProjectScale(type)!.OrderedLevels.Select(l => l.Color));
         }
 
         var m = PriorityMatrix.Build(doc);
@@ -71,7 +101,7 @@ public class DocumentTests
     {
         var doc = Sample.Document(0);
         var risk = doc.AddRisk(Sample.NewRisk(doc, "r", 4, 4));
-        Assert.Equal("Crítico", doc.RiskLevelOf(risk)!.Name);
+        Assert.Equal("Alto", doc.RiskLevelOf(risk)!.Name);
 
         var low = Sample.Level(doc, ScaleType.Risk, 0);
         doc.SetHeatCell(risk.ImpactLevelId, risk.ProbabilityLevelId, low.Id);
@@ -79,10 +109,10 @@ public class DocumentTests
         Assert.Single(doc.Project.HeatMap);
 
         doc.History.Undo();
-        Assert.Equal("Crítico", doc.RiskLevelOf(risk)!.Name);
+        Assert.Equal("Alto", doc.RiskLevelOf(risk)!.Name);
         doc.History.Redo();
         doc.ResetHeatMap();
-        Assert.Equal("Crítico", doc.RiskLevelOf(risk)!.Name);
+        Assert.Equal("Alto", doc.RiskLevelOf(risk)!.Name);
         Assert.Empty(doc.Project.HeatMap);
 
         Assert.Throws<DomainException>(() => doc.SetHeatCell(Guid.NewGuid(), risk.ProbabilityLevelId, low.Id));
@@ -292,7 +322,7 @@ public class DocumentTests
         Assert.Equal("Alto", rows[0].RiskLevel.Name);
 
         var dist = Reports.Distribution(doc);
-        Assert.Equal("Crítico", dist[0].Level.Name);
+        Assert.Equal("Alto", dist[0].Level.Name);
         Assert.Equal(2, dist.Single(d => d.Level.Name == "Alto").Count);
         Assert.Equal(1.0, dist.Sum(d => d.Share), 3);
     }
@@ -301,9 +331,9 @@ public class DocumentTests
     public void Query_filters_searches_and_sorts_RF12()
     {
         var doc = Sample.Document(0);
-        doc.AddRisk(Sample.NewRisk(doc, "Accesos privilegiados", 4, 4));   // crítico
-        doc.AddRisk(Sample.NewRisk(doc, "Backups", 0, 4));                 // medio, la más probable
-        var r = doc.AddRisk(Sample.NewRisk(doc, "Contraseñas", 3, 2));     // alto
+        doc.AddRisk(Sample.NewRisk(doc, "Accesos privilegiados", 4, 4));   // alto
+        doc.AddRisk(Sample.NewRisk(doc, "Backups", 0, 4));                 // bajo, la más probable
+        var r = doc.AddRisk(Sample.NewRisk(doc, "Contraseñas", 3, 2));     // medio
         var edit = r.Clone();
         edit.LongDescription = "Política de CLAVES débil";
         doc.UpdateRisk(edit);
@@ -311,7 +341,7 @@ public class DocumentTests
         Assert.Equal(["Accesos privilegiados", "Contraseñas", "Backups"], RiskQuery.Apply(doc, new RiskFilter()).Select(x => x.Title));
         Assert.Equal(["Backups", "Contraseñas", "Accesos privilegiados"], RiskQuery.Apply(doc, new RiskFilter { Descending = false }).Select(x => x.Title));
         Assert.Equal(["Contraseñas"], RiskQuery.Apply(doc, new RiskFilter { Text = "claves" }).Select(x => x.Title));
-        Assert.Equal(["Contraseñas"], RiskQuery.Apply(doc, new RiskFilter { RiskLevelId = Sample.Level(doc, ScaleType.Risk, 2).Id }).Select(x => x.Title));
+        Assert.Equal(["Contraseñas"], RiskQuery.Apply(doc, new RiskFilter { RiskLevelId = Sample.Level(doc, ScaleType.Risk, 1).Id }).Select(x => x.Title));
         Assert.Equal(["Accesos privilegiados"], RiskQuery.Apply(doc, new RiskFilter { ImpactLevelId = Sample.Level(doc, ScaleType.Impact, 4).Id }).Select(x => x.Title));
         Assert.Equal("Contraseñas", RiskQuery.Apply(doc, new RiskFilter { SortBy = RiskSortField.Probability, Descending = false }).First().Title);
         Assert.Equal("Accesos privilegiados", RiskQuery.Apply(doc, new RiskFilter { SortBy = RiskSortField.Title, Descending = false }).First().Title);
@@ -326,7 +356,7 @@ public class DocumentTests
         Assert.Equal(nameof(Level.TextColor), Assert.Throws<DomainException>(() => doc.UpdateScale(scale)).Field);
 
         Assert.Equal(21, Palette.ContrastRatio(Palette.White, Palette.Black), 1);
-        Assert.True(Palette.ContrastRatio(Palette.Yellow, Palette.White) < 4.5);
+        Assert.True(Palette.ContrastRatio(Palette.Yellow, Palette.White) < Palette.WhiteTextMinContrast);
         Assert.All(DefaultScales.Create().SelectMany(s => s.Levels), l => Assert.Equal(Palette.ContrastingText(l.Color), l.TextColor));
     }
 
@@ -341,7 +371,7 @@ public class DocumentTests
         scale.Levels[0].TextColor = "#123456";
         doc.UpdateScale(scale);
         var cellRisk = doc.Risks[0];
-        doc.SetHeatCell(cellRisk.ImpactLevelId, cellRisk.ProbabilityLevelId, Sample.Level(doc, ScaleType.Risk, 3).Id);
+        doc.SetHeatCell(cellRisk.ImpactLevelId, cellRisk.ProbabilityLevelId, Sample.Level(doc, ScaleType.Risk, 2).Id);
 
         var json = JsonExchange.Export(doc);
         var back = JsonExchange.Import(json);
@@ -350,7 +380,7 @@ public class DocumentTests
         Assert.Equal("Cliente S.A.", back.Project.Company);
         Assert.Equal(doc.Project.CompanyLogo, back.Project.CompanyLogo);
         Assert.Equal(doc.Project.HeatMap, back.Project.HeatMap);
-        Assert.Equal("Crítico", back.RiskLevelOf(back.Risks[0])!.Name);
+        Assert.Equal("Alto", back.RiskLevelOf(back.Risks[0])!.Name);
         Assert.Equal("#123456", back.FindScale(scale.Id)!.FindLevel(scale.Levels[0].Id)!.TextColor);
         Assert.Equal(doc.Scales.Count, back.Scales.Count);
         Assert.Throws<DomainException>(() => JsonExchange.Import("{\"format\":\"otro\"}"));
@@ -380,5 +410,8 @@ public class DocumentTests
     {
         Assert.Equal("#000000", Palette.ContrastingText(Palette.Yellow));
         Assert.Equal("#FFFFFF", Palette.ContrastingText(Palette.Violet));
+        Assert.Equal("#FFFFFF", Palette.ContrastingText(Palette.Green));   // verde oscuro: fuente blanca
+        Assert.Equal("#FFFFFF", Palette.ContrastingText("#5FA733"));
+        Assert.Equal("#000000", Palette.ContrastingText("#90B022"));       // verde claro: fuente negra
     }
 }

@@ -15,7 +15,7 @@ public class FileFormatTests
     {
         using var dir = new TempDir();
         var doc = Sample.Document(25);
-        doc.SetHeatCell(doc.Risks[0].ImpactLevelId, doc.Risks[0].ProbabilityLevelId, Sample.Level(doc, ScaleType.Risk, 3).Id);
+        doc.SetHeatCell(doc.Risks[0].ImpactLevelId, doc.Risks[0].ProbabilityLevelId, Sample.Level(doc, ScaleType.Risk, 2).Id);
         var p = doc.Project.Clone();
         p.CompanyLogo = [9, 8, 7];
         doc.UpdateProject(p);

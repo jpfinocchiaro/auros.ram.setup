@@ -52,9 +52,9 @@ public sealed partial class LevelEditViewModel : ObservableObject
     public IBrush Preview => Brushes.FromHex(Hex);
     public IBrush PreviewText => Brushes.FromHex(TextHex);
 
-    /// <summary>RNF-46: avisa si la fuente no se lee bien sobre el fondo (WCAG AA, 4,5:1).</summary>
+    /// <summary>RNF-46: avisa si la fuente no se lee bien sobre el fondo (menos de ~3:1, mínimo para etiquetas en negrita).</summary>
     public bool LowContrast =>
-        Palette.IsValidHex(Hex) && Palette.IsValidHex(TextHex) && Palette.ContrastRatio(Hex, TextHex) < 4.5;
+        Palette.IsValidHex(Hex) && Palette.IsValidHex(TextHex) && Palette.ContrastRatio(Hex, TextHex) < Palette.WhiteTextMinContrast;
 
     partial void OnNamedColorChanged(NamedColor? value)
     {

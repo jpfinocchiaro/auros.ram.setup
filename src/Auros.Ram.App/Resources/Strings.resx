@@ -103,10 +103,9 @@ Clic para abrir la ficha</value></data>
   <data name="New_NameRequired" xml:space="preserve"><value>Escriba el nombre del proyecto.</value></data>
   <data name="New_PasswordTitle" xml:space="preserve"><value>Contraseña del archivo nuevo</value></data>
   <data name="New_SaveTitle" xml:space="preserve"><value>Guardar la matriz nueva</value></data>
-  <data name="New_Scales" xml:space="preserve"><value>Escalas</value></data>
-  <data name="New_SimpleScales" xml:space="preserve"><value>Simple 3 × 3: Bajo, Medio y Alto</value></data>
-  <data name="New_StandardScales" xml:space="preserve"><value>Estándar 5 × 5: niveles de riesgo Bajo, Medio, Alto y Crítico</value></data>
-  <data name="New_TemplateScales" xml:space="preserve"><value>Desde una plantilla de escalas (.rmt)</value></data>
+  <data name="New_Scales" xml:space="preserve"><value>Tamaño de la matriz (impacto × probabilidad)</value></data>
+  <data name="New_SizeHint" xml:space="preserve"><value>Nivel de riesgo: Bajo, Medio y Alto. Todo se puede editar después en Escalas.</value></data>
+  <data name="New_TemplateScales" xml:space="preserve"><value>Usar las escalas de una plantilla (.rmt)</value></data>
   <data name="New_Title" xml:space="preserve"><value>Nueva matriz de riesgo</value></data>
   <data name="Open_ErrorTitle" xml:space="preserve"><value>No se pudo abrir</value></data>
   <data name="Open_MigratedMessage" xml:space="preserve"><value>El archivo era de una versión anterior y se actualizó al formato vigente. Se guardó una copia del original como «{0}» en la misma carpeta.</value></data>
@@ -212,7 +211,7 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Scale_LevelNameHint" xml:space="preserve"><value>Ej.: Alto</value></data>
   <data name="Scale_LevelsHint" xml:space="preserve"><value>El orden ubica cada nivel en la escala (el número más bajo es el nivel más bajo) y define su posición en la matriz. Los cambios de nombre o color se reflejan en todos los riesgos e informes.</value></data>
   <data name="Scale_LowContrast" xml:space="preserve"><value>Contraste bajo</value></data>
-  <data name="Scale_LowContrastTip" xml:space="preserve"><value>La fuente puede ser difícil de leer sobre este fondo. Se recomienda un contraste de al menos 4,5:1.</value></data>
+  <data name="Scale_LowContrastTip" xml:space="preserve"><value>La fuente puede ser difícil de leer sobre este fondo. Se recomienda un contraste de al menos 3:1 para estas etiquetas en negrita.</value></data>
   <data name="Scale_Name" xml:space="preserve"><value>Nombre de la escala</value></data>
   <data name="Scale_New" xml:space="preserve"><value>Nueva escala</value></data>
   <data name="Scale_Order" xml:space="preserve"><value>Orden</value></data>

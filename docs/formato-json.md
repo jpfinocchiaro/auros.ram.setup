@@ -52,8 +52,8 @@ Contenido completo de una matriz, para integraciones y migraciones. Implementaci
 El nivel de riesgo de cada riesgo no se exporta: se calcula con el mapa de calor (ver
 `src/Auros.Ram.Core/Services/HeatMap.cs`). Por omisión, con las posiciones *i* (impacto) y *p*
 (probabilidad) contadas desde 1, el puntaje *i·p / (nI·nP)* se compara con los umbrales
-((k+1)/(n+1))², k = 1…n−1, siendo *n* la cantidad de niveles de riesgo. En 5 × 5 con cuatro niveles
-da la matriz clásica: 1–4 bajo, 5–9 medio, 10–16 alto, 20–25 crítico.
+((k+1)/(n+1))², k = 1…n−1, siendo *n* la cantidad de niveles de riesgo. En 5 × 5
+y los tres niveles por omisión (Bajo, Medio, Alto) da: producto 1–6 bajo, 8–12 medio, 15–25 alto.
 
 Al importar se aplican las mismas validaciones que en la edición (RF-02, RF-03, RF-08, RF-11).
 Un error indica el riesgo o campo que falla. La importación crea un archivo `.rmx` nuevo, con una

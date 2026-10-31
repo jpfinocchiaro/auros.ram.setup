@@ -1,4 +1,6 @@
 using Auros.Ram.App.Resources;
+using Auros.Ram.Core;
+using Auros.Ram.Core.Model;
 using Auros.Ram.Core.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -116,20 +118,49 @@ public sealed partial class PasswordDialogViewModel : ObservableObject
     }
 }
 
+/// <summary>Un tamaño de matriz para elegir al crearla, con la miniatura de su mapa de calor por omisión.</summary>
+public sealed partial class MatrixSizeOption : ObservableObject
+{
+    public const double PreviewSize = 76;
+
+    public MatrixSizeOption(ScalePreset preset)
+    {
+        Preset = preset;
+        Size = (int)preset;
+        Label = $"{Size} × {Size}";
+        var m = PriorityMatrix.Build(RiskMatrixDocument.CreateNew(scales: DefaultScales.Create(preset)));
+        Cells = [.. Enumerable.Range(0, m.Rows.Count).SelectMany(r => Enumerable.Range(0, m.Columns.Count)
+            .Select(c => m.LevelAt(r, c) is { } level ? Brushes.FromHex(level.Color) : Avalonia.Media.Brushes.Transparent))];
+    }
+
+    public ScalePreset Preset { get; }
+    public int Size { get; }
+    public string Label { get; }
+    public IReadOnlyList<Avalonia.Media.IBrush> Cells { get; }
+
+    [ObservableProperty]
+    private bool _isSelected;
+}
+
 public sealed partial class NewMatrixViewModel : ObservableObject
 {
+    public NewMatrixViewModel()
+    {
+        SizeOptions = [.. DefaultScales.Presets.Select(p => new MatrixSizeOption(p))];
+        SizeOptions.First(o => o.Preset == ScalePreset.Matrix5x5).IsSelected = true;
+    }
+
+    /// <summary>3 × 3, 5 × 5, 7 × 7 y 9 × 9; junto con "plantilla" forman un único grupo de opciones.</summary>
+    public IReadOnlyList<MatrixSizeOption> SizeOptions { get; }
+
+    /// <summary>Tamaño elegido, o null si se cargan las escalas de una plantilla.</summary>
+    public ScalePreset? SelectedPreset => UseTemplate ? null : SizeOptions.FirstOrDefault(o => o.IsSelected)?.Preset ?? ScalePreset.Matrix5x5;
+
     [ObservableProperty]
     private string _name = "";
 
     [ObservableProperty]
     private string _company = "";
-
-    // Origen de las escalas: estándar 5 × 5, simple 3 × 3 o una plantilla (botones de opción excluyentes).
-    [ObservableProperty]
-    private bool _useStandard = true;
-
-    [ObservableProperty]
-    private bool _useSimple;
 
     [ObservableProperty]
     private bool _useTemplate;

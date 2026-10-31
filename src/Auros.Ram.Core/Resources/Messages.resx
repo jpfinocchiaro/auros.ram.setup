@@ -13,12 +13,9 @@
   <data name="Color_Violet" xml:space="preserve"><value>Violeta</value></data>
   <data name="Color_White" xml:space="preserve"><value>Blanco</value></data>
   <data name="Color_Yellow" xml:space="preserve"><value>Amarillo</value></data>
-  <data name="DefaultScale_Impact" xml:space="preserve"><value>Impacto estándar</value></data>
-  <data name="DefaultScale_Impact3" xml:space="preserve"><value>Impacto 3 niveles</value></data>
-  <data name="DefaultScale_Probability" xml:space="preserve"><value>Probabilidad estándar</value></data>
-  <data name="DefaultScale_Probability3" xml:space="preserve"><value>Probabilidad 3 niveles</value></data>
+  <data name="DefaultScale_Impact" xml:space="preserve"><value>Impacto ({0} niveles)</value></data>
+  <data name="DefaultScale_Probability" xml:space="preserve"><value>Probabilidad ({0} niveles)</value></data>
   <data name="DefaultScale_Risk" xml:space="preserve"><value>Nivel de riesgo estándar</value></data>
-  <data name="DefaultScale_Risk3" xml:space="preserve"><value>Nivel de riesgo 3 niveles</value></data>
   <data name="Error_DuplicateLevelId" xml:space="preserve"><value>La escala tiene niveles repetidos. Quite el duplicado y vuelva a intentar.</value></data>
   <data name="Error_FieldTooLong" xml:space="preserve"><value>El campo «{0}» puede tener hasta {1} caracteres.</value></data>
   <data name="Error_HeatCellInvalid" xml:space="preserve"><value>La celda del mapa de calor no corresponde a las escalas del proyecto.</value></data>
@@ -53,12 +50,18 @@
   <data name="Error_ScalesLockedByRisks" xml:space="preserve"><value>Las escalas del proyecto no se pueden cambiar porque ya tiene riesgos cargados.</value></data>
   <data name="Field_Company" xml:space="preserve"><value>Empresa</value></data>
   <data name="Field_ProjectName" xml:space="preserve"><value>Nombre del proyecto</value></data>
+  <data name="Graded_Extreme" xml:space="preserve"><value>Extremo</value></data>
+  <data name="Graded_FairlyHigh" xml:space="preserve"><value>Moderadamente alto</value></data>
+  <data name="Graded_FairlyLow" xml:space="preserve"><value>Moderadamente bajo</value></data>
+  <data name="Graded_Minimal" xml:space="preserve"><value>Mínimo</value></data>
+  <data name="Graded_Moderate" xml:space="preserve"><value>Moderado</value></data>
+  <data name="Graded_VeryHigh" xml:space="preserve"><value>Muy alto</value></data>
+  <data name="Graded_VeryLow" xml:space="preserve"><value>Muy bajo</value></data>
   <data name="Impact_Catastrophic" xml:space="preserve"><value>Catastrófico</value></data>
   <data name="Impact_Insignificant" xml:space="preserve"><value>Insignificante</value></data>
   <data name="Impact_Major" xml:space="preserve"><value>Mayor</value></data>
   <data name="Impact_Minor" xml:space="preserve"><value>Menor</value></data>
   <data name="Impact_Moderate" xml:space="preserve"><value>Moderado</value></data>
-  <data name="Level_Critical" xml:space="preserve"><value>Crítico</value></data>
   <data name="Level_High" xml:space="preserve"><value>Alto</value></data>
   <data name="Level_Low" xml:space="preserve"><value>Bajo</value></data>
   <data name="Level_Medium" xml:space="preserve"><value>Medio</value></data>

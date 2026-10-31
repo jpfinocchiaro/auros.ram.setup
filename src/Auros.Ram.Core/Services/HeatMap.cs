@@ -34,8 +34,8 @@ public static class HeatMap
     /// <summary>
     /// Nivel por omisión. Con las posiciones i (impacto) y p (probabilidad) contadas desde 1, el puntaje
     /// s = i·p / (cantidad de impactos · cantidad de probabilidades) se compara con los umbrales
-    /// ((k+1)/(n+1))², k = 1…n−1, donde n es la cantidad de niveles de riesgo. Para 5×5 con 4 niveles
-    /// da la matriz clásica: 1–4 bajo, 5–9 medio, 10–16 alto, 20–25 crítico.
+    /// ((k+1)/(n+1))², k = 1…n−1, donde n es la cantidad de niveles de riesgo. Para 5×5 con los tres
+    /// niveles estándar da: producto 1–6 bajo, 8–12 medio, 15–25 alto (con 4 niveles, la clásica 1–4 / 5–9 / 10–16 / 20–25).
     /// </summary>
     public static Level? Default(Scale risk, Scale impact, Scale probability, Guid impactLevelId, Guid probabilityLevelId)
     {

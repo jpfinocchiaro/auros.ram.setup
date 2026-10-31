@@ -51,14 +51,18 @@ public static partial class Palette
         return (Math.Max(la, lb) + 0.05) / (Math.Min(la, lb) + 0.05);
     }
 
-    /// <summary>Negro o blanco, el que tenga más contraste sobre el color dado (WCAG).</summary>
-    public static string ContrastingText(string hex)
-    {
-        var l = RelativeLuminance(hex);
-        var contrastWhite = 1.05 / (l + 0.05);
-        var contrastBlack = (l + 0.05) / 0.05;
-        return contrastBlack >= contrastWhite ? Black : White;
-    }
+    /// <summary>
+    /// Contraste mínimo para preferir fuente blanca: ~3:1, el mínimo WCAG para texto en negrita de las
+    /// etiquetas de nivel. Así los verdes, naranjas y rojos oscuros llevan fuente blanca.
+    /// </summary>
+    public const double WhiteTextMinContrast = 2.9;
+
+    /// <summary>
+    /// Fuente para un fondo: blanca si alcanza <see cref="WhiteTextMinContrast"/> (p. ej., verde oscuro);
+    /// si no, negra (amarillos, verdes y naranjas claros).
+    /// </summary>
+    public static string ContrastingText(string hex) =>
+        ContrastRatio(hex, White) >= WhiteTextMinContrast ? White : Black;
 
     public static double RelativeLuminance(string hex)
     {
