@@ -1,6 +1,7 @@
 using Auros.Ram.App.ViewModels;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.VisualTree;
 
 namespace Auros.Ram.App.Views;
 
@@ -41,6 +42,21 @@ public partial class ScalesView : UserControl
 public partial class MatrixView : UserControl
 {
     public MatrixView() => InitializeComponent();
+
+    private async void OnCellDoubleTapped(object? sender, TappedEventArgs e)
+    {
+        // Un doble clic sobre un riesgo ya lo abre su botón; acá solo cuenta el espacio libre de la celda.
+        if (e.Source is Avalonia.Visual source && source.FindAncestorOfType<Button>(includeSelf: true) is not null)
+        {
+            return;
+        }
+
+        if (sender is Control { DataContext: MatrixCell cell } && DataContext is MatrixViewModel vm)
+        {
+            e.Handled = true;
+            await vm.AddAt(cell);
+        }
+    }
 }
 
 public partial class RisksView : UserControl

@@ -67,10 +67,11 @@
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="vm:LevelChip">
                 <Border Classes="chip" Background="{Binding Background}">
-                  <TextBlock FontSize="13" Foreground="{Binding Foreground}">
-                    <Run FontWeight="SemiBold" Text="{Binding Abbrev, StringFormat='[{0}]', Mode=OneWay}" />
-                    <Run Text="{Binding Name, Mode=OneWay}" />
-                  </TextBlock>
+                  <StackPanel Orientation="Horizontal" Spacing="4">
+                    <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="{Binding Foreground}" Text="{Binding Abbrev, StringFormat='[{0}]'}"
+                               IsVisible="{Binding $parent[UserControl].((vm:MatrixViewModel)DataContext).Display.ShowLevelAbbreviations, FallbackValue=True}" />
+                    <TextBlock FontSize="13" Foreground="{Binding Foreground}" Text="{Binding Name}" />
+                  </StackPanel>
                 </Border>
               </DataTemplate>
             </ItemsControl.ItemTemplate>
@@ -103,12 +104,14 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                       <DataTemplate x:DataType="vm:MatrixCell">
-                        <Border Classes="cell" MinHeight="{Binding MinHeight}"
+                        <!-- Doble clic en la celda (fuera de un riesgo): riesgo nuevo con este impacto y esta probabilidad. -->
+                        <Border Classes="cell" MinHeight="{Binding MinHeight}" DoubleTapped="OnCellDoubleTapped" ToolTip.Tip="{Binding Tooltip}"
                                 Background="{Binding Level.Background, FallbackValue=Transparent}"
                                 TextElement.Foreground="{Binding Level.Foreground, FallbackValue=Black}">
                           <DockPanel>
-                            <!-- El nivel también en texto, no solo con color (RNF-46). -->
+                            <!-- El nivel también en texto, no solo con color (RNF-46); se puede ocultar en Preferencias. -->
                             <TextBlock DockPanel.Dock="Top" Margin="2,0,0,2" FontSize="11" FontWeight="SemiBold" Opacity="0.85"
+                                       IsVisible="{Binding $parent[UserControl].((vm:MatrixViewModel)DataContext).Display.ShowLevelAbbreviations, FallbackValue=True}"
                                        Text="{Binding Level.Abbrev, StringFormat='[{0}]', FallbackValue=''}" />
                             <ItemsControl ItemsSource="{Binding Items}" VerticalAlignment="Top">
                               <ItemsControl.ItemTemplate>

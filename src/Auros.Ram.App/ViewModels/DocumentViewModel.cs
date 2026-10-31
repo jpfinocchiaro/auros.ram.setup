@@ -127,6 +127,18 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
         await Ui.EditRiskAsync(new RiskEditorViewModel(Document, risk));
     }
 
+    /// <summary>Riesgo nuevo con impacto y probabilidad ya elegidos (doble clic en una celda de la matriz).</summary>
+    public async Task NewRiskAtAsync(Guid impactLevelId, Guid probabilityLevelId)
+    {
+        if (IsLocked)
+        {
+            return;
+        }
+
+        var preset = new Risk { ImpactLevelId = impactLevelId, ProbabilityLevelId = probabilityLevelId };
+        await Ui.EditRiskAsync(new RiskEditorViewModel(Document, null, preset));
+    }
+
     public async Task EditScaleAsync(Scale? scale, ScaleType type)
     {
         if (IsLocked)

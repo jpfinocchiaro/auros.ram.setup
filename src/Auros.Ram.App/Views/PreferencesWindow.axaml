@@ -20,6 +20,14 @@
       <NumericUpDown Value="{Binding LockMinutes}" Minimum="1" Maximum="240" Increment="1" FormatString="0" />
       <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{x:Static r:Strings.Prefs_LockHint}" />
     </StackPanel>
+    <StackPanel>
+      <TextBlock Classes="label" TextWrapping="Wrap" Text="{x:Static r:Strings.Prefs_Abbreviations}" />
+      <StackPanel Orientation="Horizontal" Spacing="16">
+        <RadioButton GroupName="abbrev" IsChecked="{Binding ShowAbbreviations}" Content="{x:Static r:Strings.Common_Yes}" />
+        <RadioButton GroupName="abbrev" IsChecked="{Binding HideAbbreviations}" Content="{x:Static r:Strings.Common_No}" />
+      </StackPanel>
+      <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{x:Static r:Strings.Prefs_AbbreviationsHint}" />
+    </StackPanel>
     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
       <Button Content="{x:Static r:Strings.Common_Cancel}" IsCancel="True" Click="OnCancel" />
       <Button Classes="accent" Content="{x:Static r:Strings.Common_Save}" IsDefault="True" Click="OnAccept" />

@@ -10,7 +10,7 @@
       <TabItem>
         <TabItem.Header>
           <StackPanel Orientation="Horizontal" Spacing="10">
-            <PathIcon Classes="nav" Data="{StaticResource IconProject}" />
+            <Path Classes="nav" Data="{StaticResource IconProject}" />
             <TextBlock Text="{x:Static r:Strings.Section_Project}" VerticalAlignment="Center" />
           </StackPanel>
         </TabItem.Header>
@@ -19,7 +19,7 @@
       <TabItem>
         <TabItem.Header>
           <StackPanel Orientation="Horizontal" Spacing="10">
-            <PathIcon Classes="nav" Data="{StaticResource IconRisks}" />
+            <Path Classes="nav" Data="{StaticResource IconRisks}" />
             <TextBlock Text="{x:Static r:Strings.Section_Risks}" VerticalAlignment="Center" />
           </StackPanel>
         </TabItem.Header>
@@ -28,7 +28,7 @@
       <TabItem>
         <TabItem.Header>
           <StackPanel Orientation="Horizontal" Spacing="10">
-            <PathIcon Classes="nav" Data="{StaticResource IconMatrix}" />
+            <Path Classes="nav" Data="{StaticResource IconMatrix}" />
             <TextBlock Text="{x:Static r:Strings.Section_Matrix}" VerticalAlignment="Center" />
           </StackPanel>
         </TabItem.Header>
@@ -37,7 +37,7 @@
       <TabItem>
         <TabItem.Header>
           <StackPanel Orientation="Horizontal" Spacing="10">
-            <PathIcon Classes="nav" Data="{StaticResource IconReports}" />
+            <Path Classes="nav" Data="{StaticResource IconReports}" />
             <TextBlock Text="{x:Static r:Strings.Section_Reports}" VerticalAlignment="Center" />
           </StackPanel>
         </TabItem.Header>
@@ -46,7 +46,7 @@
       <TabItem>
         <TabItem.Header>
           <StackPanel Orientation="Horizontal" Spacing="10">
-            <PathIcon Classes="nav" Data="{StaticResource IconScales}" />
+            <Path Classes="nav" Data="{StaticResource IconScales}" />
             <TextBlock Text="{x:Static r:Strings.Section_Scales}" VerticalAlignment="Center" />
           </StackPanel>
         </TabItem.Header>

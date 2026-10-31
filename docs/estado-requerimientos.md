@@ -10,7 +10,7 @@
 | RF-06 | ✅ | Escalas → *Guardar como plantilla* (`.rmt` cifrado); Nueva matriz → *desde plantilla* |
 | RF-07 a RF-09 | ✅ | Ficha del proyecto: **una matriz corresponde a una sola empresa** (por decisión del cliente no existe la consultora); logo de la empresa; escalas bloqueadas cuando hay riesgos |
 | RF-10 a RF-12 | ✅ | Editor con botones de color y justificación por dimensión, y el nivel de riesgo resultante a la vista; búsqueda, filtros por nivel de riesgo, impacto y probabilidad, y orden |
-| RF-13, RF-14 | ✅ | Matriz de riesgo impacto × probabilidad pintada como mapa de calor; tamaño según escalas, celdas de igual altura, *tooltip* y clic para abrir la ficha |
+| RF-13, RF-14 | ✅ | Matriz de riesgo impacto × probabilidad pintada como mapa de calor; tamaño según escalas, celdas de igual altura, *tooltip* y clic para abrir la ficha; doble clic en una celda agrega un riesgo con ese impacto y esa probabilidad; las abreviaturas de nivel se pueden ocultar (Preferencias) |
 | RF-15 | ✅ | Logo de la empresa en pantalla y en PDF; exportación PDF/Excel e impresión |
 | RF-16 a RF-19 | ✅ | Ficha resumen, ficha detallada y distribución; todo se calcula en el momento |
 | RN-02 a RN-12 | ✅ | RN-06: se aplica la regla más estricta de RF-05 (una escala asignada nunca se elimina) |

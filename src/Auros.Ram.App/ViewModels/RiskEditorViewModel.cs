@@ -69,15 +69,18 @@ public sealed partial class RiskEditorViewModel : ObservableObject
     private readonly RiskMatrixDocument _doc;
     private readonly Risk? _original;
 
-    public RiskEditorViewModel(RiskMatrixDocument doc, Risk? risk)
+    /// <param name="risk">El riesgo a modificar, o null para uno nuevo.</param>
+    /// <param name="preset">Para uno nuevo: niveles ya elegidos (p. ej., la celda de la matriz donde se hizo doble clic).</param>
+    public RiskEditorViewModel(RiskMatrixDocument doc, Risk? risk, Risk? preset = null)
     {
         _doc = doc;
         _original = risk;
         _title = risk?.Title ?? "";
         _shortDescription = risk?.ShortDescription ?? "";
         _longDescription = risk?.LongDescription ?? "";
+        var source = risk ?? preset;
         Dimensions = [.. ScaleTypeExtensions.Dimensions.Select(t =>
-            new DimensionEditor(t, doc.ProjectScale(t), risk?.LevelIdFor(t) ?? Guid.Empty, risk?.JustificationFor(t) ?? ""))];
+            new DimensionEditor(t, doc.ProjectScale(t), source?.LevelIdFor(t) ?? Guid.Empty, risk?.JustificationFor(t) ?? ""))];
         foreach (var d in Dimensions)
         {
             d.SelectionChanged += (_, _) => UpdateRiskLevel();

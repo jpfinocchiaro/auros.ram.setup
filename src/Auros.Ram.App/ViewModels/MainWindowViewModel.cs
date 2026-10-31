@@ -34,6 +34,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     {
         _ui = ui;
         _settings = settings;
+        DisplayOptions.Current.ShowLevelAbbreviations = settings.ShowLevelAbbreviations;
         RefreshRecent();
 
         _autosaveTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(settings.AutosaveMinutes) };
@@ -536,11 +537,18 @@ public sealed partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private async Task Preferences()
     {
-        var vm = new PreferencesViewModel { AutosaveMinutes = _settings.AutosaveMinutes, LockMinutes = _settings.LockMinutes };
+        var vm = new PreferencesViewModel
+        {
+            AutosaveMinutes = _settings.AutosaveMinutes,
+            LockMinutes = _settings.LockMinutes,
+            ShowAbbreviations = _settings.ShowLevelAbbreviations,
+        };
         if (await _ui.EditPreferencesAsync(vm))
         {
             _settings.AutosaveMinutes = (int)Math.Clamp(vm.AutosaveMinutes ?? 5, 1, 60);
             _settings.LockMinutes = (int)Math.Clamp(vm.LockMinutes ?? 15, 1, 240);
+            _settings.ShowLevelAbbreviations = vm.ShowAbbreviations;
+            DisplayOptions.Current.ShowLevelAbbreviations = vm.ShowAbbreviations;
             _settings.Save();
             _autosaveTimer.Interval = TimeSpan.FromMinutes(_settings.AutosaveMinutes);
         }

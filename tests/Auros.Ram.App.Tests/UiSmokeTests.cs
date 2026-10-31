@@ -80,6 +80,12 @@ public class UiSmokeTests
         reportTabs.SelectedIndex = 1;
         Shot(window, "06-ficha-detallada");
 
+        // Preferencia: matriz sin abreviaturas de nivel.
+        docVm.SelectedSection = (int)Section.Matrix;
+        DisplayOptions.Current.ShowLevelAbbreviations = false;
+        Shot(window, "16-matriz-sin-abreviaturas");
+        DisplayOptions.Current.ShowLevelAbbreviations = true;
+
         docVm.Lock();
         Shot(window, "07-bloqueado");
         docVm.IsLocked = false;
@@ -92,6 +98,7 @@ public class UiSmokeTests
         ShowDialog(new ExportConfirmWindow(new ExportConfirmViewModel(true) { ProtectPdf = true }), "12-exportar");
         ShowDialog(new AboutWindow(), "13-acerca-de");
         ShowDialog(new SplashWindow(), "15-inicio");
+        ShowDialog(new PreferencesWindow(new PreferencesViewModel { AutosaveMinutes = 5, LockMinutes = 15, ShowAbbreviations = true }), "17-preferencias");
         ShowDialog(new MessageWindow("Cambios sin guardar", "¿Guardar los cambios?", ["Cancelar", "No guardar", "Guardar"], 2), "14-mensaje");
 
         // "Value is null" son nulos transitorios (sin documento activo, plantillas aún sin árbol visual).
@@ -140,6 +147,15 @@ public class UiSmokeTests
         scaleEditor.SaveCommand.Execute(null);
         Assert.Null(scaleEditor.Error);
         Assert.Contains(docVm.Project.Distribution, d => d.Level.Name == "Muy bajo");
+
+        // Doble clic en una celda de la matriz: el riesgo nuevo llega con el impacto y la probabilidad de esa celda.
+        var cell = docVm.Matrix.Rows[0].Cells[^1];   // mayor impacto × mayor probabilidad
+        var preset = new Risk { ImpactLevelId = cell.ImpactId, ProbabilityLevelId = cell.ProbabilityId };
+        var fromCell = new RiskEditorViewModel(doc, null, preset);
+        Assert.Equal(cell.ImpactId, fromCell.Dimensions[0].SelectedId);
+        Assert.Equal(cell.ProbabilityId, fromCell.Dimensions[1].SelectedId);
+        Assert.Equal(cell.Level!.Id, fromCell.RiskLevel!.Id);
+        Assert.Equal("", fromCell.Dimensions[0].Justification);
 
         docVm.Project.Name = "Proyecto renombrado";
         docVm.Project.ApplyCommand.Execute(null);

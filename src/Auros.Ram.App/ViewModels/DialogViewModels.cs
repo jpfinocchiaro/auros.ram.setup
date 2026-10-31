@@ -193,4 +193,15 @@ public sealed partial class PreferencesViewModel : ObservableObject
 
     [ObservableProperty]
     private decimal? _lockMinutes;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HideAbbreviations))]
+    private bool _showAbbreviations = true;
+
+    /// <summary>Opción "No" del par Sí / No.</summary>
+    public bool HideAbbreviations
+    {
+        get => !ShowAbbreviations;
+        set => ShowAbbreviations = !value;
+    }
 }

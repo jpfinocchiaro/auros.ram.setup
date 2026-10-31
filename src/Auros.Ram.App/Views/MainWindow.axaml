@@ -56,21 +56,21 @@
       </MenuItem>
       <MenuItem Header="{x:Static r:Strings.Menu_View}" IsEnabled="{Binding HasActive}">
         <MenuItem x:Name="MiProject" Header="{x:Static r:Strings.Section_Project}" Command="{Binding ShowSectionCommand}" CommandParameter="Project">
-          <MenuItem.Icon><PathIcon Classes="nav" Data="{StaticResource IconProject}" /></MenuItem.Icon>
+          <MenuItem.Icon><Path Classes="nav" Data="{StaticResource IconProject}" /></MenuItem.Icon>
         </MenuItem>
         <MenuItem x:Name="MiRisks" Header="{x:Static r:Strings.Section_Risks}" Command="{Binding ShowSectionCommand}" CommandParameter="Risks">
-          <MenuItem.Icon><PathIcon Classes="nav" Data="{StaticResource IconRisks}" /></MenuItem.Icon>
+          <MenuItem.Icon><Path Classes="nav" Data="{StaticResource IconRisks}" /></MenuItem.Icon>
         </MenuItem>
         <MenuItem x:Name="MiMatrix" Header="{x:Static r:Strings.Section_Matrix}" Command="{Binding ShowSectionCommand}" CommandParameter="Matrix">
-          <MenuItem.Icon><PathIcon Classes="nav" Data="{StaticResource IconMatrix}" /></MenuItem.Icon>
+          <MenuItem.Icon><Path Classes="nav" Data="{StaticResource IconMatrix}" /></MenuItem.Icon>
         </MenuItem>
         <MenuItem x:Name="MiReports" Header="{x:Static r:Strings.Section_Reports}" Command="{Binding ShowSectionCommand}" CommandParameter="Reports">
-          <MenuItem.Icon><PathIcon Classes="nav" Data="{StaticResource IconReports}" /></MenuItem.Icon>
+          <MenuItem.Icon><Path Classes="nav" Data="{StaticResource IconReports}" /></MenuItem.Icon>
         </MenuItem>
       </MenuItem>
       <MenuItem Header="{x:Static r:Strings.Menu_Settings}">
         <MenuItem x:Name="MiScales" Header="{x:Static r:Strings.Section_Scales}" Command="{Binding ShowSectionCommand}" CommandParameter="Scales" IsEnabled="{Binding HasActive}">
-          <MenuItem.Icon><PathIcon Classes="nav" Data="{StaticResource IconScales}" /></MenuItem.Icon>
+          <MenuItem.Icon><Path Classes="nav" Data="{StaticResource IconScales}" /></MenuItem.Icon>
         </MenuItem>
         <MenuItem Header="{x:Static r:Strings.Menu_Preferences}" Command="{Binding PreferencesCommand}" />
       </MenuItem>

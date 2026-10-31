@@ -12,7 +12,9 @@ namespace Auros.Ram.App.ViewModels;
 public sealed record MatrixItem(Guid RiskId, string Title, string Tooltip);
 
 /// <param name="Level">Nivel de riesgo de la celda según el mapa de calor: da el color de fondo y de fuente.</param>
-public sealed record MatrixCell(IReadOnlyList<MatrixItem> Items, double MinHeight, LevelChip? Level);
+/// <param name="ImpactId">Nivel de impacto de la fila (para agregar un riesgo con doble clic).</param>
+/// <param name="ProbabilityId">Nivel de probabilidad de la columna.</param>
+public sealed record MatrixCell(IReadOnlyList<MatrixItem> Items, double MinHeight, LevelChip? Level, Guid ImpactId, Guid ProbabilityId, string Tooltip);
 
 public sealed record MatrixRow(LevelChip Level, IReadOnlyList<MatrixCell> Cells, double MinHeight);
 
@@ -63,7 +65,8 @@ public sealed partial class MatrixViewModel : ObservableObject
                 {
                     var tip = string.Format(CultureInfo.CurrentCulture, Strings.Matrix_Tooltip, x.Title, level?.Name ?? "—");
                     return new MatrixItem(x.Id, x.Title, tip);
-                })], height, level));
+                })], height, level, m.Rows[r].Id, m.Columns[c].Id,
+                    string.Format(CultureInfo.CurrentCulture, Strings.Matrix_CellTip, m.Rows[r].Name, m.Columns[c].Name)));
             }
 
             Rows.Add(new MatrixRow(new LevelChip(m.Rows[r]), cells, height));
@@ -80,6 +83,11 @@ public sealed partial class MatrixViewModel : ObservableObject
         IsEmpty = doc.Risks.Count == 0;
     }
 
+    public DisplayOptions Display => DisplayOptions.Current;
+
     [RelayCommand]
     private Task Open(MatrixItem item) => _owner.EditRiskAsync(item.RiskId);
+
+    /// <summary>Doble clic en una celda: riesgo nuevo con el impacto y la probabilidad de esa celda ya elegidos.</summary>
+    public Task AddAt(MatrixCell cell) => _owner.NewRiskAtAsync(cell.ImpactId, cell.ProbabilityId);
 }

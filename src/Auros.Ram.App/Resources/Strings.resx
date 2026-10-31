@@ -22,8 +22,10 @@
   <data name="Common_Delete" xml:space="preserve"><value>Eliminar</value></data>
   <data name="Common_Discard" xml:space="preserve"><value>Descartar</value></data>
   <data name="Common_Edit" xml:space="preserve"><value>Editar</value></data>
+  <data name="Common_No" xml:space="preserve"><value>No</value></data>
   <data name="Common_Remove" xml:space="preserve"><value>Quitar</value></data>
   <data name="Common_Save" xml:space="preserve"><value>Guardar</value></data>
+  <data name="Common_Yes" xml:space="preserve"><value>Sí</value></data>
   <data name="Error_ReadFile" xml:space="preserve"><value>No se pudo leer el archivo. Verifique que exista y que no esté abierto en otro programa.</value></data>
   <data name="Error_SaveTitle" xml:space="preserve"><value>No se pudo guardar</value></data>
   <data name="Error_UnexpectedMessage" xml:space="preserve"><value>Ocurrió un error inesperado. Sus archivos no se modificaron. Guarde su trabajo y, si el problema se repite, reinicie la aplicación.</value></data>
@@ -60,6 +62,7 @@
   <data name="Lock_Unlock" xml:space="preserve"><value>Desbloquear</value></data>
   <data name="Matrix_AxisImpact" xml:space="preserve"><value>Impacto →</value></data>
   <data name="Matrix_AxisProbability" xml:space="preserve"><value>Probabilidad de ocurrencia →</value></data>
+  <data name="Matrix_CellTip" xml:space="preserve"><value>Impacto «{0}» × probabilidad «{1}». Doble clic para agregar un riesgo aquí.</value></data>
   <data name="Matrix_ExportPdf" xml:space="preserve"><value>Exportar PDF</value></data>
   <data name="Matrix_ExportXlsx" xml:space="preserve"><value>Exportar Excel</value></data>
   <data name="Matrix_Legend" xml:space="preserve"><value>Nivel de riesgo</value></data>
@@ -134,6 +137,8 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Password_SetTitle" xml:space="preserve"><value>Agregar contraseña</value></data>
   <data name="Password_TooShort" xml:space="preserve"><value>La contraseña debe tener al menos 12 caracteres.</value></data>
   <data name="Password_Wrong" xml:space="preserve"><value>La contraseña no es correcta.</value></data>
+  <data name="Prefs_Abbreviations" xml:space="preserve"><value>¿Mostrar en la matriz de riesgo las abreviaturas de los niveles ([ALT], [MED], [BAJ])?</value></data>
+  <data name="Prefs_AbbreviationsHint" xml:space="preserve"><value>Ayudan a distinguir los niveles sin depender del color (por ejemplo, al imprimir en blanco y negro).</value></data>
   <data name="Prefs_Autosave" xml:space="preserve"><value>Autoguardado de recuperación (minutos)</value></data>
   <data name="Prefs_AutosaveHint" xml:space="preserve"><value>Cada cuánto se guarda una copia cifrada de los cambios sin guardar, para recuperarlos tras un cierre inesperado.</value></data>
   <data name="Prefs_Lock" xml:space="preserve"><value>Bloqueo por inactividad (minutos)</value></data>

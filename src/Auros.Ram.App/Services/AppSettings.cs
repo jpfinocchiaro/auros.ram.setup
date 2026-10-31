@@ -15,6 +15,9 @@ public sealed class AppSettings
     public int AutosaveMinutes { get; set; } = 5;
     public int LockMinutes { get; set; } = 15;
 
+    /// <summary>Abreviaturas de los niveles ([ALT], [MED], [BAJ]) en la matriz de riesgo.</summary>
+    public bool ShowLevelAbbreviations { get; set; } = true;
+
     public static AppSettings Load()
     {
         try
