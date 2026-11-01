@@ -306,7 +306,7 @@
                       <LayoutTransformControl.LayoutTransform>
                         <RotateTransform Angle="-90" />
                       </LayoutTransformControl.LayoutTransform>
-                      <TextBlock FontSize="15" Foreground="#5E6A75" Text="{x:Static r:Strings.Matrix_AxisImpact}" />
+                      <TextBlock FontSize="17" Foreground="#5E6A75" Text="{x:Static r:Strings.Matrix_AxisImpact}" />
                     </LayoutTransformControl>
                     <StackPanel Grid.Column="1">
                       <ItemsControl ItemsSource="{Binding Rows}">
@@ -383,7 +383,7 @@
                     <!-- Eje X: centrado bajo las celdas (corrido por el ancho de los rótulos de fila, si se muestran) -->
                     <DockPanel Grid.Row="1" Grid.Column="1" Margin="0,10,0,0" IsVisible="{Binding ShowAxisNames}">
                       <Border DockPanel.Dock="Left" Width="153" IsVisible="{Binding ShowLevelLabels}" />
-                      <TextBlock FontSize="15" Foreground="#5E6A75" HorizontalAlignment="Center" Text="{x:Static r:Strings.Matrix_AxisProbability}" />
+                      <TextBlock FontSize="17" Foreground="#5E6A75" HorizontalAlignment="Center" Text="{x:Static r:Strings.Matrix_AxisProbability}" />
                     </DockPanel>
                   </Grid>
                 </DockPanel>
