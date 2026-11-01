@@ -98,6 +98,8 @@ public sealed class UiService(Window owner) : IUiService
 
     public Task ShowAboutAsync() => new AboutWindow().ShowDialog(Top());
 
+    public Task EditCatalogsAsync(CatalogsViewModel vm) => new CatalogsWindow(vm).ShowDialog(Top());
+
     public async Task OpenWithSystemAsync(string path)
     {
         if (!await owner.Launcher.LaunchFileInfoAsync(new FileInfo(path)))

@@ -201,7 +201,7 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Risks_ClearFilters" xml:space="preserve"><value>Limpiar</value></data>
   <data name="Risks_ColRisk" xml:space="preserve"><value>Riesgo / oportunidad de mejora</value></data>
   <data name="Risks_Count" xml:space="preserve"><value>Mostrando {0} de {1} riesgos</value></data>
-  <data name="Risks_DeleteMessage" xml:space="preserve"><value>¿Eliminar el riesgo «{0}»? Puede deshacerlo con Edición → Deshacer.</value></data>
+  <data name="Risks_DeleteMessage" xml:space="preserve"><value>Se eliminará «{0}» con todas sus evaluaciones ({1}). Se puede deshacer con Edición → Deshacer.</value></data>
   <data name="Risks_DeleteTitle" xml:space="preserve"><value>Eliminar riesgo</value></data>
   <data name="Risks_DescendingTip" xml:space="preserve"><value>Orden descendente (de mayor a menor)</value></data>
   <data name="Risks_EmptyHint" xml:space="preserve"><value>Cargue el primer riesgo: título, descripciones, impacto y probabilidad de ocurrencia. El nivel de riesgo se calcula solo.</value></data>
@@ -394,4 +394,35 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Image_ShowLevelLabels" xml:space="preserve"><value>Niveles de impacto y probabilidad</value></data>
   <data name="Image_ShowAxisNames" xml:space="preserve"><value>Nombres de los ejes</value></data>
   <data name="Image_ShowRisks" xml:space="preserve"><value>Riesgos en las celdas</value></data>
+  <data name="Risk_Consequences" xml:space="preserve"><value>Consecuencias potenciales</value></data>
+  <data name="Risk_ConsequenceHint" xml:space="preserve"><value>Elegí una consecuencia o escribí una nueva…</value></data>
+  <data name="Risk_AddConsequence" xml:space="preserve"><value>Agregar</value></data>
+  <data name="Risk_RemoveConsequence" xml:space="preserve"><value>Quitar esta consecuencia</value></data>
+  <data name="Risk_Materiality" xml:space="preserve"><value>Criterio de materialidad</value></data>
+  <data name="Risk_MaterialityHint" xml:space="preserve"><value>Elegí un criterio o escribí uno nuevo… (opcional)</value></data>
+  <data name="Catalog_Menu" xml:space="preserve"><value>Consecuencias y criterios de materialidad…</value></data>
+  <data name="Catalog_Title" xml:space="preserve"><value>Consecuencias y criterios de materialidad</value></data>
+  <data name="Catalog_Hint" xml:space="preserve"><value>Son las opciones de los combos de cada riesgo en esta matriz. También se pueden agregar escribiendo una nueva en el combo del riesgo. Una opción que usa algún riesgo no se puede quitar. Los cambios se pueden deshacer (Edición → Deshacer).</value></data>
+  <data name="Catalog_NewHint" xml:space="preserve"><value>Nueva opción (descripción corta)</value></data>
+  <data name="Catalog_Remove" xml:space="preserve"><value>Quitar esta opción del catálogo</value></data>
+  <data name="Catalog_Unused" xml:space="preserve"><value>sin usar</value></data>
+  <data name="Catalog_Usage" xml:space="preserve"><value>en {0} riesgo(s)</value></data>
+  <data name="Risks_CheckedText" xml:space="preserve"><value>Marcados: {0} riesgo(s) y {1} evaluación(es)</value></data>
+  <data name="Risks_DeleteChecked" xml:space="preserve"><value>Eliminar marcados</value></data>
+  <data name="Risks_DeleteCheckedTitle" xml:space="preserve"><value>Eliminar riesgos y evaluaciones</value></data>
+  <data name="Risks_DeleteCheckedRisks" xml:space="preserve"><value>Se eliminarán {0} riesgo(s) con todas sus evaluaciones ({1} en total).</value></data>
+  <data name="Risks_DeleteCheckedEntries" xml:space="preserve"><value>Se quitarán {0} evaluación(es) de otros riesgos; cada uno vuelve al estado de su evaluación más reciente que quede.</value></data>
+  <data name="Risks_DeleteCheckedUndo" xml:space="preserve"><value>Se puede deshacer con Edición → Deshacer.</value></data>
+  <data name="Risks_ExpandAll" xml:space="preserve"><value>Expandir todo</value></data>
+  <data name="Risks_CollapseAll" xml:space="preserve"><value>Contraer todo</value></data>
+  <data name="Risks_CheckAll" xml:space="preserve"><value>Marcar todos</value></data>
+  <data name="Risks_UncheckAll" xml:space="preserve"><value>Desmarcar todo</value></data>
+  <data name="Risks_ExpandTip" xml:space="preserve"><value>Ver las evaluaciones de este riesgo</value></data>
+  <data name="Risks_CheckTip" xml:space="preserve"><value>Marcar para eliminar</value></data>
+  <data name="Risks_Current" xml:space="preserve"><value>vigente</value></data>
+  <data name="Matrix_ShowAmount" xml:space="preserve"><value>Monto del impacto</value></data>
+  <data name="Matrix_ShowAmountTip" xml:space="preserve"><value>Muestra el monto del impacto junto a cada riesgo. Dentro de cada celda, los riesgos van del mayor monto al menor (los que no tienen monto, al final).</value></data>
+  <data name="Risks_ColAmount" xml:space="preserve"><value>Monto</value></data>
+  <data name="Risks_ColEntries" xml:space="preserve"><value>Eval.</value></data>
+  <data name="Risks_ColLast" xml:space="preserve"><value>Última eval.</value></data>
 </root>

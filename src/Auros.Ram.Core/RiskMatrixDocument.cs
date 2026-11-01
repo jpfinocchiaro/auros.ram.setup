@@ -56,7 +56,92 @@ public sealed class RiskMatrixDocument
         info.RiskScaleId ??= scaleList.FirstOrDefault(s => s.Type == ScaleType.Risk)?.Id;
         info.ImpactScaleId ??= scaleList.FirstOrDefault(s => s.Type == ScaleType.Impact)?.Id;
         info.ProbabilityScaleId ??= scaleList.FirstOrDefault(s => s.Type == ScaleType.Probability)?.Id;
+        if (info.Consequences.Count == 0 && info.MaterialityCriteria.Count == 0)
+        {
+            info.Consequences = SuggestedCatalog(CatalogKind.Consequence);
+            info.MaterialityCriteria = SuggestedCatalog(CatalogKind.Materiality);
+        }
+
         return new RiskMatrixDocument(info, scaleList, []);
+    }
+
+    /// <summary>Opciones con las que arranca cada catálogo (se pueden cambiar, quitar o agregar otras).</summary>
+    public static IReadOnlyList<CatalogItem> SuggestedCatalog(CatalogKind kind) =>
+        [.. (kind == CatalogKind.Consequence ? Messages.Suggested_Consequences : Messages.Suggested_Materiality)
+            .Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(name => new CatalogItem(Guid.NewGuid(), name))];
+
+    // ---- Catálogos -----------------------------------------------------------
+
+    /// <summary>
+    /// Agrega una opción al catálogo y la devuelve. Si ya hay una con el mismo nombre (sin distinguir
+    /// mayúsculas), devuelve esa y no agrega otra.
+    /// </summary>
+    public CatalogItem AddCatalogItem(CatalogKind kind, string name)
+    {
+        var trimmed = (name ?? "").Trim();
+        Validation.ValidateCatalogName(trimmed);
+        var list = Project.CatalogFor(kind);
+        if (list.FirstOrDefault(i => string.Equals(i.Name, trimmed, StringComparison.CurrentCultureIgnoreCase)) is { } existing)
+        {
+            return existing;
+        }
+
+        var item = new CatalogItem(Guid.NewGuid(), trimmed);
+        SetCatalog(kind, [.. list, item], Validation.Format(Messages.Undo_AddCatalogItem, trimmed));
+        return item;
+    }
+
+    public void RenameCatalogItem(CatalogKind kind, Guid id, string name)
+    {
+        var trimmed = (name ?? "").Trim();
+        Validation.ValidateCatalogName(trimmed);
+        var list = Project.CatalogFor(kind);
+        if (list.All(i => i.Id != id))
+        {
+            throw new DomainException(Messages.Error_CatalogItemNotFound);
+        }
+
+        if (list.Any(i => i.Id != id && string.Equals(i.Name, trimmed, StringComparison.CurrentCultureIgnoreCase)))
+        {
+            throw new DomainException(Validation.Format(Messages.Error_CatalogDuplicate, trimmed));
+        }
+
+        SetCatalog(kind, [.. list.Select(i => i.Id == id ? i with { Name = trimmed } : i)], Validation.Format(Messages.Undo_EditCatalogItem, trimmed));
+    }
+
+    /// <summary>Cantidad de riesgos que usan la opción.</summary>
+    public int CatalogItemUsage(CatalogKind kind, Guid id) => kind == CatalogKind.Consequence
+        ? _risks.Count(r => r.ConsequenceIds.Contains(id))
+        : _risks.Count(r => r.MaterialityId == id);
+
+    /// <summary>Quita una opción del catálogo. No se puede si algún riesgo la usa.</summary>
+    public void RemoveCatalogItem(CatalogKind kind, Guid id)
+    {
+        var list = Project.CatalogFor(kind);
+        var item = list.FirstOrDefault(i => i.Id == id) ?? throw new DomainException(Messages.Error_CatalogItemNotFound);
+        if (CatalogItemUsage(kind, id) is var used and > 0)
+        {
+            throw new DomainException(Validation.Format(Messages.Error_CatalogItemInUse, item.Name, used));
+        }
+
+        SetCatalog(kind, [.. list.Where(i => i.Id != id)], Validation.Format(Messages.Undo_RemoveCatalogItem, item.Name));
+    }
+
+    private void SetCatalog(CatalogKind kind, IReadOnlyList<CatalogItem> items, string description)
+    {
+        var next = Project.Clone();
+        if (kind == CatalogKind.Consequence)
+        {
+            next.Consequences = items;
+        }
+        else
+        {
+            next.MaterialityCriteria = items;
+        }
+
+        var previous = Project;
+        Apply(description, DocumentChangeKind.Project, () => Project = next, () => Project = previous);
     }
 
     /// <param name="stateId">
@@ -107,6 +192,14 @@ public sealed class RiskMatrixDocument
     public Level? RiskLevelOf(Risk risk) => LevelOf(risk, ScaleType.Risk);
 
     public Risk? FindRisk(Guid id) => _risks.Find(r => r.Id == id);
+
+    /// <summary>Nombres de las consecuencias potenciales del riesgo, en el orden en que se cargaron.</summary>
+    public IReadOnlyList<string> ConsequenceNames(Risk risk) =>
+        [.. risk.ConsequenceIds.Select(id => Project.Consequences.FirstOrDefault(c => c.Id == id)?.Name).OfType<string>()];
+
+    /// <summary>Nombre del criterio de materialidad del riesgo (vacío si no tiene).</summary>
+    public string MaterialityName(Risk risk) =>
+        risk.MaterialityId is { } id ? Project.MaterialityCriteria.FirstOrDefault(c => c.Id == id)?.Name ?? "" : "";
 
     /// <summary>
     /// RF-05: un nivel está en uso si algún riesgo lo tiene (hoy o en una evaluación anterior del historial)
@@ -467,6 +560,71 @@ public sealed class RiskMatrixDocument
             () => _risks[index] = previous);
     }
 
+    /// <summary>Elimina varios riesgos (con todas sus evaluaciones) en un solo paso que se puede deshacer.</summary>
+    public void RemoveRisks(IReadOnlyCollection<Guid> riskIds)
+    {
+        var removed = _risks.Select((r, i) => (Risk: r, Index: i)).Where(x => riskIds.Contains(x.Risk.Id)).ToList();
+        if (removed.Count == 0)
+        {
+            return;
+        }
+
+        if (removed.Count == 1)
+        {
+            RemoveRisk(removed[0].Risk.Id);
+            return;
+        }
+
+        Apply(Validation.Format(Messages.Undo_RemoveRisks, removed.Count), DocumentChangeKind.Risks,
+            () => _risks.RemoveAll(r => riskIds.Contains(r.Id)),
+            () =>
+            {
+                foreach (var (risk, index) in removed)
+                {
+                    _risks.Insert(index, risk);
+                }
+            });
+    }
+
+    /// <summary>
+    /// Quita varias evaluaciones (de uno o más riesgos) en un solo paso que se puede deshacer. Cada riesgo vuelve
+    /// al estado de la última evaluación que le quede; a ninguno se le pueden quitar todas (para eso se elimina el riesgo).
+    /// </summary>
+    public void RemoveAssessments(IReadOnlyCollection<(Guid RiskId, Guid AssessmentId)> entries)
+    {
+        var changes = new List<(int Index, Risk Previous, Risk Next)>();
+        foreach (var group in entries.GroupBy(e => e.RiskId))
+        {
+            var index = _risks.FindIndex(r => r.Id == group.Key);
+            if (index < 0)
+            {
+                throw new DomainException(Messages.Error_RiskNotFound);
+            }
+
+            var previous = _risks[index];
+            var ids = group.Select(e => e.AssessmentId).ToHashSet();
+            if (previous.Assessments.All(a => ids.Contains(a.Id)))
+            {
+                throw new DomainException(Validation.Format(Messages.Error_AllAssessments, previous.Title));
+            }
+
+            var next = previous.Clone();
+            next.Assessments = [.. previous.Assessments.Where(a => !ids.Contains(a.Id))];
+            WithCurrentFromHistory(next);
+            next.ModifiedUtc = DateTime.UtcNow;
+            changes.Add((index, previous, next));
+        }
+
+        if (changes.Count == 0)
+        {
+            return;
+        }
+
+        Apply(Validation.Format(Messages.Undo_RemoveAssessments, entries.Count), DocumentChangeKind.Risks,
+            () => changes.ForEach(c => _risks[c.Index] = c.Next),
+            () => changes.ForEach(c => _risks[c.Index] = c.Previous));
+    }
+
     public void RemoveRisk(Guid riskId)
     {
         var index = _risks.FindIndex(r => r.Id == riskId);
@@ -507,6 +665,7 @@ public sealed class RiskMatrixDocument
         risk.ProbabilityJustification = risk.ProbabilityJustification.Trim();
         risk.ImpactAmount = Round(risk.ImpactAmount);
         risk.ProbabilityPercent = Round(risk.ProbabilityPercent);
+        risk.ConsequenceIds = [.. risk.ConsequenceIds.Distinct()];
         return risk;
     }
 

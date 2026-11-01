@@ -187,6 +187,9 @@ public sealed partial class HistoryEntry(
 }
 
 /// <summary>Alta y modificación de un riesgo (F3). Los errores se muestran sin cerrar el diálogo.</summary>
+/// <summary>Una consecuencia elegida para el riesgo (Id vacío: nueva, se agrega al catálogo al guardar).</summary>
+public sealed record ConsequenceChoice(Guid Id, string Name);
+
 /// <summary>Qué se hace con la ventana del riesgo.</summary>
 public enum RiskEditorMode
 {
@@ -233,10 +236,80 @@ public sealed partial class RiskEditorViewModel : ObservableObject
             };
         }
 
+        // Consecuencias potenciales y criterio de materialidad, del catálogo de la matriz.
+        foreach (var id in risk?.ConsequenceIds ?? [])
+        {
+            if (doc.Project.Consequences.FirstOrDefault(c => c.Id == id) is { } item)
+            {
+                Consequences.Add(new ConsequenceChoice(item.Id, item.Name));
+            }
+        }
+
+        _materiality = risk?.MaterialityId is { } m ? doc.Project.MaterialityCriteria.FirstOrDefault(c => c.Id == m)?.Name ?? "" : "";
+
         _currentImpact = risk?.ImpactLevelId ?? Guid.Empty;
         _currentProbability = risk?.ProbabilityLevelId ?? Guid.Empty;
         UpdateRiskLevel();
         LoadHistory();
+    }
+
+    // ---- Consecuencias y criterio de materialidad --------------------------
+
+    /// <summary>Consecuencias potenciales elegidas para el riesgo.</summary>
+    public ObservableCollection<ConsequenceChoice> Consequences { get; } = [];
+
+    /// <summary>Opciones del combo: el catálogo de la matriz (se puede escribir una nueva).</summary>
+    public IReadOnlyList<string> ConsequenceOptions => [.. _doc.Project.Consequences.Select(c => c.Name)];
+
+    public IReadOnlyList<string> MaterialityOptions => [.. _doc.Project.MaterialityCriteria.Select(c => c.Name)];
+
+    /// <summary>Lo escrito o elegido en el combo de consecuencias, antes de agregarlo.</summary>
+    [ObservableProperty]
+    private string? _newConsequence;
+
+    /// <summary>Criterio de materialidad elegido o escrito (vacío: sin criterio).</summary>
+    [ObservableProperty]
+    private string? _materiality;
+
+    public bool HasConsequences => Consequences.Count > 0;
+
+    /// <summary>Agrega la consecuencia del combo. Si no está en el catálogo, se agrega a él al guardar el riesgo.</summary>
+    [RelayCommand]
+    private void AddConsequence()
+    {
+        var name = (NewConsequence ?? "").Trim();
+        if (name.Length == 0)
+        {
+            return;
+        }
+
+        if (Consequences.All(c => !string.Equals(c.Name, name, StringComparison.CurrentCultureIgnoreCase)))
+        {
+            var known = _doc.Project.Consequences.FirstOrDefault(c => string.Equals(c.Name, name, StringComparison.CurrentCultureIgnoreCase));
+            Consequences.Add(new ConsequenceChoice(known?.Id ?? Guid.Empty, known?.Name ?? name));
+            OnPropertyChanged(nameof(HasConsequences));
+        }
+
+        NewConsequence = null;
+    }
+
+    [RelayCommand]
+    private void RemoveConsequence(ConsequenceChoice choice)
+    {
+        Consequences.Remove(choice);
+        OnPropertyChanged(nameof(HasConsequences));
+    }
+
+    /// <summary>Ids de las consecuencias y del criterio; los escritos que no están en el catálogo se agregan a él.</summary>
+    private (IReadOnlyList<Guid> Consequences, Guid? Materiality) ResolveCatalogs()
+    {
+        // Lo que quedó escrito en el combo sin apretar "Agregar" también cuenta.
+        AddConsequence();
+        var consequences = Consequences
+            .Select(c => c.Id != Guid.Empty ? c.Id : _doc.AddCatalogItem(CatalogKind.Consequence, c.Name).Id)
+            .ToList();
+        var materiality = string.IsNullOrWhiteSpace(Materiality) ? (Guid?)null : _doc.AddCatalogItem(CatalogKind.Materiality, Materiality).Id;
+        return (consequences, materiality);
     }
 
     // ---- Evaluación e historial -------------------------------------------
@@ -532,6 +605,11 @@ public sealed partial class RiskEditorViewModel : ObservableObject
         var date = DateOnly.FromDateTime(AssessmentDate ?? DateTime.Today);
         try
         {
+            if (CanEditTexts)
+            {
+                (risk.ConsequenceIds, risk.MaterialityId) = ResolveCatalogs();
+            }
+
             switch (Mode)
             {
                 case RiskEditorMode.New:

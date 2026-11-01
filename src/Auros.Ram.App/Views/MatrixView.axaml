@@ -57,6 +57,8 @@
                                     Watermark="{x:Static r:Strings.Matrix_Today}" DisplayDateEnd="{x:Static sys:DateTime.Today}" />
                 <Button Content="{x:Static r:Strings.Matrix_Today}" Command="{Binding ShowTodayCommand}" IsVisible="{Binding IsHistorical}" />
               </StackPanel>
+              <CheckBox IsChecked="{Binding Display.ShowImpactAmount}" Content="{x:Static r:Strings.Matrix_ShowAmount}"
+                        Margin="0,0,24,4" ToolTip.Tip="{x:Static r:Strings.Matrix_ShowAmountTip}" />
               <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,0,4">
                 <TextBlock Classes="muted" FontSize="13" VerticalAlignment="Center" Text="{x:Static r:Strings.Matrix_Path}" />
                 <ComboBox x:Name="PathPicker" ItemsSource="{Binding PathRisks}" SelectedItem="{Binding PathRisk}" Width="280" />
@@ -142,7 +144,18 @@
                                                   Command="{Binding $parent[UserControl].((vm:MatrixViewModel)DataContext).ReassessCommand}" />
                                       </ContextMenu>
                                     </Button.ContextMenu>
-                                    <TextBlock Margin="6,0" Text="{Binding Title, StringFormat='• {0}'}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                    <!-- Monto del impacto a la derecha (opcional); dentro de la celda, el mayor arriba. -->
+                                    <DockPanel Margin="6,0">
+                                      <TextBlock DockPanel.Dock="Right" Margin="8,0,0,0" FontWeight="SemiBold" VerticalAlignment="Center" Text="{Binding Amount}">
+                                        <TextBlock.IsVisible>
+                                          <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                            <Binding Path="HasAmount" />
+                                            <Binding Path="$parent[UserControl].((vm:MatrixViewModel)DataContext).Display.ShowImpactAmount" FallbackValue="False" />
+                                          </MultiBinding>
+                                        </TextBlock.IsVisible>
+                                      </TextBlock>
+                                      <TextBlock Text="{Binding Title, StringFormat='• {0}'}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                    </DockPanel>
                                   </Button>
                                 </DataTemplate>
                               </ItemsControl.ItemTemplate>

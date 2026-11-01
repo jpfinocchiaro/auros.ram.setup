@@ -12,12 +12,14 @@ namespace Auros.Ram.Core.Serialization;
 /// Versión 3: riesgos clasificados por impacto y probabilidad, con mapa de calor. Versión 4: historial de
 /// evaluaciones de cada riesgo (un JSON de la versión 3 se importa con una sola evaluación por riesgo).
 /// Versión 5: rangos de los niveles (monto o porcentaje) y monto del impacto y probabilidad en porcentaje.
+/// Versión 6: catálogos de consecuencias y de criterios de materialidad, y su uso en cada riesgo (un JSON anterior
+/// se importa con los catálogos sugeridos).
 /// Las versiones 1 y 2 (valor agregado y dificultad) fueron de prueba y ya no se importan.
 /// </summary>
 public static class JsonExchange
 {
     public const string FormatId = "auros.ram/matrix";
-    public const int FormatVersion = 5;
+    public const int FormatVersion = 6;
     public const int OldestSupportedVersion = 3;
 
     private static readonly JsonSerializerOptions Options = new()
@@ -46,6 +48,8 @@ public static class JsonExchange
                 RiskScaleId = p.RiskScaleId,
                 ImpactScaleId = p.ImpactScaleId,
                 ProbabilityScaleId = p.ProbabilityScaleId,
+                Consequences = [.. p.Consequences.Select(i => new CatalogItemDto { Id = i.Id, Name = i.Name })],
+                MaterialityCriteria = [.. p.MaterialityCriteria.Select(i => new CatalogItemDto { Id = i.Id, Name = i.Name })],
                 HeatMap = [.. p.HeatMap.Select(c => new HeatCellDto
                 {
                     ImpactLevelId = c.ImpactLevelId,
@@ -77,6 +81,8 @@ public static class JsonExchange
                 ModifiedUtc = r.ModifiedUtc,
                 ImpactAmount = r.ImpactAmount,
                 ProbabilityPercent = r.ProbabilityPercent,
+                ConsequenceIds = [.. r.ConsequenceIds],
+                MaterialityId = r.MaterialityId,
                 Assessments = [.. r.Assessments.Select(a => new AssessmentDto
                 {
                     Id = a.Id,
@@ -151,6 +157,18 @@ public static class JsonExchange
             ProbabilityScaleId = p.ProbabilityScaleId,
         };
 
+        // Catálogos: los del JSON; uno anterior a la versión 6 recibe los sugeridos.
+        if (p.Consequences is null && p.MaterialityCriteria is null)
+        {
+            project.Consequences = RiskMatrixDocument.SuggestedCatalog(CatalogKind.Consequence);
+            project.MaterialityCriteria = RiskMatrixDocument.SuggestedCatalog(CatalogKind.Materiality);
+        }
+        else
+        {
+            project.Consequences = Catalog(p.Consequences);
+            project.MaterialityCriteria = Catalog(p.MaterialityCriteria);
+        }
+
         var doc = new RiskMatrixDocument(project, scales, []);
         Validation.ValidateProject(project, doc);
         project.HeatMap = HeatMap.Prune(
@@ -171,6 +189,8 @@ public static class JsonExchange
             ModifiedUtc = r.ModifiedUtc ?? DateTime.UtcNow,
             ImpactAmount = r.ImpactAmount,
             ProbabilityPercent = r.ProbabilityPercent,
+            ConsequenceIds = [.. (r.ConsequenceIds ?? []).Distinct()],
+            MaterialityId = r.MaterialityId,
         })).ToList();
 
         foreach (var risk in risks)
@@ -206,6 +226,17 @@ public static class JsonExchange
         return risk;
     }
 
+    private static IReadOnlyList<CatalogItem> Catalog(List<CatalogItemDto>? items)
+    {
+        var list = (items ?? []).Select(i => new CatalogItem(i.Id == Guid.Empty ? Guid.NewGuid() : i.Id, (i.Name ?? "").Trim())).ToList();
+        foreach (var item in list)
+        {
+            Validation.ValidateCatalogName(item.Name);
+        }
+
+        return list;
+    }
+
     // DTOs: el contrato del JSON es independiente del modelo interno.
     private sealed class MatrixDto
     {
@@ -228,6 +259,14 @@ public static class JsonExchange
         public Guid? ImpactScaleId { get; set; }
         public Guid? ProbabilityScaleId { get; set; }
         public List<HeatCellDto>? HeatMap { get; set; }
+        public List<CatalogItemDto>? Consequences { get; set; }
+        public List<CatalogItemDto>? MaterialityCriteria { get; set; }
+    }
+
+    private sealed class CatalogItemDto
+    {
+        public Guid Id { get; set; }
+        public string? Name { get; set; }
     }
 
     private sealed class HeatCellDto
@@ -270,6 +309,8 @@ public static class JsonExchange
         public DateTime? ModifiedUtc { get; set; }
         public decimal? ImpactAmount { get; set; }
         public decimal? ProbabilityPercent { get; set; }
+        public List<Guid>? ConsequenceIds { get; set; }
+        public Guid? MaterialityId { get; set; }
         public List<AssessmentDto>? Assessments { get; set; }
     }
 

@@ -271,6 +271,15 @@ public static class PdfExport
 
             Block(section, ExportText.Col_Short, x.Risk.ShortDescription);
             Block(section, ExportText.Col_Long, x.Risk.LongDescription);
+            if (doc.ConsequenceNames(x.Risk) is { Count: > 0 } consequences)
+            {
+                Block(section, ExportText.Col_Consequences, string.Join("\n", consequences.Select(c => RichText.BulletPrefix + c)));
+            }
+
+            if (doc.MaterialityName(x.Risk) is { Length: > 0 } materiality)
+            {
+                Block(section, ExportText.Col_Materiality, materiality);
+            }
             HistoryTable(section, doc, x.Risk);
         }
     }

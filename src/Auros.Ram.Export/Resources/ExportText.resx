@@ -56,4 +56,6 @@
   <data name="Label_Change" xml:space="preserve"><value>impacto {0} · probabilidad {1} → {2}</value></data>
   <data name="Col_ImpactAmount" xml:space="preserve"><value>Monto del impacto</value></data>
   <data name="Col_ProbabilityPercent" xml:space="preserve"><value>Probabilidad (%)</value></data>
+  <data name="Col_Consequences" xml:space="preserve"><value>Consecuencias potenciales</value></data>
+  <data name="Col_Materiality" xml:space="preserve"><value>Criterio de materialidad</value></data>
 </root>

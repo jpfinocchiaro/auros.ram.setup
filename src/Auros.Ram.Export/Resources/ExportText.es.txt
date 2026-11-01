@@ -51,3 +51,5 @@ Label_NotAssessed=Sin evaluar
 Label_Change=impacto {0} · probabilidad {1} → {2}
 Col_ImpactAmount=Monto del impacto
 Col_ProbabilityPercent=Probabilidad (%)
+Col_Consequences=Consecuencias potenciales
+Col_Materiality=Criterio de materialidad

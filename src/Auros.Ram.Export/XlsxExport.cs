@@ -54,6 +54,7 @@ public static class XlsxExport
             ExportText.Col_Number, ExportText.Col_Title, ExportText.Col_Short, ExportText.Col_Risk, ExportText.Col_Impact,
             ExportText.Col_Probability, ExportText.Col_Long, ExportText.Col_ImpactJustification,
             ExportText.Col_ProbabilityJustification, ExportText.Col_ImpactAmount, ExportText.Col_ProbabilityPercent,
+            ExportText.Col_Consequences, ExportText.Col_Materiality,
         ];
         for (var c = 0; c < headers.Length; c++)
         {
@@ -74,6 +75,8 @@ public static class XlsxExport
             ws.Cell(row, 9).Value = x.Risk.ProbabilityJustification;
             Number(ws.Cell(row, 10), x.Risk.ImpactAmount, "#,##0.00");
             Number(ws.Cell(row, 11), x.Risk.ProbabilityPercent, "0.00\" %\"");
+            ws.Cell(row, 12).Value = string.Join(", ", doc.ConsequenceNames(x.Risk));
+            ws.Cell(row, 13).Value = doc.MaterialityName(x.Risk);
             row++;
         }
 
@@ -83,6 +86,7 @@ public static class XlsxExport
         ws.Columns(4, 6).Width = 16;
         ws.Columns(7, 9).Width = 60;
         ws.Columns(10, 11).Width = 18;
+        ws.Columns(12, 13).Width = 40;
         ws.Range(1, 1, Math.Max(row - 1, 1), headers.Length).Style.Alignment.WrapText = true;
         ws.Range(1, 1, Math.Max(row - 1, 1), headers.Length).Style.Alignment.Vertical = XLAlignmentVerticalValues.Top;
         ws.SheetView.FreezeRows(1);

@@ -94,6 +94,40 @@ internal static class Schema
             ALTER TABLE risk_assessment ADD COLUMN impact_amount TEXT;
             ALTER TABLE risk_assessment ADD COLUMN probability_percent TEXT;
             """),
+
+        // v6: catálogos de la matriz (consecuencias potenciales y criterios de materialidad), las consecuencias de
+        // cada riesgo y su criterio de materialidad. Los archivos anteriores reciben la lista sugerida.
+        (6, """
+            CREATE TABLE IF NOT EXISTS catalog_item (
+                id        TEXT PRIMARY KEY,
+                kind      INTEGER NOT NULL,
+                position  INTEGER NOT NULL,
+                name      TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS risk_consequence (
+                risk_id   TEXT NOT NULL REFERENCES risk(id) ON DELETE CASCADE,
+                item_id   TEXT NOT NULL,
+                position  INTEGER NOT NULL,
+                PRIMARY KEY (risk_id, item_id)
+            );
+            ALTER TABLE risk ADD COLUMN materiality_id TEXT;
+            INSERT INTO catalog_item (id, kind, position, name)
+                SELECT lower(hex(randomblob(16))), kind, position, name FROM (
+                    SELECT 1 AS kind, 0 AS position, 'Accidente laboral' AS name
+                    UNION ALL SELECT 1, 1, 'Pérdida de rentabilidad'
+                    UNION ALL SELECT 1, 2, 'Pérdida de reputación'
+                    UNION ALL SELECT 1, 3, 'Sanción regulatoria'
+                    UNION ALL SELECT 1, 4, 'Interrupción de la operación'
+                    UNION ALL SELECT 1, 5, 'Pérdida o fuga de información'
+                    UNION ALL SELECT 1, 6, 'Fraude'
+                    UNION ALL SELECT 1, 7, 'Daño ambiental'
+                    UNION ALL SELECT 2, 0, 'Impacto económico significativo'
+                    UNION ALL SELECT 2, 1, 'Incumplimiento legal o regulatorio'
+                    UNION ALL SELECT 2, 2, 'Afecta la reputación'
+                    UNION ALL SELECT 2, 3, 'Afecta la seguridad de las personas'
+                    UNION ALL SELECT 2, 4, 'Afecta la continuidad del negocio')
+                WHERE NOT EXISTS (SELECT 1 FROM catalog_item);
+            """),
     ];
 
     /// <summary>Archivos con un esquema anterior a este no se abren (versiones de prueba sin migración).</summary>

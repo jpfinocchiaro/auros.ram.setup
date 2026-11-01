@@ -8,11 +8,60 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace Auros.Ram.App.ViewModels;
 
-public sealed record RiskRow(Risk Risk, LevelChip? RiskLevel, LevelChip? ImpactLevel, LevelChip? ProbabilityLevel)
+/// <summary>Una evaluación (entrada) de un riesgo en la grilla jerárquica; se puede marcar para quitarla.</summary>
+public sealed partial class EntryRow(Guid riskId, HistoryStep step, bool isCurrent, Action onCheck) : ObservableObject
 {
+    public Guid RiskId { get; } = riskId;
+    public Guid Id { get; } = step.Assessment.Id;
+    public string Date { get; } = step.Assessment.Date.ToString("d", CultureInfo.CurrentCulture);
+    public LevelChip Impact { get; } = new(step.Impact);
+    public LevelChip Probability { get; } = new(step.Probability);
+    public LevelChip? RiskLevel { get; } = LevelChip.From(step.RiskLevel);
+    public string ImpactValue { get; } = RangeFormat.Value(step.Assessment.ImpactAmount);
+    public string ProbabilityValue { get; } = RangeFormat.Value(step.Assessment.ProbabilityPercent, "%");
+    public string Note { get; } = step.Assessment.Note;
+
+    /// <summary>La vigente (la más reciente): el estado actual del riesgo.</summary>
+    public bool IsCurrent { get; } = isCurrent;
+
+    [ObservableProperty]
+    private bool _isChecked;
+
+    partial void OnIsCheckedChanged(bool value) => onCheck();
+}
+
+/// <summary>Un riesgo en la grilla jerárquica: se despliega para ver sus evaluaciones y se puede marcar para eliminarlo.</summary>
+public sealed partial class RiskRow(Risk risk, LevelChip? riskLevel, LevelChip? impactLevel, LevelChip? probabilityLevel) : ObservableObject
+{
+    public Risk Risk { get; } = risk;
+    public LevelChip? RiskLevel { get; } = riskLevel;
+    public LevelChip? ImpactLevel { get; } = impactLevel;
+    public LevelChip? ProbabilityLevel { get; } = probabilityLevel;
+
     public string Title => Risk.Title;
+
     /// <summary>Sin marcas de formato: en la lista se muestra como texto simple de dos líneas.</summary>
     public string ShortDescription => Auros.Ram.Core.Text.RichText.ToPlain(Risk.ShortDescription);
+
+    public string ImpactValue => RangeFormat.Value(Risk.ImpactAmount);
+    public string ProbabilityValue => RangeFormat.Value(Risk.ProbabilityPercent, "%");
+
+    /// <summary>Cantidad de evaluaciones y fecha de la última, para las columnas de la grilla.</summary>
+    public int EntriesCount => Risk.Assessments.Count;
+
+    public string LastDate => Risk.Assessments.Count > 0 ? Risk.Assessments[^1].Date.ToString("d", CultureInfo.CurrentCulture) : "";
+
+    public ObservableCollection<EntryRow> Entries { get; } = [];
+
+    [ObservableProperty]
+    private bool _isExpanded;
+
+    [ObservableProperty]
+    private bool _isChecked;
+
+    public Action? CheckChanged { get; set; }
+
+    partial void OnIsCheckedChanged(bool value) => CheckChanged?.Invoke();
 }
 
 /// <summary>Lista de riesgos con búsqueda, filtros y orden (RF-10, RF-12).</summary>
@@ -51,6 +100,18 @@ public sealed partial class RisksViewModel : ObservableObject
     [ObservableProperty] private RiskRow? _selected;
     [ObservableProperty] private string _countText = "";
 
+    /// <summary>Riesgos y evaluaciones marcados para eliminar.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasChecked))]
+    private string _checkedText = "";
+
+    public bool HasChecked => CheckedRisks.Any() || CheckedEntries.Any();
+
+    private IEnumerable<RiskRow> CheckedRisks => Items.Where(r => r.IsChecked);
+
+    /// <summary>Evaluaciones marcadas de riesgos que no se eliminan enteros.</summary>
+    private IEnumerable<EntryRow> CheckedEntries => Items.Where(r => !r.IsChecked).SelectMany(r => r.Entries).Where(e => e.IsChecked);
+
     public bool HasRisks => _owner.Document.Risks.Count > 0;
 
     partial void OnSearchTextChanged(string value) => Refresh();
@@ -82,6 +143,11 @@ public sealed partial class RisksViewModel : ObservableObject
 
         var doc = _owner.Document;
         var selectedId = Selected?.Risk.Id;
+
+        // Se conserva lo desplegado y lo marcado al volver a armar la lista.
+        var expanded = Items.Where(r => r.IsExpanded).Select(r => r.Risk.Id).ToHashSet();
+        var checkedRisks = CheckedRisks.Select(r => r.Risk.Id).ToHashSet();
+        var checkedEntries = Items.SelectMany(r => r.Entries).Where(e => e.IsChecked).Select(e => e.Id).ToHashSet();
         var filter = new RiskFilter
         {
             Text = SearchText,
@@ -110,8 +176,19 @@ public sealed partial class RisksViewModel : ObservableObject
         Items.Clear();
         foreach (var row in rows)
         {
+            var steps = RiskHistory.Steps(doc, row.Risk);
+            for (var i = steps.Count - 1; i >= 0; i--)
+            {
+                row.Entries.Add(new EntryRow(row.Risk.Id, steps[i], i == steps.Count - 1, UpdateChecked) { IsChecked = checkedEntries.Contains(steps[i].Assessment.Id) });
+            }
+
+            row.IsExpanded = expanded.Contains(row.Risk.Id);
+            row.IsChecked = checkedRisks.Contains(row.Risk.Id);
+            row.CheckChanged = UpdateChecked;
             Items.Add(row);
         }
+
+        UpdateChecked();
 
         Selected = Items.FirstOrDefault(i => i.Risk.Id == selectedId);
         CountText = string.Format(CultureInfo.CurrentCulture, Strings.Risks_Count, rows.Count, doc.Risks.Count);
@@ -136,12 +213,91 @@ public sealed partial class RisksViewModel : ObservableObject
             return;
         }
 
+        // Se avisa que con el riesgo se borran todas sus evaluaciones.
         var ok = await _owner.Ui.ConfirmAsync(Strings.Risks_DeleteTitle,
-            string.Format(CultureInfo.CurrentCulture, Strings.Risks_DeleteMessage, r.Title), Strings.Common_Delete);
+            string.Format(CultureInfo.CurrentCulture, Strings.Risks_DeleteMessage, r.Title, r.Risk.Assessments.Count), Strings.Common_Delete);
         if (ok)
         {
             _owner.Run(() => _owner.Document.RemoveRisk(r.Risk.Id));
         }
+    }
+
+    /// <summary>
+    /// Elimina los riesgos marcados (con todas sus evaluaciones) y quita las evaluaciones marcadas de los demás,
+    /// después de confirmar. A un riesgo no se le pueden quitar todas sus evaluaciones: para eso se elimina.
+    /// </summary>
+    [RelayCommand]
+    private async Task DeleteChecked()
+    {
+        var risks = CheckedRisks.ToList();
+        var entries = CheckedEntries.ToList();
+        if (risks.Count == 0 && entries.Count == 0)
+        {
+            return;
+        }
+
+        var parts = new List<string>();
+        if (risks.Count > 0)
+        {
+            parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Risks_DeleteCheckedRisks,
+                risks.Count, risks.Sum(r => r.Risk.Assessments.Count)));
+        }
+
+        if (entries.Count > 0)
+        {
+            parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Risks_DeleteCheckedEntries, entries.Count));
+        }
+
+        var ok = await _owner.Ui.ConfirmAsync(Strings.Risks_DeleteCheckedTitle,
+            string.Join("\n", parts) + "\n\n" + Strings.Risks_DeleteCheckedUndo, Strings.Common_Delete);
+        if (!ok)
+        {
+            return;
+        }
+
+        _owner.Run(() =>
+        {
+            if (entries.Count > 0)
+            {
+                _owner.Document.RemoveAssessments([.. entries.Select(e => (e.RiskId, e.Id))]);
+            }
+
+            if (risks.Count > 0)
+            {
+                _owner.Document.RemoveRisks([.. risks.Select(r => r.Risk.Id)]);
+            }
+        });
+    }
+
+    [RelayCommand]
+    private void ExpandAll(bool expand)
+    {
+        foreach (var row in Items)
+        {
+            row.IsExpanded = expand;
+        }
+    }
+
+    /// <summary>Marca o desmarca todos los riesgos que se ven (con el filtro aplicado).</summary>
+    [RelayCommand]
+    private void CheckAll(bool check)
+    {
+        foreach (var row in Items)
+        {
+            row.IsChecked = check;
+            foreach (var entry in row.Entries.Where(e => !check))
+            {
+                entry.IsChecked = false;
+            }
+        }
+    }
+
+    private void UpdateChecked()
+    {
+        var risks = CheckedRisks.Count();
+        var entries = CheckedEntries.Count();
+        CheckedText = risks + entries == 0 ? "" : string.Format(CultureInfo.CurrentCulture, Strings.Risks_CheckedText, risks, entries);
+        OnPropertyChanged(nameof(HasChecked));
     }
 
     [RelayCommand]

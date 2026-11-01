@@ -19,6 +19,9 @@ public sealed class AppSettings
     /// <summary>Abreviaturas de los niveles ([ALT], [MED], [BAJ]) en la matriz de riesgo.</summary>
     public bool ShowLevelAbbreviations { get; set; } = true;
 
+    /// <summary>Monto del impacto junto a cada riesgo en la matriz (casilla de la pantalla de la matriz).</summary>
+    public bool ShowImpactAmount { get; set; }
+
     /// <summary>Fechas de evaluación: anterior a hoy al dar de alta un riesgo.</summary>
     public bool AllowPastDateOnCreate { get; set; } = true;
 

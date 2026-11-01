@@ -15,6 +15,7 @@ public static class Limits
     public const int RiskTitleMax = 200;
     public const int RiskShortDescriptionMax = 500;
     public const int ProjectTextMax = 200;
+    public const int CatalogNameMax = 80;
 }
 
 internal static class Validation
@@ -229,6 +230,13 @@ internal static class Validation
             throw new DomainException(Messages.Error_PercentRequired, nameof(Risk.ProbabilityPercent));
         }
 
+        // Consecuencias y criterio de materialidad: del catálogo de la matriz.
+        if (risk.ConsequenceIds.Any(id => doc.Project.Consequences.All(c => c.Id != id)) ||
+            (risk.MaterialityId is { } m && doc.Project.MaterialityCriteria.All(c => c.Id != m)))
+        {
+            throw new DomainException(Messages.Error_CatalogItemNotFound);
+        }
+
         // Las evaluaciones del historial también usan niveles de las escalas del proyecto.
         var impact = doc.ProjectScale(ScaleType.Impact);
         var probability = doc.ProjectScale(ScaleType.Probability);
@@ -239,6 +247,19 @@ internal static class Validation
     }
 
     public static string ScaleTypeName(ScaleType type) => type.DisplayName();
+
+    public static void ValidateCatalogName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new DomainException(Messages.Error_CatalogNameRequired);
+        }
+
+        if (name.Length > Limits.CatalogNameMax)
+        {
+            throw new DomainException(Format(Messages.Error_CatalogNameTooLong, Limits.CatalogNameMax));
+        }
+    }
 
     private static void CheckLength(string value, string label, string field)
     {

@@ -10,7 +10,10 @@ using CommunityToolkit.Mvvm.Input;
 namespace Auros.Ram.App.ViewModels;
 
 /// <summary>Un riesgo en una celda de la foto; <paramref name="Changed"/> si se movió o apareció en esta foto.</summary>
-public sealed record PlaybackItem(string Title, bool Changed, string Tooltip);
+public sealed record PlaybackItem(string Title, bool Changed, string Tooltip, string Amount = "")
+{
+    public bool HasAmount => Amount.Length > 0;
+}
 
 public sealed record PlaybackCell(IReadOnlyList<PlaybackItem> Items, LevelChip? Level, double MinHeight);
 

@@ -10,7 +10,11 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace Auros.Ram.App.ViewModels;
 
-public sealed record MatrixItem(Guid RiskId, string Title, string Tooltip);
+/// <param name="Amount">Monto del impacto a la fecha de la matriz (vacío si no tiene).</param>
+public sealed record MatrixItem(Guid RiskId, string Title, string Tooltip, string Amount = "")
+{
+    public bool HasAmount => Amount.Length > 0;
+}
 
 /// <param name="Level">Nivel de riesgo de la celda según el mapa de calor: da el color de fondo y de fuente.</param>
 /// <param name="ImpactId">Nivel de impacto de la fila (para agregar un riesgo con doble clic).</param>
@@ -99,7 +103,7 @@ public sealed partial class MatrixViewModel : ObservableObject
                 cells.Add(new MatrixCell([.. m[r, c].Select(x =>
                 {
                     var tip = string.Format(CultureInfo.CurrentCulture, Strings.Matrix_Tooltip, x.Title, level?.Name ?? "—");
-                    return new MatrixItem(x.Id, x.Title, tip);
+                    return new MatrixItem(x.Id, x.Title, tip, RangeFormat.Value(m.AmountOf(x.Id)));
                 })], height, level, m.Rows[r].Id, m.Columns[c].Id,
                     string.Format(CultureInfo.CurrentCulture, Strings.Matrix_CellTip, m.Rows[r].Name, m.Columns[c].Name)));
             }

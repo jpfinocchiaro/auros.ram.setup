@@ -102,6 +102,19 @@ public class UiSmokeTests
         Shot(window, "16-matriz-sin-abreviaturas");
         DisplayOptions.Current.ShowLevelAbbreviations = true;
 
+        docVm.SelectedSection = (int)Section.Risks;
+        docVm.Risks.Items[0].IsExpanded = true;
+        docVm.Risks.Items[1].IsExpanded = true;
+        docVm.Risks.Items[1].Entries[0].IsChecked = true;
+        docVm.Risks.Items[2].IsChecked = true;
+        Shot(window, "37-riesgos-jerarquicos");
+        docVm.Risks.CheckAllCommand.Execute(false);
+
+        docVm.SelectedSection = (int)Section.Matrix;
+        DisplayOptions.Current.ShowImpactAmount = true;
+        Shot(window, "38-matriz-montos");
+        DisplayOptions.Current.ShowImpactAmount = false;
+
         docVm.Lock();
         Shot(window, "07-bloqueado");
         docVm.IsLocked = false;
@@ -125,6 +138,8 @@ public class UiSmokeTests
         ShowDialog(new AboutWindow(), "13-acerca-de");
         ShowDialog(new SplashWindow(), "15-inicio");
         ShowDialog(new PreferencesWindow(new PreferencesViewModel { AutosaveMinutes = 5, LockMinutes = 15, ShowAbbreviations = true }), "17-preferencias");
+        ShowDialog(new CatalogsWindow(new CatalogsViewModel(doc)), "39-catalogos");
+        ShowDialog(new RiskEditorWindow(new RiskEditorViewModel(doc, doc.Risks[0])), "40-riesgo-consecuencias", scrollTo: 430);
         ShowDialog(new MessageWindow("Cambios sin guardar", "¿Guardar los cambios?", ["Cancelar", "No guardar", "Guardar"], 2), "14-mensaje");
 
         // "Value is null" son nulos transitorios (sin documento activo, plantillas aún sin árbol visual).
@@ -249,6 +264,50 @@ public class UiSmokeTests
         movie.NextCommand.Execute(null);        // navegar a mano pausa
         Assert.False(movie.IsPlaying);
         Assert.Equal(1, movie.Index);
+
+        // Consecuencias y criterio de materialidad: del combo, o escritos (se agregan al catálogo al guardar).
+        var withCatalogs = new RiskEditorViewModel(doc, doc.Risks[1]);
+        var before = withCatalogs.Consequences.Count;
+        withCatalogs.NewConsequence = "Pérdida de reputación";
+        withCatalogs.AddConsequenceCommand.Execute(null);
+        withCatalogs.NewConsequence = "Pérdida de reputación";   // repetida: no se agrega dos veces
+        withCatalogs.AddConsequenceCommand.Execute(null);
+        withCatalogs.NewConsequence = "Paralización de planta";
+        withCatalogs.AddConsequenceCommand.Execute(null);
+        withCatalogs.Materiality = "Supera el 5 % del resultado";
+        withCatalogs.SaveCommand.Execute(null);
+        Assert.Null(withCatalogs.Error);
+        var updated = doc.FindRisk(doc.Risks[1].Id)!;
+        Assert.Contains("Paralización de planta", doc.ConsequenceNames(updated));
+        Assert.Equal("Supera el 5 % del resultado", doc.MaterialityName(updated));
+        Assert.Contains(doc.Project.Consequences, c => c.Name == "Paralización de planta");
+        Assert.True(withCatalogs.Consequences.Count <= before + 2);
+
+        // Catálogos: renombrar y quitar desde Configuración.
+        var catalogs = new CatalogsViewModel(doc);
+        var row = catalogs.Consequences.Items.First(i => i.Name == "Paralización de planta");
+        row.Name = "Paralización de la planta";
+        Assert.True(catalogs.Close());
+        Assert.Contains("Paralización de la planta", doc.ConsequenceNames(doc.FindRisk(updated.Id)!));
+        catalogs = new CatalogsViewModel(doc);
+        catalogs.Consequences.RemoveCommand.Execute(catalogs.Consequences.Items.First(i => i.Name == "Paralización de la planta"));
+        Assert.NotNull(catalogs.Error);   // la usa un riesgo
+
+        // Grilla jerárquica: cada riesgo con sus evaluaciones; lo marcado se conserva al refrescar.
+        var risks = docVm.Risks;
+        risks.ClearFiltersCommand.Execute(null);
+        var first = risks.Items.First(r => r.Risk.Assessments.Count > 1);
+        Assert.Equal(first.Risk.Assessments.Count, first.Entries.Count);
+        Assert.True(first.Entries[0].IsCurrent);
+        first.IsExpanded = true;
+        first.Entries[^1].IsChecked = true;
+        risks.Items.Last().IsChecked = true;
+        Assert.True(risks.HasChecked);
+        risks.Refresh();
+        Assert.True(risks.Items.First(r => r.Risk.Id == first.Risk.Id).IsExpanded);
+        Assert.Contains("1", risks.CheckedText, StringComparison.Ordinal);
+        risks.CheckAllCommand.Execute(false);
+        Assert.False(risks.HasChecked);
 
         docVm.Project.Name = "Proyecto renombrado";
         docVm.Project.ApplyCommand.Execute(null);
@@ -569,15 +628,15 @@ public class UiSmokeTests
         window.Close();
     }
 
-    private static void ShowDialog(Window dialog, string name, bool scrollToEnd = false)
+    private static void ShowDialog(Window dialog, string name, bool scrollToEnd = false, double? scrollTo = null)
     {
         dialog.Show();
-        if (scrollToEnd)
+        if (scrollToEnd || scrollTo is not null)
         {
             Avalonia.Threading.Dispatcher.UIThread.RunJobs();
             dialog.UpdateLayout();
             var scroll = dialog.GetVisualDescendants<ScrollViewer>().First();
-            scroll.Offset = new Vector(0, scroll.Extent.Height);
+            scroll.Offset = new Vector(0, scrollTo ?? scroll.Extent.Height);
             dialog.UpdateLayout();
         }
 
@@ -638,6 +697,9 @@ public class UiSmokeTests
                 ImpactLevelId = doc.ProjectScale(ScaleType.Impact)!.OrderedLevels[i].Id,
                 ProbabilityLevelId = doc.ProjectScale(ScaleType.Probability)!.OrderedLevels[p].Id,
                 ImpactJustification = i >= 3 ? "Expone información sensible de clientes." : "",
+                ImpactAmount = (n * 7500m) + 2500m,
+                ConsequenceIds = [doc.Project.Consequences[n % 3].Id, doc.Project.Consequences[3 + (n % 4)].Id],
+                MaterialityId = doc.Project.MaterialityCriteria[n % 5].Id,
             }, start, "Relevamiento inicial");
         }
 

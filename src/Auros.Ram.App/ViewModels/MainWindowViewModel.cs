@@ -35,6 +35,15 @@ public sealed partial class MainWindowViewModel : ObservableObject
         _ui = ui;
         _settings = settings;
         DisplayOptions.Current.ShowLevelAbbreviations = settings.ShowLevelAbbreviations;
+        DisplayOptions.Current.ShowImpactAmount = settings.ShowImpactAmount;
+        DisplayOptions.Current.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(DisplayOptions.ShowImpactAmount) && _settings.ShowImpactAmount != DisplayOptions.Current.ShowImpactAmount)
+            {
+                _settings.ShowImpactAmount = DisplayOptions.Current.ShowImpactAmount;
+                _settings.Save();
+            }
+        };
         DisplayOptions.Current.DatePolicy = settings.DatePolicy;
         DisplayOptions.Current.EntryPolicy = settings.EntryPolicy;
         RefreshRecent();
@@ -579,6 +588,11 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     [RelayCommand]
     private Task About() => _ui.ShowAboutAsync();
+
+    /// <summary>Configuración → Consecuencias y criterios: los catálogos de la matriz activa.</summary>
+    [RelayCommand]
+    private Task Catalogs() =>
+        Active is { IsLocked: false } doc ? _ui.EditCatalogsAsync(new CatalogsViewModel(doc.Document)) : Task.CompletedTask;
 
     private void RefreshRecent()
     {

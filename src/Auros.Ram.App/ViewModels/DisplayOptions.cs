@@ -14,6 +14,10 @@ public sealed partial class DisplayOptions : ObservableObject
     [ObservableProperty]
     private bool _showLevelAbbreviations = true;
 
+    /// <summary>Muestra en la matriz el monto del impacto junto a cada riesgo (se recuerda entre sesiones).</summary>
+    [ObservableProperty]
+    private bool _showImpactAmount;
+
     /// <summary>Qué fechas de evaluación se aceptan (Preferencias); se aplica a todos los archivos abiertos.</summary>
     public Auros.Ram.Core.Model.AssessmentDatePolicy DatePolicy { get; set; } = Auros.Ram.Core.Model.AssessmentDatePolicy.AllowAll;
 

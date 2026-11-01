@@ -87,11 +87,11 @@ internal static class DocumentStore
 
         using (var cmd = Command(c, tx, """
             INSERT INTO risk (id, position, title, short_description, long_description, impact_level_id, probability_level_id,
-                              impact_justification, probability_justification, created_utc, modified_utc, impact_amount, probability_percent)
-            VALUES ($id, $pos, $title, $short, $long, $il, $pl, $ij, $pj, $created, $modified, $amount, $percent);
+                              impact_justification, probability_justification, created_utc, modified_utc, impact_amount, probability_percent, materiality_id)
+            VALUES ($id, $pos, $title, $short, $long, $il, $pl, $ij, $pj, $created, $modified, $amount, $percent, $materiality);
             """))
         {
-            var names = new[] { "$id", "$pos", "$title", "$short", "$long", "$il", "$pl", "$ij", "$pj", "$created", "$modified", "$amount", "$percent" };
+            var names = new[] { "$id", "$pos", "$title", "$short", "$long", "$il", "$pl", "$ij", "$pj", "$created", "$modified", "$amount", "$percent", "$materiality" };
             var prm = names.Select(n => cmd.Parameters.Add(n, SqliteType.Text)).ToArray();
             prm[1].SqliteType = SqliteType.Integer;
             for (var i = 0; i < doc.Risks.Count; i++)
@@ -110,6 +110,7 @@ internal static class DocumentStore
                 prm[10].Value = r.ModifiedUtc.ToString("o", CultureInfo.InvariantCulture);
                 prm[11].Value = Dec(r.ImpactAmount);
                 prm[12].Value = Dec(r.ProbabilityPercent);
+                prm[13].Value = Id(r.MaterialityId);
                 cmd.ExecuteNonQuery();
             }
         }
@@ -134,6 +135,40 @@ internal static class DocumentStore
                     prm[6].Value = a.RecordedUtc.ToString("o", CultureInfo.InvariantCulture);
                     prm[7].Value = Dec(a.ImpactAmount);
                     prm[8].Value = Dec(a.ProbabilityPercent);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        // La base nueva ya trae la lista sugerida (paso v6 del esquema): se reemplaza por el catálogo de la matriz.
+        Sql.Execute(c, "DELETE FROM catalog_item;", tx);
+        using (var cmd = Command(c, tx, "INSERT INTO catalog_item (id, kind, position, name) VALUES ($id, $kind, $pos, $name);"))
+        {
+            var id = cmd.Parameters.Add("$id", SqliteType.Text);
+            var kind = cmd.Parameters.Add("$kind", SqliteType.Integer);
+            var pos = cmd.Parameters.Add("$pos", SqliteType.Integer);
+            var name = cmd.Parameters.Add("$name", SqliteType.Text);
+            foreach (var k in new[] { CatalogKind.Consequence, CatalogKind.Materiality })
+            {
+                var items = p.CatalogFor(k);
+                for (var i = 0; i < items.Count; i++)
+                {
+                    (id.Value, kind.Value, pos.Value, name.Value) = (items[i].Id.ToString(), (int)k, i, items[i].Name);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        using (var cmd = Command(c, tx, "INSERT INTO risk_consequence (risk_id, item_id, position) VALUES ($risk, $item, $pos);"))
+        {
+            var risk = cmd.Parameters.Add("$risk", SqliteType.Text);
+            var item = cmd.Parameters.Add("$item", SqliteType.Text);
+            var pos = cmd.Parameters.Add("$pos", SqliteType.Integer);
+            foreach (var r in doc.Risks)
+            {
+                for (var i = 0; i < r.ConsequenceIds.Count; i++)
+                {
+                    (risk.Value, item.Value, pos.Value) = (r.Id.ToString(), r.ConsequenceIds[i].ToString(), i);
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -216,10 +251,25 @@ internal static class DocumentStore
 
         project.HeatMap = heat;
 
+        var consequences = new List<CatalogItem>();
+        var materiality = new List<CatalogItem>();
+        using (var cmd = Command(c, null, "SELECT id, kind, name FROM catalog_item ORDER BY kind, position;"))
+        using (var r = cmd.ExecuteReader())
+        {
+            while (r.Read())
+            {
+                var item = new CatalogItem(Guid.Parse(r.GetString(0)), r.GetString(2));
+                ((CatalogKind)r.GetInt32(1) == CatalogKind.Consequence ? consequences : materiality).Add(item);
+            }
+        }
+
+        project.Consequences = consequences;
+        project.MaterialityCriteria = materiality;
+
         var risks = new List<Risk>();
         using (var cmd = Command(c, null, """
             SELECT id, title, short_description, long_description, impact_level_id, probability_level_id,
-                   impact_justification, probability_justification, created_utc, modified_utc, impact_amount, probability_percent
+                   impact_justification, probability_justification, created_utc, modified_utc, impact_amount, probability_percent, materiality_id
             FROM risk ORDER BY position;
             """))
         using (var r = cmd.ExecuteReader())
@@ -240,8 +290,30 @@ internal static class DocumentStore
                     ModifiedUtc = DateTime.Parse(r.GetString(9), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind),
                     ImpactAmount = Dec(r, 10),
                     ProbabilityPercent = Dec(r, 11),
+                    MaterialityId = OptionalGuid(r, 12),
                 });
             }
+        }
+
+        var riskConsequences = new Dictionary<Guid, List<Guid>>();
+        using (var cmd = Command(c, null, "SELECT risk_id, item_id FROM risk_consequence ORDER BY risk_id, position;"))
+        using (var r = cmd.ExecuteReader())
+        {
+            while (r.Read())
+            {
+                var riskId = Guid.Parse(r.GetString(0));
+                if (!riskConsequences.TryGetValue(riskId, out var list))
+                {
+                    riskConsequences[riskId] = list = [];
+                }
+
+                list.Add(Guid.Parse(r.GetString(1)));
+            }
+        }
+
+        foreach (var risk in risks)
+        {
+            risk.ConsequenceIds = riskConsequences.GetValueOrDefault(risk.Id) ?? [];
         }
 
         var history = new Dictionary<Guid, List<RiskAssessment>>();

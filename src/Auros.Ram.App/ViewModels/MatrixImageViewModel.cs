@@ -26,6 +26,7 @@ public sealed partial class MatrixImageViewModel : ObservableObject
     {
         _owner = owner;
         _showAbbreviations = DisplayOptions.Current.ShowLevelAbbreviations;
+        _showAmounts = DisplayOptions.Current.ShowImpactAmount;
         Scale = Scales[1];
         Reload();
     }
@@ -41,6 +42,7 @@ public sealed partial class MatrixImageViewModel : ObservableObject
     [ObservableProperty] private bool _showLevelLabels = true;
     [ObservableProperty] private bool _showRisks = true;
     [ObservableProperty] private bool _showAbbreviations;
+    [ObservableProperty] private bool _showAmounts;
 
     /// <summary>Encabezado: título, proyecto y fecha, o logo (si no queda nada, no ocupa lugar).</summary>
     public bool HasHeader => ShowTitle || ShowSubtitle || (ShowLogo && CompanyLogo is not null);
@@ -84,7 +86,9 @@ public sealed partial class MatrixImageViewModel : ObservableObject
             var cells = new List<PlaybackCell>();
             for (var c = 0; c < m.Columns.Count; c++)
             {
-                IReadOnlyList<PlaybackItem> items = ShowRisks ? [.. m[r, c].Select(x => new PlaybackItem(x.Title, false, x.Title))] : [];
+                IReadOnlyList<PlaybackItem> items = ShowRisks
+                    ? [.. m[r, c].Select(x => new PlaybackItem(x.Title, false, x.Title, RangeFormat.Value(m.AmountOf(x.Id))))]
+                    : [];
                 cells.Add(new PlaybackCell(items, LevelChip.From(m.LevelAt(r, c)), height));
             }
 

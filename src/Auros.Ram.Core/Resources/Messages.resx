@@ -115,4 +115,17 @@
   <data name="Error_PercentRequired" xml:space="preserve"><value>Falta la probabilidad en porcentaje (la configuración la pide como dato obligatorio).</value></data>
   <data name="Graded_ModerateLow" xml:space="preserve"><value>Moderado bajo</value></data>
   <data name="Graded_ModerateHigh" xml:space="preserve"><value>Moderado alto</value></data>
+  <data name="Suggested_Consequences" xml:space="preserve"><value>Accidente laboral|Pérdida de rentabilidad|Pérdida de reputación|Sanción regulatoria|Interrupción de la operación|Pérdida o fuga de información|Fraude|Daño ambiental</value></data>
+  <data name="Suggested_Materiality" xml:space="preserve"><value>Impacto económico significativo|Incumplimiento legal o regulatorio|Afecta la reputación|Afecta la seguridad de las personas|Afecta la continuidad del negocio</value></data>
+  <data name="Error_CatalogNameRequired" xml:space="preserve"><value>Escriba una descripción.</value></data>
+  <data name="Error_CatalogNameTooLong" xml:space="preserve"><value>La descripción no puede tener más de {0} caracteres.</value></data>
+  <data name="Error_CatalogItemNotFound" xml:space="preserve"><value>La opción ya no existe en el catálogo de la matriz.</value></data>
+  <data name="Error_CatalogDuplicate" xml:space="preserve"><value>Ya hay una opción «{0}».</value></data>
+  <data name="Error_CatalogItemInUse" xml:space="preserve"><value>No se puede quitar «{0}»: la usan {1} riesgo(s). Quítela primero de esos riesgos.</value></data>
+  <data name="Error_AllAssessments" xml:space="preserve"><value>No se pueden quitar todas las evaluaciones de «{0}»: para eso elimine el riesgo.</value></data>
+  <data name="Undo_AddCatalogItem" xml:space="preserve"><value>Agregar «{0}» al catálogo</value></data>
+  <data name="Undo_EditCatalogItem" xml:space="preserve"><value>Renombrar opción «{0}»</value></data>
+  <data name="Undo_RemoveCatalogItem" xml:space="preserve"><value>Quitar «{0}» del catálogo</value></data>
+  <data name="Undo_RemoveRisks" xml:space="preserve"><value>Eliminar {0} riesgos</value></data>
+  <data name="Undo_RemoveAssessments" xml:space="preserve"><value>Quitar {0} evaluación(es)</value></data>
 </root>

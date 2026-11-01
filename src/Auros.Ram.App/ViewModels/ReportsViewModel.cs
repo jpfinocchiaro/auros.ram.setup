@@ -22,6 +22,11 @@ public sealed record ReportItem(
     IReadOnlyList<DetailDimension> Dimensions)
 {
     public string Heading => $"{Number}. {Title}";
+
+    public IReadOnlyList<string> Consequences { get; init; } = [];
+    public string Materiality { get; init; } = "";
+    public bool HasConsequences => Consequences.Count > 0;
+    public bool HasMateriality => Materiality.Length > 0;
 }
 
 /// <summary>Un renglón de la evolución: estado al inicio y al final del período, tendencia y cambios.</summary>
@@ -117,7 +122,11 @@ public sealed partial class ReportsViewModel : ObservableObject
                     new DetailDimension(ScaleType.Risk.DisplayName(), new LevelChip(row.RiskLevel), Resources.Strings.Reports_FromHeatMap, false),
                     Dim(ScaleType.Impact, row.ImpactLevel, r.ImpactJustification),
                     Dim(ScaleType.Probability, row.ProbabilityLevel, r.ProbabilityJustification),
-                ]));
+                ])
+            {
+                Consequences = doc.ConsequenceNames(r),
+                Materiality = doc.MaterialityName(r),
+            });
         }
 
         Selected = Items.FirstOrDefault(i => i.RiskId == selectedId) ?? Items.FirstOrDefault();

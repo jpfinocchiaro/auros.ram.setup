@@ -259,6 +259,7 @@
           <CheckBox IsChecked="{Binding ShowLevelLabels}" Content="{x:Static r:Strings.Image_ShowLevelLabels}" Margin="0,0,12,4" />
           <CheckBox IsChecked="{Binding ShowAxisNames}" Content="{x:Static r:Strings.Image_ShowAxisNames}" Margin="0,0,12,4" />
           <CheckBox IsChecked="{Binding ShowRisks}" Content="{x:Static r:Strings.Image_ShowRisks}" Margin="0,0,12,4" />
+          <CheckBox IsChecked="{Binding ShowAmounts}" Content="{x:Static r:Strings.Matrix_ShowAmount}" Margin="0,0,12,4" IsEnabled="{Binding ShowRisks}" />
           <CheckBox IsChecked="{Binding ShowAbbreviations}" Content="{x:Static r:Strings.Image_ShowAbbreviations}" Margin="0,0,12,4" />
           <CheckBox IsChecked="{Binding ShowLegend}" Content="{x:Static r:Strings.Image_ShowLegend}" Margin="0,0,12,4" />
         </WrapPanel>
@@ -336,8 +337,18 @@
                                         <ItemsControl ItemsSource="{Binding Items}" VerticalAlignment="Top">
                                           <ItemsControl.ItemTemplate>
                                             <DataTemplate x:DataType="vm:PlaybackItem">
-                                              <TextBlock Text="{Binding Title, StringFormat='• {0}'}" TextTrimming="CharacterEllipsis" Height="24"
-                                                         FontFamily="{StaticResource CondensedFontFamily}" FontSize="15" />
+                                              <DockPanel Height="24">
+                                                <TextBlock DockPanel.Dock="Right" Margin="8,0,0,0" FontWeight="SemiBold" FontSize="15" Text="{Binding Amount}">
+                                                  <TextBlock.IsVisible>
+                                                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                      <Binding Path="HasAmount" />
+                                                      <Binding Path="$parent[UserControl].((vm:ReportsViewModel)DataContext).Image.ShowAmounts" FallbackValue="False" />
+                                                    </MultiBinding>
+                                                  </TextBlock.IsVisible>
+                                                </TextBlock>
+                                                <TextBlock Text="{Binding Title, StringFormat='• {0}'}" TextTrimming="CharacterEllipsis"
+                                                           FontFamily="{StaticResource CondensedFontFamily}" FontSize="15" />
+                                              </DockPanel>
                                             </DataTemplate>
                                           </ItemsControl.ItemTemplate>
                                         </ItemsControl>
@@ -428,6 +439,21 @@
                 <views:RichTextBlock Markup="{Binding ShortDescription}" />
                 <TextBlock Classes="h2" Text="{x:Static r:Strings.Risk_Long}" />
                 <views:RichTextBlock Markup="{Binding LongDescription}" />
+                <TextBlock Classes="h2" Text="{x:Static r:Strings.Risk_Consequences}" IsVisible="{Binding HasConsequences}" />
+                <ItemsControl ItemsSource="{Binding Consequences}" IsVisible="{Binding HasConsequences}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                      <Border Background="{DynamicResource AccentSoftBrush}" CornerRadius="12" Padding="10,2" Margin="0,0,6,6">
+                        <TextBlock Text="{Binding}" Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" />
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock Classes="h2" Text="{x:Static r:Strings.Risk_Materiality}" IsVisible="{Binding HasMateriality}" />
+                <TextBlock Text="{Binding Materiality}" TextWrapping="Wrap" IsVisible="{Binding HasMateriality}" />
               </StackPanel>
             </ScrollViewer>
           </Border>

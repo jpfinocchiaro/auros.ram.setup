@@ -74,6 +74,22 @@ public sealed class Scale
     public override string ToString() => Name;
 }
 
+/// <summary>Las dos listas de opciones de cada matriz.</summary>
+public enum CatalogKind
+{
+    /// <summary>Consecuencias potenciales ("Accidente laboral", "Pérdida de reputación", …): varias por riesgo.</summary>
+    Consequence = 1,
+
+    /// <summary>Criterios de materialidad: uno por riesgo.</summary>
+    Materiality = 2,
+}
+
+/// <summary>Una opción de un catálogo: una descripción muy corta.</summary>
+public sealed record CatalogItem(Guid Id, string Name)
+{
+    public override string ToString() => Name;
+}
+
 /// <summary>Una celda del mapa de calor: qué nivel de riesgo corresponde a un impacto y una probabilidad.</summary>
 public sealed record HeatCell(Guid ImpactLevelId, Guid ProbabilityLevelId, Guid RiskLevelId);
 
@@ -97,6 +113,15 @@ public sealed class ProjectInfo
     /// nivel por omisión (ver <see cref="Services.HeatMap"/>).
     /// </summary>
     public IReadOnlyList<HeatCell> HeatMap { get; set; } = [];
+
+    /// <summary>Catálogo de consecuencias potenciales de la matriz (se elige de él en cada riesgo).</summary>
+    public IReadOnlyList<CatalogItem> Consequences { get; set; } = [];
+
+    /// <summary>Catálogo de criterios de materialidad de la matriz.</summary>
+    public IReadOnlyList<CatalogItem> MaterialityCriteria { get; set; } = [];
+
+    public IReadOnlyList<CatalogItem> CatalogFor(CatalogKind kind) =>
+        kind == CatalogKind.Consequence ? Consequences : MaterialityCriteria;
 
     public Guid? ScaleIdFor(ScaleType type) => type switch
     {
@@ -172,6 +197,12 @@ public sealed class Risk
 
     public Guid ImpactLevelId { get; set; }
     public Guid ProbabilityLevelId { get; set; }
+
+    /// <summary>Consecuencias potenciales del riesgo (del catálogo de la matriz), en el orden en que se cargaron.</summary>
+    public IReadOnlyList<Guid> ConsequenceIds { get; set; } = [];
+
+    /// <summary>Criterio de materialidad del riesgo (del catálogo de la matriz), si tiene.</summary>
+    public Guid? MaterialityId { get; set; }
 
     /// <summary>Monto del impacto (opcional, 2 decimales): el de la evaluación vigente.</summary>
     public decimal? ImpactAmount { get; set; }

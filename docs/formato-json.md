@@ -1,4 +1,4 @@
-# Exportación JSON (RNF-63) — `formatVersion` 5
+# Exportación JSON (RNF-63) — `formatVersion` 6
 
 Contenido completo de una matriz, para integraciones y migraciones. Implementación:
 `src/Auros.Ram.Core/Serialization/JsonExchange.cs`. **El JSON no está cifrado.**
@@ -6,7 +6,7 @@ Contenido completo de una matriz, para integraciones y migraciones. Implementaci
 ```jsonc
 {
   "format": "auros.ram/matrix",      // identificador fijo
-  "formatVersion": 5,                // se rechaza si es mayor que la soportada o anterior a 3
+  "formatVersion": 6,                // se rechaza si es mayor que la soportada o anterior a 3
   "exportedUtc": "2026-10-30T12:00:00Z",
   "project": {
     "name": "Relevamiento 2026",     // obligatorio
@@ -17,6 +17,12 @@ Contenido completo de una matriz, para integraciones y migraciones. Implementaci
     "impactScaleId": "guid",         // las tres son obligatorias y del tipo correcto
     "probabilityScaleId": "guid",
     "riskScaleId": "guid",
+    "consequences": [                // catálogo de consecuencias potenciales (descripciones cortas, 1–80)
+      { "id": "guid", "name": "Accidente laboral" }
+    ],
+    "materialityCriteria": [         // catálogo de criterios de materialidad
+      { "id": "guid", "name": "Impacto económico significativo" }
+    ],
     "heatMap": [                     // celdas fijadas a mano; las que faltan toman el nivel por omisión
       { "impactLevelId": "guid", "probabilityLevelId": "guid", "riskLevelId": "guid" }
     ]
@@ -48,6 +54,8 @@ Contenido completo de una matriz, para integraciones y migraciones. Implementaci
       "modifiedUtc": "…",
       "impactAmount": 2500.00,       // opcional: monto del impacto (2 decimales), el de la evaluación vigente
       "probabilityPercent": 45.50,   // opcional: probabilidad de 0 a 100 %
+      "consequenceIds": ["guid"],    // consecuencias potenciales (del catálogo), en orden
+      "materialityId": "guid",       // criterio de materialidad (del catálogo), opcional
       "assessments": [               // historial de evaluaciones, de la más antigua a la más reciente
         {
           "id": "guid",
@@ -75,7 +83,8 @@ Al importar se aplican las mismas validaciones que en la edición (RF-02, RF-03,
 Un error indica el riesgo o campo que falla. La importación crea un archivo `.rmx` nuevo, con una
 contraseña nueva (opcional).
 
-Un JSON de la versión 3 (sin `assessments`) se importa con una sola evaluación por riesgo: su estado
+Un JSON anterior a la versión 6 se importa con los catálogos sugeridos y sin consecuencias ni criterio en los
+riesgos. Un JSON de la versión 3 (sin `assessments`) se importa con una sola evaluación por riesgo: su estado
 actual, fechado el día en que se creó.
 
 Los JSON de las versiones 1 y 2 (valor agregado y dificultad) fueron de prueba y se rechazan con un

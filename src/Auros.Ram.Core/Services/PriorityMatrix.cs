@@ -12,8 +12,12 @@ public sealed class PriorityMatrix
     private readonly IReadOnlyList<Risk>[,] _cells;
     private readonly Level?[,] _levels;
 
-    private PriorityMatrix(IReadOnlyList<Level> columns, IReadOnlyList<Level> rows, IReadOnlyList<Risk>[,] cells, Level?[,] levels)
+    private readonly Dictionary<Guid, decimal?> _amounts;
+
+    private PriorityMatrix(IReadOnlyList<Level> columns, IReadOnlyList<Level> rows, IReadOnlyList<Risk>[,] cells, Level?[,] levels,
+        Dictionary<Guid, decimal?> amounts)
     {
+        _amounts = amounts;
         Columns = columns;
         Rows = rows;
         _cells = cells;
@@ -34,6 +38,9 @@ public sealed class PriorityMatrix
     public int MaxCellCount { get; }
 
     public IReadOnlyList<Risk> this[int row, int column] => _cells[row, column];
+
+    /// <summary>Monto del impacto del riesgo en la fecha de la matriz (el de la evaluación vigente ese día).</summary>
+    public decimal? AmountOf(Guid riskId) => _amounts.GetValueOrDefault(riskId);
 
     /// <summary>Nivel de riesgo de la celda según el mapa de calor.</summary>
     public Level? LevelAt(int row, int column) => _levels[row, column];
@@ -62,9 +69,11 @@ public sealed class PriorityMatrix
             }
         }
 
+        var amounts = new Dictionary<Guid, decimal?>();
         foreach (var risk in doc.Risks)
         {
             var (impact, probability) = (risk.ImpactLevelId, risk.ProbabilityLevelId);
+            amounts[risk.Id] = risk.ImpactAmount;
             if (asOf is { } date && risk.Assessments.Count > 0)
             {
                 if (risk.AssessmentAt(date) is not { } state)
@@ -73,6 +82,7 @@ public sealed class PriorityMatrix
                 }
 
                 (impact, probability) = (state.ImpactLevelId, state.ProbabilityLevelId);
+                amounts[risk.Id] = state.ImpactAmount;
             }
 
             if (rowIndex.TryGetValue(impact, out var r) && colIndex.TryGetValue(probability, out var c))
@@ -86,10 +96,14 @@ public sealed class PriorityMatrix
         {
             for (var c = 0; c < columns.Count; c++)
             {
-                cells[r, c] = [.. buckets[r, c].OrderBy(x => x.Title, StringComparer.CurrentCultureIgnoreCase)];
+                // Dentro de la celda (mismo nivel de impacto), el mayor monto arriba; los que no tienen monto, al final por título.
+                cells[r, c] = [.. buckets[r, c]
+                    .OrderBy(x => amounts[x.Id] is null)
+                    .ThenByDescending(x => amounts[x.Id])
+                    .ThenBy(x => x.Title, StringComparer.CurrentCultureIgnoreCase)];
             }
         }
 
-        return new PriorityMatrix(columns, rows, cells, levels);
+        return new PriorityMatrix(columns, rows, cells, levels, amounts);
     }
 }

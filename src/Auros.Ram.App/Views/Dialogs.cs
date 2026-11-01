@@ -171,6 +171,23 @@ public partial class ExportConfirmWindow : Window
     private void OnCancel(object? sender, RoutedEventArgs e) => Close(false);
 }
 
+/// <summary>Catálogos de la matriz: consecuencias potenciales y criterios de materialidad.</summary>
+public partial class CatalogsWindow : Window
+{
+    public CatalogsWindow() => InitializeComponent();
+
+    public CatalogsWindow(CatalogsViewModel vm) : this() => DataContext = vm;
+
+    // Al cerrar se aplican los nombres corregidos; si alguno no se puede, queda abierta con el motivo.
+    private void OnClose(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not CatalogsViewModel vm || vm.Close())
+        {
+            Close();
+        }
+    }
+}
+
 public partial class PreferencesWindow : Window
 {
     public PreferencesWindow() => InitializeComponent();
