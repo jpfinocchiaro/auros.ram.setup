@@ -201,7 +201,7 @@
             <TextBlock Text="{x:Static r:Strings.History_Title}" FontWeight="SemiBold" />
             <views:EvolutionChart Height="150" Points="{Binding ChartPoints}" LevelNames="{Binding ChartLevels}" />
             <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{x:Static r:Strings.History_DateEditHint}" />
-            <Grid ColumnDefinitions="150,130,130,130,*,36" Margin="0,4,0,0">
+            <Grid ColumnDefinitions="150,170,170,110,*,32" Margin="0,4,0,2">
               <TextBlock Classes="label" Text="{x:Static r:Strings.History_ColDate}" />
               <TextBlock Grid.Column="1" Classes="label" Text="{x:Static r:Strings.ScaleType_Impact}" />
               <TextBlock Grid.Column="2" Classes="label" Text="{x:Static r:Strings.Risks_ProbabilityShort}" />
@@ -211,26 +211,30 @@
             <ItemsControl ItemsSource="{Binding History}">
               <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="vm:HistoryEntry">
-                  <Grid ColumnDefinitions="150,130,130,130,*,36" Margin="0,0,0,6">
-                    <!-- La fecha de cada evaluación se puede corregir (según lo que permitan las Preferencias). -->
-                    <CalendarDatePicker SelectedDate="{Binding Date}" Width="140" HorizontalAlignment="Left" VerticalAlignment="Center"
-                                        DisplayDateEnd="{x:Static sys:DateTime.Today}" ToolTip.Tip="{x:Static r:Strings.History_DateEditTip}"
-                                        FontWeight="{Binding IsCurrent, Converter={x:Static vm:Converters.BoldIf}}" />
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0" Spacing="1">
-                      <ContentControl Content="{Binding Impact}" HorizontalAlignment="Left" />
-                      <TextBlock Classes="muted" FontSize="11" Text="{Binding ImpactValue}" />
-                    </StackPanel>
-                    <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,8,0" Spacing="1">
-                      <ContentControl Content="{Binding Probability}" HorizontalAlignment="Left" />
-                      <TextBlock Classes="muted" FontSize="11" Text="{Binding ProbabilityValue}" />
-                    </StackPanel>
-                    <ContentControl Grid.Column="3" Content="{Binding RiskLevel}" VerticalAlignment="Center" Margin="0,0,8,0" />
-                    <TextBlock Grid.Column="4" Text="{Binding Note}" TextWrapping="Wrap" VerticalAlignment="Center" />
-                    <Button Grid.Column="5" Content="✕" Padding="8,2" VerticalAlignment="Center" IsVisible="{Binding CanRemove}"
-                            ToolTip.Tip="{x:Static r:Strings.History_RemoveTip}"
-                            Command="{Binding $parent[Window].((vm:RiskEditorViewModel)DataContext).RemoveAssessmentCommand}"
-                            CommandParameter="{Binding}" />
-                  </Grid>
+                  <!-- Una evaluación por línea, compacta: el monto y el % al lado de su nivel, con una línea divisoria. -->
+                  <Border BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1" Padding="0,3">
+                    <Grid ColumnDefinitions="150,170,170,110,*,32">
+                      <!-- La fecha de cada evaluación se puede corregir (según lo que permitan las Preferencias). -->
+                      <CalendarDatePicker Classes="compact" SelectedDate="{Binding Date}" Width="140" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                          DisplayDateEnd="{x:Static sys:DateTime.Today}" ToolTip.Tip="{x:Static r:Strings.History_DateEditTip}"
+                                          FontWeight="{Binding IsCurrent, Converter={x:Static vm:Converters.BoldIf}}" />
+                      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <ContentControl Content="{Binding Impact}" />
+                        <TextBlock Classes="muted" FontSize="12" VerticalAlignment="Center" Text="{Binding ImpactValue}" />
+                      </StackPanel>
+                      <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <ContentControl Content="{Binding Probability}" />
+                        <TextBlock Classes="muted" FontSize="12" VerticalAlignment="Center" Text="{Binding ProbabilityValue}" />
+                      </StackPanel>
+                      <ContentControl Grid.Column="3" Content="{Binding RiskLevel}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                      <TextBlock Grid.Column="4" Text="{Binding Note}" FontSize="13" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
+                                 ToolTip.Tip="{Binding Note}" />
+                      <Button Grid.Column="5" Classes="compact" Content="✕" VerticalAlignment="Center" IsVisible="{Binding CanRemove}"
+                              ToolTip.Tip="{x:Static r:Strings.History_RemoveTip}"
+                              Command="{Binding $parent[Window].((vm:RiskEditorViewModel)DataContext).RemoveAssessmentCommand}"
+                              CommandParameter="{Binding}" />
+                    </Grid>
+                  </Border>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>
@@ -241,6 +245,19 @@
   </DockPanel>
 
   <Window.Styles>
+    <!-- Historial compacto: selector de fecha y botón de quitar más bajos. -->
+    <Style Selector="CalendarDatePicker.compact">
+      <Setter Property="MinHeight" Value="28" />
+      <Setter Property="Height" Value="28" />
+      <Setter Property="Padding" Value="8,0,4,0" />
+      <Setter Property="FontSize" Value="13" />
+    </Style>
+    <Style Selector="Button.compact">
+      <Setter Property="MinHeight" Value="0" />
+      <Setter Property="Height" Value="26" />
+      <Setter Property="Padding" Value="7,0" />
+      <Setter Property="FontSize" Value="11" />
+    </Style>
     <!-- Color del modo: verde petróleo (alta), gris (edición), azul (nueva evaluación). -->
     <Style Selector="Border.modeBanner">
       <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />

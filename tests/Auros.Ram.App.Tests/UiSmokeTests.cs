@@ -655,11 +655,16 @@ public class UiSmokeTests
         dialog.Show();
         if (scrollToEnd || scrollTo is not null)
         {
-            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
-            dialog.UpdateLayout();
-            var scroll = dialog.GetVisualDescendants<ScrollViewer>().First();
-            scroll.Offset = new Vector(0, scrollTo ?? scroll.Extent.Height);
-            dialog.UpdateLayout();
+            // La ventana termina de armarse en varias pasadas (editores, historial): se desplaza hasta que se estabiliza.
+            var scroll = dialog.GetVisualDescendants<ScrollViewer>().OrderByDescending(v => v.Extent.Height).First();
+            for (var i = 0; i < 4; i++)
+            {
+                Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+                Thread.Sleep(30);
+                dialog.UpdateLayout();
+                scroll.Offset = new Vector(0, scrollTo ?? scroll.Extent.Height);
+                dialog.UpdateLayout();
+            }
         }
 
         Shot(dialog, name);
