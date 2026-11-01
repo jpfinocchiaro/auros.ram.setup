@@ -1,4 +1,5 @@
 <UserControl xmlns="https://github.com/avaloniaui"
+        xmlns:ui="using:Auros.Ram.App.Views"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Auros.Ram.App.ViewModels"
              xmlns:views="using:Auros.Ram.App.Views"
@@ -63,7 +64,7 @@
           <TextBox x:Name="UnlockBox" PasswordChar="•" RevealPassword="False" Text="{Binding UnlockPassword}"
                    Watermark="{x:Static r:Strings.Password_Label}" KeyDown="OnUnlockKeyDown" />
           <TextBlock Classes="error" Text="{Binding UnlockError}" IsVisible="{Binding UnlockError, Converter={x:Static ObjectConverters.IsNotNull}}" />
-          <Button Classes="accent" HorizontalAlignment="Right" Content="{x:Static r:Strings.Lock_Unlock}" Command="{Binding UnlockCommand}" IsEnabled="{Binding !IsBusy}" />
+          <Button ui:ButtonIcon.Icon="{StaticResource IconUnlock}" Classes="accent" HorizontalAlignment="Right" Content="{x:Static r:Strings.Lock_Unlock}" Command="{Binding UnlockCommand}" IsEnabled="{Binding !IsBusy}" />
         </StackPanel>
       </Border>
     </Border>

@@ -103,6 +103,7 @@ public partial class MessageWindow : Window
         {
             var index = i;
             var button = new Button { Content = buttons[i], IsDefault = i == defaultIndex };
+            ButtonIcon.SetIconByKey(button, MessageIcons.IconFor(buttons[i]));
             if (i == defaultIndex)
             {
                 button.Classes.Add("accent");
@@ -186,6 +187,17 @@ public partial class CatalogsWindow : Window
             Close();
         }
     }
+}
+
+/// <summary>Íconos de los botones de los mensajes, según su texto.</summary>
+internal static class MessageIcons
+{
+    public static string IconFor(string text) =>
+        text == Strings.Common_Save ? "IconSave"
+        : text == Strings.Common_Delete ? "IconDelete"
+        : text == Strings.Common_Discard || text == Strings.Close_DontSave ? "IconUndo"
+        : text == Strings.Common_Cancel ? "IconClose"
+        : "IconCheck";
 }
 
 public partial class PreferencesWindow : Window

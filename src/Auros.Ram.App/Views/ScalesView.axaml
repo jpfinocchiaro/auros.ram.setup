@@ -1,4 +1,5 @@
 <UserControl xmlns="https://github.com/avaloniaui"
+        xmlns:ui="using:Auros.Ram.App.Views"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Auros.Ram.App.ViewModels"
              xmlns:r="using:Auros.Ram.App.Resources"
@@ -27,7 +28,7 @@
   <ScrollViewer>
     <StackPanel Margin="24,20" Spacing="16">
       <DockPanel>
-        <Button DockPanel.Dock="Right" Content="{x:Static r:Strings.Scales_SaveTemplate}" Command="{Binding SaveTemplateCommand}"
+        <Button ui:ButtonIcon.Icon="{StaticResource IconSave}" DockPanel.Dock="Right" Content="{x:Static r:Strings.Scales_SaveTemplate}" Command="{Binding SaveTemplateCommand}"
                 ToolTip.Tip="{x:Static r:Strings.Scales_SaveTemplateTip}" />
         <StackPanel Spacing="4">
           <TextBlock Classes="h1" Text="{x:Static r:Strings.Section_Scales}" />
@@ -39,7 +40,7 @@
       <Border Classes="card" IsVisible="{Binding HasHeatMap}">
         <StackPanel Spacing="12">
           <DockPanel>
-            <Button DockPanel.Dock="Right" Content="{x:Static r:Strings.HeatMap_Reset}" Command="{Binding ResetHeatMapCommand}"
+            <Button ui:ButtonIcon.Icon="{StaticResource IconReassess}" DockPanel.Dock="Right" Content="{x:Static r:Strings.HeatMap_Reset}" Command="{Binding ResetHeatMapCommand}"
                     IsEnabled="{Binding IsHeatMapCustom}" VerticalAlignment="Top" />
             <StackPanel Spacing="2">
               <TextBlock Classes="h2" Text="{x:Static r:Strings.HeatMap_Title}" />
@@ -111,7 +112,7 @@
             <Border Classes="card" Margin="0,0,0,16">
               <StackPanel Spacing="10">
                 <DockPanel>
-                  <Button DockPanel.Dock="Right" Content="{x:Static r:Strings.Scales_Add}"
+                  <Button ui:ButtonIcon.Icon="{StaticResource IconAdd}" DockPanel.Dock="Right" Content="{x:Static r:Strings.Scales_Add}"
                           Command="{Binding $parent[UserControl].((vm:ScalesViewModel)DataContext).AddCommand}" CommandParameter="{Binding}" />
                   <StackPanel>
                     <TextBlock Classes="h2" Text="{Binding Title}" />
@@ -124,9 +125,9 @@
                       <Border BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,1,0,0" Padding="0,10">
                         <DockPanel>
                           <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                            <Button Content="{x:Static r:Strings.Common_Edit}"
+                            <Button ui:ButtonIcon.Icon="{StaticResource IconEdit}" Content="{x:Static r:Strings.Common_Edit}"
                                     Command="{Binding $parent[UserControl].((vm:ScalesViewModel)DataContext).EditCommand}" CommandParameter="{Binding}" />
-                            <Button Content="{x:Static r:Strings.Common_Delete}"
+                            <Button ui:ButtonIcon.Icon="{StaticResource IconDelete}" Content="{x:Static r:Strings.Common_Delete}"
                                     Command="{Binding $parent[UserControl].((vm:ScalesViewModel)DataContext).DeleteCommand}" CommandParameter="{Binding}" />
                           </StackPanel>
                           <StackPanel Spacing="6">

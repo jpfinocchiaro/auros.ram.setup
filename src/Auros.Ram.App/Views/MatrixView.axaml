@@ -1,4 +1,5 @@
 <UserControl xmlns="https://github.com/avaloniaui"
+        xmlns:ui="using:Auros.Ram.App.Views"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Auros.Ram.App.ViewModels"
              xmlns:r="using:Auros.Ram.App.Resources"
@@ -55,7 +56,7 @@
                 <TextBlock Classes="muted" FontSize="13" VerticalAlignment="Center" Text="{x:Static r:Strings.Matrix_AsOf}" />
                 <CalendarDatePicker x:Name="AsOfPicker" SelectedDate="{Binding AsOfDate}" Width="150"
                                     Watermark="{x:Static r:Strings.Matrix_Today}" DisplayDateEnd="{x:Static sys:DateTime.Today}" />
-                <Button Content="{x:Static r:Strings.Matrix_Today}" Command="{Binding ShowTodayCommand}" IsVisible="{Binding IsHistorical}" />
+                <Button ui:ButtonIcon.Icon="{StaticResource IconCalendar}" Content="{x:Static r:Strings.Matrix_Today}" Command="{Binding ShowTodayCommand}" IsVisible="{Binding IsHistorical}" />
               </StackPanel>
               <CheckBox IsChecked="{Binding Display.ShowImpactAmount}" Content="{x:Static r:Strings.Matrix_ShowAmount}"
                         Margin="0,0,24,4" ToolTip.Tip="{x:Static r:Strings.Matrix_ShowAmountTip}" />
@@ -71,9 +72,9 @@
       <!-- Pie: leyenda del nivel de riesgo y exportaciones -->
       <DockPanel DockPanel.Dock="Bottom" Margin="0,20,0,0">
         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8">
-          <Button Content="{x:Static r:Strings.Matrix_ExportPdf}" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="PdfMatrix" />
-          <Button Content="{x:Static r:Strings.Matrix_ExportXlsx}" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="Xlsx" />
-          <Button Content="{x:Static r:Strings.Menu_Print}" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="Print" />
+          <Button ui:ButtonIcon.Icon="{StaticResource IconPdf}" Content="{x:Static r:Strings.Matrix_ExportPdf}" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="PdfMatrix" />
+          <Button ui:ButtonIcon.Icon="{StaticResource IconTable}" Content="{x:Static r:Strings.Matrix_ExportXlsx}" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="Xlsx" />
+          <Button ui:ButtonIcon.Icon="{StaticResource IconPrint}" Content="{x:Static r:Strings.Menu_Print}" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="Print" />
         </StackPanel>
         <StackPanel Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
           <TextBlock Classes="muted" FontSize="13" VerticalAlignment="Center" Text="{x:Static r:Strings.Matrix_Legend}" />
@@ -139,11 +140,17 @@
                                     <Button.ContextMenu>
                                       <ContextMenu>
                                         <MenuItem Header="{x:Static r:Strings.Risks_Edit}" CommandParameter="{Binding}"
-                                                  Command="{Binding $parent[UserControl].((vm:MatrixViewModel)DataContext).OpenCommand}" />
+                                                  Command="{Binding $parent[UserControl].((vm:MatrixViewModel)DataContext).OpenCommand}">
+                                          <MenuItem.Icon><Path Classes="nav" Data="{StaticResource IconEdit}" /></MenuItem.Icon>
+                                        </MenuItem>
                                         <MenuItem Header="{x:Static r:Strings.Risks_Reassess}" CommandParameter="{Binding}"
-                                                  Command="{Binding $parent[UserControl].((vm:MatrixViewModel)DataContext).ReassessCommand}" />
+                                                  Command="{Binding $parent[UserControl].((vm:MatrixViewModel)DataContext).ReassessCommand}">
+                                          <MenuItem.Icon><Path Classes="nav" Data="{StaticResource IconReassess}" /></MenuItem.Icon>
+                                        </MenuItem>
                                         <MenuItem Header="{x:Static r:Strings.Clone_Risk}" CommandParameter="{Binding}"
-                                                  Command="{Binding $parent[UserControl].((vm:MatrixViewModel)DataContext).CloneCommand}" />
+                                                  Command="{Binding $parent[UserControl].((vm:MatrixViewModel)DataContext).CloneCommand}">
+                                          <MenuItem.Icon><Path Classes="nav" Data="{StaticResource IconClone}" /></MenuItem.Icon>
+                                        </MenuItem>
                                       </ContextMenu>
                                     </Button.ContextMenu>
                                     <!-- Monto del impacto a la derecha (opcional); dentro de la celda, el mayor arriba. -->

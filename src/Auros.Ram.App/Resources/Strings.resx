@@ -329,9 +329,9 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Mode_RiskLabel" xml:space="preserve"><value>Riesgo</value></data>
   <data name="Mode_CorrectionHint" xml:space="preserve"><value>Cambiaste el impacto o la probabilidad: al guardar se corrige la evaluación vigente (del {0}), sin agregar otra al historial. Si el riesgo cambió en el tiempo, registralo como nueva evaluación.</value></data>
   <data name="Mode_SwitchToReassess" xml:space="preserve"><value>Registrar como nueva evaluación</value></data>
-  <data name="Risks_Edit" xml:space="preserve"><value>✎ Editar</value></data>
+  <data name="Risks_Edit" xml:space="preserve"><value>Editar</value></data>
   <data name="Risks_EditTip" xml:space="preserve"><value>Corrige los datos del riesgo (no agrega evaluaciones al historial)</value></data>
-  <data name="Risks_Reassess" xml:space="preserve"><value>⟳ Nueva evaluación</value></data>
+  <data name="Risks_Reassess" xml:space="preserve"><value>Nueva evaluación</value></data>
   <data name="Risks_ReassessTip" xml:space="preserve"><value>Registra el impacto y la probabilidad del riesgo en una fecha (queda en el historial)</value></data>
   <data name="Playback_Tab" xml:space="preserve"><value>Película de la matriz</value></data>
   <data name="Playback_Seconds" xml:space="preserve"><value>Segundos por foto</value></data>
@@ -427,10 +427,10 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Risks_ColLast" xml:space="preserve"><value>Última eval.</value></data>
   <data name="Risks_SelectionText" xml:space="preserve"><value>Seleccionados: {0} riesgo(s) y {1} evaluación(es)</value></data>
   <data name="Risks_DeleteTip" xml:space="preserve"><value>Elimina lo seleccionado: los riesgos con todas sus evaluaciones y las evaluaciones sueltas (también con la tecla Suprimir)</value></data>
-  <data name="Clone_Button" xml:space="preserve"><value>⧉ Clonar</value></data>
+  <data name="Clone_Button" xml:space="preserve"><value>Clonar</value></data>
   <data name="Clone_Tip" xml:space="preserve"><value>Clona lo seleccionado: un riesgo abre «Nuevo riesgo» con todo copiado; una evaluación abre «Nueva evaluación» del mismo riesgo con sus valores</value></data>
-  <data name="Clone_Risk" xml:space="preserve"><value>⧉ Clonar riesgo</value></data>
-  <data name="Clone_Assessment" xml:space="preserve"><value>⧉ Nueva evaluación a partir de esta</value></data>
+  <data name="Clone_Risk" xml:space="preserve"><value>Clonar riesgo</value></data>
+  <data name="Clone_Assessment" xml:space="preserve"><value>Nueva evaluación a partir de esta</value></data>
   <data name="Clone_Title" xml:space="preserve"><value>{0} (copia)</value></data>
   <data name="Clone_Note" xml:space="preserve"><value>Copia de «{0}»</value></data>
 </root>

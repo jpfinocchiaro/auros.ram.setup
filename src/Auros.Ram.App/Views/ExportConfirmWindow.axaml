@@ -1,4 +1,5 @@
 <Window xmlns="https://github.com/avaloniaui"
+        xmlns:ui="using:Auros.Ram.App.Views"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:Auros.Ram.App.ViewModels"
         xmlns:r="using:Auros.Ram.App.Resources"
@@ -23,8 +24,8 @@
     </StackPanel>
     <TextBlock Classes="error" Text="{Binding Error}" IsVisible="{Binding Error, Converter={x:Static ObjectConverters.IsNotNull}}" />
     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-      <Button Content="{x:Static r:Strings.Common_Cancel}" IsCancel="True" Click="OnCancel" />
-      <Button Classes="accent" Content="{x:Static r:Strings.Export_Continue}" IsDefault="True" Click="OnAccept" />
+      <Button ui:ButtonIcon.Icon="{StaticResource IconClose}" Content="{x:Static r:Strings.Common_Cancel}" IsCancel="True" Click="OnCancel" />
+      <Button ui:ButtonIcon.Icon="{StaticResource IconExport}" Classes="accent" Content="{x:Static r:Strings.Export_Continue}" IsDefault="True" Click="OnAccept" />
     </StackPanel>
   </StackPanel>
 </Window>

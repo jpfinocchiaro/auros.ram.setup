@@ -1,4 +1,5 @@
 <Window xmlns="https://github.com/avaloniaui"
+        xmlns:ui="using:Auros.Ram.App.Views"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:Auros.Ram.App.ViewModels"
         xmlns:m="using:Auros.Ram.Core.Model"
@@ -32,7 +33,7 @@
       <TextBlock Classes="muted" TextWrapping="Wrap" Text="{x:Static r:Strings.Scale_LevelsHint}" />
       <!-- Rangos: monto (Impacto) o porcentaje (Probabilidad) por nivel, para elegir el nivel desde el valor. -->
       <DockPanel IsVisible="{Binding HasRanges}">
-        <Button DockPanel.Dock="Right" Content="{x:Static r:Strings.Scale_SplitPercent}" Command="{Binding SplitPercentCommand}"
+        <Button ui:ButtonIcon.Icon="{StaticResource IconSplit}" DockPanel.Dock="Right" Content="{x:Static r:Strings.Scale_SplitPercent}" Command="{Binding SplitPercentCommand}"
                 IsVisible="{Binding IsProbability}" Margin="12,0,0,0" />
         <TextBlock Classes="muted" TextWrapping="Wrap" VerticalAlignment="Center" Text="{Binding RangeHint}" />
       </DockPanel>
@@ -41,10 +42,10 @@
     <StackPanel DockPanel.Dock="Bottom" Spacing="8" Margin="0,12,0,0">
       <TextBlock Classes="error" Text="{Binding Error}" IsVisible="{Binding Error, Converter={x:Static ObjectConverters.IsNotNull}}" />
       <DockPanel>
-        <Button DockPanel.Dock="Left" Content="{x:Static r:Strings.Scale_AddLevel}" Command="{Binding AddLevelCommand}" />
+        <Button ui:ButtonIcon.Icon="{StaticResource IconAdd}" DockPanel.Dock="Left" Content="{x:Static r:Strings.Scale_AddLevel}" Command="{Binding AddLevelCommand}" />
         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-          <Button Content="{x:Static r:Strings.Common_Cancel}" IsCancel="True" Click="OnCancel" />
-          <Button Classes="accent" Content="{x:Static r:Strings.Common_Save}" Command="{Binding SaveCommand}" />
+          <Button ui:ButtonIcon.Icon="{StaticResource IconClose}" Content="{x:Static r:Strings.Common_Cancel}" IsCancel="True" Click="OnCancel" />
+          <Button ui:ButtonIcon.Icon="{StaticResource IconSave}" Classes="accent" Content="{x:Static r:Strings.Common_Save}" Command="{Binding SaveCommand}" />
         </StackPanel>
       </DockPanel>
     </StackPanel>

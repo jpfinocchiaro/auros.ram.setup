@@ -1,4 +1,5 @@
 <UserControl xmlns="https://github.com/avaloniaui"
+        xmlns:ui="using:Auros.Ram.App.Views"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Auros.Ram.App.ViewModels"
              xmlns:r="using:Auros.Ram.App.Resources"
@@ -33,9 +34,9 @@
     <TabItem Header="{x:Static r:Strings.Reports_Summary}">
       <DockPanel>
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
-          <Button Content="{x:Static r:Strings.Reports_ExportPdf}" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="PdfSummary" />
-          <Button Content="{x:Static r:Strings.Matrix_ExportXlsx}" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="Xlsx" />
-          <Button Content="{x:Static r:Strings.Reports_ExportCsv}" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="CsvRisks" />
+          <Button ui:ButtonIcon.Icon="{StaticResource IconPdf}" Content="{x:Static r:Strings.Reports_ExportPdf}" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="PdfSummary" />
+          <Button ui:ButtonIcon.Icon="{StaticResource IconTable}" Content="{x:Static r:Strings.Matrix_ExportXlsx}" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="Xlsx" />
+          <Button ui:ButtonIcon.Icon="{StaticResource IconTable}" Content="{x:Static r:Strings.Reports_ExportCsv}" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="CsvRisks" />
         </StackPanel>
         <Border Classes="card" Padding="0">
           <DockPanel>
@@ -78,9 +79,9 @@
             <CalendarDatePicker SelectedDate="{Binding ToDate}" Width="150" Watermark="{x:Static r:Strings.Matrix_Today}"
                                 DisplayDateEnd="{x:Static sys:DateTime.Today}" />
           </StackPanel>
-          <Button Content="{x:Static r:Strings.Reports_ExportPdf}" Margin="0,0,8,4"
+          <Button ui:ButtonIcon.Icon="{StaticResource IconPdf}" Content="{x:Static r:Strings.Reports_ExportPdf}" Margin="0,0,8,4"
                   Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="PdfEvolution" />
-          <Button Content="{x:Static r:Strings.Matrix_ExportXlsx}" Margin="0,0,8,4"
+          <Button ui:ButtonIcon.Icon="{StaticResource IconTable}" Content="{x:Static r:Strings.Matrix_ExportXlsx}" Margin="0,0,8,4"
                   Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="Xlsx" />
         </WrapPanel>
         <TextBlock DockPanel.Dock="Top" Classes="muted" Margin="0,0,0,8" Text="{Binding EvolutionSummary}" />
@@ -246,9 +247,9 @@
             <TextBlock VerticalAlignment="Center" Classes="muted" Text="{x:Static r:Strings.Image_Resolution}" />
             <ComboBox ItemsSource="{Binding Scales}" SelectedItem="{Binding Scale}" Width="190" />
           </StackPanel>
-          <Button Content="{x:Static r:Strings.Image_Copy}" Classes="accent" Command="{Binding CopyImageCommand}" Margin="0,0,8,4"
+          <Button ui:ButtonIcon.Icon="{StaticResource IconCopy}" Content="{x:Static r:Strings.Image_Copy}" Classes="accent" Command="{Binding CopyImageCommand}" Margin="0,0,8,4"
                   ToolTip.Tip="{x:Static r:Strings.Image_CopyTip}" />
-          <Button Content="{x:Static r:Strings.Image_Save}" Command="{Binding SaveImageCommand}" Margin="0,0,8,4" />
+          <Button ui:ButtonIcon.Icon="{StaticResource IconImage}" Content="{x:Static r:Strings.Image_Save}" Command="{Binding SaveImageCommand}" Margin="0,0,8,4" />
         </WrapPanel>
         <!-- Qué partes lleva la imagen: se puede quitar cualquiera para copiar o guardar solo lo que haga falta. -->
         <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
@@ -397,7 +398,7 @@
     <TabItem Header="{x:Static r:Strings.Reports_Detail}">
       <DockPanel>
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
-          <Button Content="{x:Static r:Strings.Reports_ExportDetailPdf}" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="PdfDetail" />
+          <Button ui:ButtonIcon.Icon="{StaticResource IconPdf}" Content="{x:Static r:Strings.Reports_ExportDetailPdf}" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ExportCommand}" CommandParameter="PdfDetail" />
         </StackPanel>
         <Grid ColumnDefinitions="300,12,*">
           <Border Classes="card" Padding="0">

@@ -1,4 +1,5 @@
 <UserControl xmlns="https://github.com/avaloniaui"
+        xmlns:ui="using:Auros.Ram.App.Views"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Auros.Ram.App.ViewModels"
              xmlns:r="using:Auros.Ram.App.Resources"
@@ -63,36 +64,37 @@
         <ComboBox Grid.Column="8" Grid.Row="1" HorizontalAlignment="Stretch" ItemsSource="{Binding SortOptions}" SelectedItem="{Binding SortBy}" />
         <ToggleButton Grid.Column="9" Grid.Row="1" Margin="6,0,0,0" IsChecked="{Binding Descending}"
                       ToolTip.Tip="{x:Static r:Strings.Risks_DescendingTip}" Content="↓↑" />
-        <Button Grid.Column="10" Grid.Row="1" Margin="6,0,0,0" Content="{x:Static r:Strings.Risks_ClearFilters}" Command="{Binding ClearFiltersCommand}" />
+        <Button ui:ButtonIcon.Icon="{StaticResource IconFilterOff}" Grid.Column="10" Grid.Row="1" Margin="6,0,0,0" Content="{x:Static r:Strings.Risks_ClearFilters}" Command="{Binding ClearFiltersCommand}" />
       </Grid>
     </Border>
 
     <!-- Acciones: una sola barra. Editar y Nueva evaluación usan el riesgo de la fila seleccionada; Eliminar, todo lo seleccionado. -->
     <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6">
-        <Button Content="{x:Static r:Strings.Risks_ExpandAll}" Command="{Binding ExpandAllCommand}">
+        <Button ui:ButtonIcon.Icon="{StaticResource IconExpand}" Content="{x:Static r:Strings.Risks_ExpandAll}" Command="{Binding ExpandAllCommand}">
           <Button.CommandParameter><x:Boolean>True</x:Boolean></Button.CommandParameter>
         </Button>
-        <Button Content="{x:Static r:Strings.Risks_CollapseAll}" Command="{Binding ExpandAllCommand}" Margin="0,0,10,0">
+        <Button ui:ButtonIcon.Icon="{StaticResource IconCollapse}" Content="{x:Static r:Strings.Risks_CollapseAll}" Command="{Binding ExpandAllCommand}" Margin="0,0,10,0">
           <Button.CommandParameter><x:Boolean>False</x:Boolean></Button.CommandParameter>
         </Button>
-        <Button Content="{x:Static r:Strings.Risks_Edit}" Command="{Binding EditCommand}" CommandParameter="{Binding Selected}"
+        <Button ui:ButtonIcon.Icon="{StaticResource IconEdit}" Content="{x:Static r:Strings.Risks_Edit}" Command="{Binding EditCommand}" CommandParameter="{Binding Selected}"
                 ToolTip.Tip="{x:Static r:Strings.Risks_EditTip}"
                 IsEnabled="{Binding Selected, Converter={x:Static ObjectConverters.IsNotNull}}" />
-        <Button Content="{x:Static r:Strings.Risks_Reassess}" Command="{Binding ReassessCommand}" CommandParameter="{Binding Selected}"
+        <Button ui:ButtonIcon.Icon="{StaticResource IconReassess}" Content="{x:Static r:Strings.Risks_Reassess}" Command="{Binding ReassessCommand}" CommandParameter="{Binding Selected}"
                 ToolTip.Tip="{x:Static r:Strings.Risks_ReassessTip}"
                 IsEnabled="{Binding Selected, Converter={x:Static ObjectConverters.IsNotNull}}" />
-        <Button Content="{x:Static r:Strings.Clone_Button}" Command="{Binding CloneCommand}" IsEnabled="{Binding HasSelection}"
+        <Button ui:ButtonIcon.Icon="{StaticResource IconClone}" Content="{x:Static r:Strings.Clone_Button}" Command="{Binding CloneCommand}" IsEnabled="{Binding HasSelection}"
                 ToolTip.Tip="{x:Static r:Strings.Clone_Tip}" />
-        <Button Content="{x:Static r:Strings.Common_Delete}" Command="{Binding DeleteCommand}" IsEnabled="{Binding HasSelection}"
+        <Button ui:ButtonIcon.Icon="{StaticResource IconDelete}" Content="{x:Static r:Strings.Common_Delete}" Command="{Binding DeleteCommand}" IsEnabled="{Binding HasSelection}"
                 ToolTip.Tip="{x:Static r:Strings.Risks_DeleteTip}" />
-        <Button Classes="accent" Content="{x:Static r:Strings.Risks_Add}" Command="{Binding AddCommand}" />
-      </StackPanel>
-      <StackPanel Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
-        <TextBlock Classes="muted" Text="{Binding CountText}" />
-        <TextBlock Classes="muted" Text="{Binding SelectionText}" />
+        <Button ui:ButtonIcon.Icon="{StaticResource IconAdd}" Classes="accent" Content="{x:Static r:Strings.Risks_Add}" Command="{Binding AddCommand}" />
       </StackPanel>
     </DockPanel>
+    <!-- Cantidad mostrada y selección, en su propia línea (la barra de botones ocupa todo el ancho). -->
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="16" Margin="2,0,0,8">
+      <TextBlock Classes="muted" Text="{Binding CountText}" />
+      <TextBlock Classes="muted" Text="{Binding SelectionText}" />
+    </StackPanel>
 
     <!-- Grilla jerárquica: cada riesgo (fila padre) con sus evaluaciones (filas hijas, indentadas).
          Clic selecciona la línea completa; Ctrl y Mayús, varias. Seleccionar un riesgo selecciona sus evaluaciones. -->
@@ -120,11 +122,17 @@
                   <Grid.ContextMenu>
                     <ContextMenu>
                       <MenuItem Header="{x:Static r:Strings.Risks_Edit}"
-                                Command="{Binding $parent[UserControl].((vm:RisksViewModel)DataContext).EditCommand}" CommandParameter="{Binding}" />
+                                Command="{Binding $parent[UserControl].((vm:RisksViewModel)DataContext).EditCommand}" CommandParameter="{Binding}">
+                        <MenuItem.Icon><Path Classes="nav" Data="{StaticResource IconEdit}" /></MenuItem.Icon>
+                      </MenuItem>
                       <MenuItem Header="{x:Static r:Strings.Risks_Reassess}"
-                                Command="{Binding $parent[UserControl].((vm:RisksViewModel)DataContext).ReassessCommand}" CommandParameter="{Binding}" />
+                                Command="{Binding $parent[UserControl].((vm:RisksViewModel)DataContext).ReassessCommand}" CommandParameter="{Binding}">
+                        <MenuItem.Icon><Path Classes="nav" Data="{StaticResource IconReassess}" /></MenuItem.Icon>
+                      </MenuItem>
                       <MenuItem Header="{x:Static r:Strings.Clone_Risk}"
-                                Command="{Binding $parent[UserControl].((vm:RisksViewModel)DataContext).CloneCommand}" CommandParameter="{Binding}" />
+                                Command="{Binding $parent[UserControl].((vm:RisksViewModel)DataContext).CloneCommand}" CommandParameter="{Binding}">
+                        <MenuItem.Icon><Path Classes="nav" Data="{StaticResource IconClone}" /></MenuItem.Icon>
+                      </MenuItem>
                     </ContextMenu>
                   </Grid.ContextMenu>
                   <ToggleButton Classes="expander" IsChecked="{Binding IsExpanded}" Width="26" Height="26" Padding="0" VerticalAlignment="Center"
@@ -151,7 +159,9 @@
                   <Grid.ContextMenu>
                     <ContextMenu>
                       <MenuItem Header="{x:Static r:Strings.Clone_Assessment}"
-                                Command="{Binding $parent[UserControl].((vm:RisksViewModel)DataContext).CloneCommand}" CommandParameter="{Binding}" />
+                                Command="{Binding $parent[UserControl].((vm:RisksViewModel)DataContext).CloneCommand}" CommandParameter="{Binding}">
+                        <MenuItem.Icon><Path Classes="nav" Data="{StaticResource IconClone}" /></MenuItem.Icon>
+                      </MenuItem>
                     </ContextMenu>
                   </Grid.ContextMenu>
                   <DockPanel Grid.Column="1" Margin="22,0,12,0">
@@ -175,7 +185,7 @@
           <StackPanel IsVisible="{Binding !HasRisks}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10" Margin="24">
             <TextBlock Classes="h2" HorizontalAlignment="Center" Text="{x:Static r:Strings.Risks_EmptyTitle}" />
             <TextBlock Classes="muted" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Text="{x:Static r:Strings.Risks_EmptyHint}" />
-            <Button Classes="accent" HorizontalAlignment="Center" Content="{x:Static r:Strings.Risks_Add}" Command="{Binding AddCommand}" />
+            <Button ui:ButtonIcon.Icon="{StaticResource IconAdd}" Classes="accent" HorizontalAlignment="Center" Content="{x:Static r:Strings.Risks_Add}" Command="{Binding AddCommand}" />
           </StackPanel>
         </Panel>
       </DockPanel>

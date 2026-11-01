@@ -1,4 +1,5 @@
 <Window xmlns="https://github.com/avaloniaui"
+        xmlns:ui="using:Auros.Ram.App.Views"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:Auros.Ram.App.ViewModels"
         xmlns:r="using:Auros.Ram.App.Resources"
@@ -14,8 +15,8 @@
     <StackPanel DockPanel.Dock="Bottom" Spacing="8" Margin="0,12,0,0">
       <TextBlock Classes="error" Text="{Binding Error}" IsVisible="{Binding Error, Converter={x:Static ObjectConverters.IsNotNull}}" />
       <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-        <Button Content="{x:Static r:Strings.Common_Cancel}" IsCancel="True" Click="OnCancel" />
-        <Button Classes="accent" Content="{x:Static r:Strings.Common_Save}" Command="{Binding SaveCommand}" />
+        <Button ui:ButtonIcon.Icon="{StaticResource IconClose}" Content="{x:Static r:Strings.Common_Cancel}" IsCancel="True" Click="OnCancel" />
+        <Button ui:ButtonIcon.Icon="{StaticResource IconSave}" Classes="accent" Content="{x:Static r:Strings.Common_Save}" Command="{Binding SaveCommand}" />
       </StackPanel>
     </StackPanel>
 
@@ -85,7 +86,7 @@
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
               <DockPanel>
-                <Button DockPanel.Dock="Right" Margin="8,0,0,0" Content="{x:Static r:Strings.Risk_AddConsequence}" Command="{Binding AddConsequenceCommand}" />
+                <Button ui:ButtonIcon.Icon="{StaticResource IconAdd}" DockPanel.Dock="Right" Margin="8,0,0,0" Content="{x:Static r:Strings.Risk_AddConsequence}" Command="{Binding AddConsequenceCommand}" />
                 <ComboBox x:Name="ConsequenceBox" IsEditable="True" HorizontalAlignment="Stretch" ItemsSource="{Binding ConsequenceOptions}"
                           Text="{Binding NewConsequence}" PlaceholderText="{x:Static r:Strings.Risk_ConsequenceHint}" />
               </DockPanel>
@@ -154,7 +155,7 @@
         <!-- Edición con otro impacto o probabilidad: se corrige la evaluación vigente; se ofrece registrarlo como nueva evaluación. -->
         <Border Background="{DynamicResource WarningBackBrush}" CornerRadius="4" Padding="12,8" IsVisible="{Binding IsCorrecting}">
           <DockPanel>
-            <Button DockPanel.Dock="Right" Margin="12,0,0,0" VerticalAlignment="Center"
+            <Button ui:ButtonIcon.Icon="{StaticResource IconReassess}" DockPanel.Dock="Right" Margin="12,0,0,0" VerticalAlignment="Center"
                     Content="{x:Static r:Strings.Mode_SwitchToReassess}" Command="{Binding SwitchToReassessCommand}" />
             <TextBlock Text="{Binding CorrectionHint}" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="13" />
           </DockPanel>
