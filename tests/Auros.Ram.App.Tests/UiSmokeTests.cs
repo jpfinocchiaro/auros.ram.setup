@@ -103,12 +103,13 @@ public class UiSmokeTests
         DisplayOptions.Current.ShowLevelAbbreviations = true;
 
         docVm.SelectedSection = (int)Section.Risks;
-        docVm.Risks.Items[0].IsExpanded = true;
-        docVm.Risks.Items[1].IsExpanded = true;
-        docVm.Risks.Items[1].Entries[0].IsChecked = true;
-        docVm.Risks.Items[2].IsChecked = true;
+        // Riesgo con varias evaluaciones desplegado y seleccionado: sus evaluaciones quedan seleccionadas con él.
+        var multi = docVm.Risks.Items.First(r => r.EntriesCount > 2);
+        multi.IsExpanded = true;
+        docVm.Risks.Items.First(r => r != multi && r.EntriesCount > 1).IsExpanded = true;
+        docVm.Risks.Selection.Select(docVm.Risks.Rows.IndexOf(multi));
         Shot(window, "37-riesgos-jerarquicos");
-        docVm.Risks.CheckAllCommand.Execute(false);
+        docVm.Risks.Selection.Clear();
 
         docVm.SelectedSection = (int)Section.Matrix;
         DisplayOptions.Current.ShowImpactAmount = true;
@@ -293,21 +294,42 @@ public class UiSmokeTests
         catalogs.Consequences.RemoveCommand.Execute(catalogs.Consequences.Items.First(i => i.Name == "Paralización de la planta"));
         Assert.NotNull(catalogs.Error);   // la usa un riesgo
 
-        // Grilla jerárquica: cada riesgo con sus evaluaciones; lo marcado se conserva al refrescar.
+        // Grilla jerárquica: el riesgo es la fila padre y sus evaluaciones, las hijas (al desplegarlo).
         var risks = docVm.Risks;
         risks.ClearFiltersCommand.Execute(null);
         var first = risks.Items.First(r => r.Risk.Assessments.Count > 1);
         Assert.Equal(first.Risk.Assessments.Count, first.Entries.Count);
         Assert.True(first.Entries[0].IsCurrent);
+        Assert.DoesNotContain(first.Entries[0], risks.Rows);
         first.IsExpanded = true;
-        first.Entries[^1].IsChecked = true;
-        risks.Items.Last().IsChecked = true;
-        Assert.True(risks.HasChecked);
+        var at = risks.Rows.IndexOf(first);
+        Assert.Equal(first.Entries, risks.Rows.Skip(at + 1).Take(first.Entries.Count));
+
+        // Seleccionar el riesgo selecciona todas sus evaluaciones; quitar una deja de seleccionar el riesgo entero.
+        risks.Selection.Select(at);
+        Assert.All(first.Entries, e => Assert.Contains(e, risks.Selection.SelectedItems));
+        Assert.Equal([first], risks.SelectedRisks);
+        Assert.Empty(risks.SelectedEntries);
+        Assert.Same(first, risks.Selected);
+        risks.Selection.Deselect(at + 1);
+        Assert.Empty(risks.SelectedRisks);
+        Assert.Equal(first.Entries.Count - 1, risks.SelectedEntries.Count);
+
+        // Un riesgo seleccionado y plegado: al desplegarlo, sus evaluaciones aparecen seleccionadas.
+        risks.Selection.Clear();
+        first.IsExpanded = false;
+        risks.Selection.Select(risks.Rows.IndexOf(first));
+        first.IsExpanded = true;
+        Assert.All(first.Entries, e => Assert.Contains(e, risks.Selection.SelectedItems));
+
+        // Lo desplegado y lo seleccionado se conservan al refrescar.
         risks.Refresh();
-        Assert.True(risks.Items.First(r => r.Risk.Id == first.Risk.Id).IsExpanded);
-        Assert.Contains("1", risks.CheckedText, StringComparison.Ordinal);
-        risks.CheckAllCommand.Execute(false);
-        Assert.False(risks.HasChecked);
+        var refreshed = risks.Items.First(r => r.Risk.Id == first.Risk.Id);
+        Assert.True(refreshed.IsExpanded);
+        Assert.Contains(refreshed, risks.SelectedRisks);
+        Assert.True(risks.HasSelection);
+        risks.Selection.Clear();
+        Assert.False(risks.HasSelection);
 
         docVm.Project.Name = "Proyecto renombrado";
         docVm.Project.ApplyCommand.Execute(null);

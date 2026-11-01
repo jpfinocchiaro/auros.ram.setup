@@ -39,11 +39,6 @@
       <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}" />
       <Setter Property="BorderThickness" Value="0,0,0,1" />
     </Style>
-    <Style Selector="Border.subRow">
-      <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}" />
-      <Setter Property="BorderThickness" Value="0,1,0,0" />
-    </Style>
     <Style Selector="Border.tag">
       <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
       <Setter Property="CornerRadius" Value="8" />
@@ -72,125 +67,100 @@
       </Grid>
     </Border>
 
-    <!-- Grilla jerárquica: desplegar evaluaciones y marcar riesgos o evaluaciones para eliminarlos juntos. -->
+    <!-- Acciones: una sola barra. Editar y Nueva evaluación usan el riesgo de la fila seleccionada; Eliminar, todo lo seleccionado. -->
     <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6">
-        <TextBlock Classes="muted" VerticalAlignment="Center" FontSize="13" Text="{Binding CheckedText}" Margin="0,0,4,0" />
-        <Button Content="{x:Static r:Strings.Risks_DeleteChecked}" Command="{Binding DeleteCheckedCommand}" IsEnabled="{Binding HasChecked}" />
-      </StackPanel>
-      <StackPanel Orientation="Horizontal" Spacing="6">
         <Button Content="{x:Static r:Strings.Risks_ExpandAll}" Command="{Binding ExpandAllCommand}">
           <Button.CommandParameter><x:Boolean>True</x:Boolean></Button.CommandParameter>
         </Button>
-        <Button Content="{x:Static r:Strings.Risks_CollapseAll}" Command="{Binding ExpandAllCommand}">
+        <Button Content="{x:Static r:Strings.Risks_CollapseAll}" Command="{Binding ExpandAllCommand}" Margin="0,0,10,0">
           <Button.CommandParameter><x:Boolean>False</x:Boolean></Button.CommandParameter>
         </Button>
-        <Button Content="{x:Static r:Strings.Risks_CheckAll}" Command="{Binding CheckAllCommand}">
-          <Button.CommandParameter><x:Boolean>True</x:Boolean></Button.CommandParameter>
-        </Button>
-        <Button Content="{x:Static r:Strings.Risks_UncheckAll}" Command="{Binding CheckAllCommand}">
-          <Button.CommandParameter><x:Boolean>False</x:Boolean></Button.CommandParameter>
-        </Button>
-      </StackPanel>
-    </DockPanel>
-
-    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
-      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8">
-        <!-- Editar corrige los datos; Nueva evaluación registra un nuevo estado del riesgo con su fecha. -->
         <Button Content="{x:Static r:Strings.Risks_Edit}" Command="{Binding EditCommand}" CommandParameter="{Binding Selected}"
                 ToolTip.Tip="{x:Static r:Strings.Risks_EditTip}"
                 IsEnabled="{Binding Selected, Converter={x:Static ObjectConverters.IsNotNull}}" />
         <Button Content="{x:Static r:Strings.Risks_Reassess}" Command="{Binding ReassessCommand}" CommandParameter="{Binding Selected}"
                 ToolTip.Tip="{x:Static r:Strings.Risks_ReassessTip}"
                 IsEnabled="{Binding Selected, Converter={x:Static ObjectConverters.IsNotNull}}" />
-        <Button Content="{x:Static r:Strings.Common_Delete}" Command="{Binding DeleteCommand}" CommandParameter="{Binding Selected}"
-                IsEnabled="{Binding Selected, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        <Button Content="{x:Static r:Strings.Common_Delete}" Command="{Binding DeleteCommand}" IsEnabled="{Binding HasSelection}"
+                ToolTip.Tip="{x:Static r:Strings.Risks_DeleteTip}" />
         <Button Classes="accent" Content="{x:Static r:Strings.Risks_Add}" Command="{Binding AddCommand}" />
       </StackPanel>
-      <TextBlock Classes="muted" VerticalAlignment="Center" Text="{Binding CountText}" />
+      <StackPanel Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+        <TextBlock Classes="muted" Text="{Binding CountText}" />
+        <TextBlock Classes="muted" Text="{Binding SelectionText}" />
+      </StackPanel>
     </DockPanel>
 
-    <!-- Grilla compacta: una fila por riesgo y, al desplegarla, una sub-fila por evaluación con las mismas columnas. -->
+    <!-- Grilla jerárquica: cada riesgo (fila padre) con sus evaluaciones (filas hijas, indentadas).
+         Clic selecciona la línea completa; Ctrl y Mayús, varias. Seleccionar un riesgo selecciona sus evaluaciones. -->
     <Border Classes="card" Padding="0">
       <DockPanel>
-        <!-- Encabezado de la grilla (mismas columnas que las filas) -->
         <Border DockPanel.Dock="Top" Classes="gridHeader">
-          <Grid ColumnDefinitions="24,28,*,104,118,104,128,64,56,92" Margin="8,0,8,0">
-            <TextBlock Grid.Column="2" Classes="col" Margin="10,0,0,0" Text="{x:Static r:Strings.Risks_ColRisk}" />
-            <TextBlock Grid.Column="3" Classes="col" Text="{x:Static r:Strings.ScaleType_Risk}" />
-            <TextBlock Grid.Column="4" Classes="col" Text="{x:Static r:Strings.ScaleType_Impact}" />
-            <TextBlock Grid.Column="5" Classes="col" HorizontalAlignment="Right" Margin="0,0,12,0" Text="{x:Static r:Strings.Risks_ColAmount}" />
-            <TextBlock Grid.Column="6" Classes="col" Text="{x:Static r:Strings.Risks_ProbabilityShort}" />
-            <TextBlock Grid.Column="7" Classes="col" HorizontalAlignment="Right" Margin="0,0,12,0" Text="%" />
-            <TextBlock Grid.Column="8" Classes="col" HorizontalAlignment="Center" Text="{x:Static r:Strings.Risks_ColEntries}" />
-            <TextBlock Grid.Column="9" Classes="col" Text="{x:Static r:Strings.Risks_ColLast}" />
+          <Grid ColumnDefinitions="30,*,104,118,104,128,64,56,92" Margin="8,0,8,0">
+            <TextBlock Grid.Column="1" Classes="col" Margin="10,0,0,0" Text="{x:Static r:Strings.Risks_ColRisk}" />
+            <TextBlock Grid.Column="2" Classes="col" Text="{x:Static r:Strings.ScaleType_Risk}" />
+            <TextBlock Grid.Column="3" Classes="col" Text="{x:Static r:Strings.ScaleType_Impact}" />
+            <TextBlock Grid.Column="4" Classes="col" HorizontalAlignment="Right" Margin="0,0,12,0" Text="{x:Static r:Strings.Risks_ColAmount}" />
+            <TextBlock Grid.Column="5" Classes="col" Text="{x:Static r:Strings.Risks_ProbabilityShort}" />
+            <TextBlock Grid.Column="6" Classes="col" HorizontalAlignment="Right" Margin="0,0,12,0" Text="%" />
+            <TextBlock Grid.Column="7" Classes="col" HorizontalAlignment="Center" Text="{x:Static r:Strings.Risks_ColEntries}" />
+            <TextBlock Grid.Column="8" Classes="col" Text="{x:Static r:Strings.Risks_ColLast}" />
           </Grid>
         </Border>
         <Panel>
-          <ListBox Classes="grid" ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" DoubleTapped="OnRiskDoubleTapped" KeyDown="OnListKeyDown"
-                   Background="Transparent">
-            <ListBox.ItemTemplate>
+          <ListBox x:Name="Grid" Classes="grid" ItemsSource="{Binding Rows}" Selection="{Binding Selection}" SelectionMode="Multiple"
+                   DoubleTapped="OnRiskDoubleTapped" KeyDown="OnListKeyDown" Background="Transparent">
+            <ListBox.DataTemplates>
+              <!-- Fila padre: el riesgo -->
               <DataTemplate x:DataType="vm:RiskRow">
-                <StackPanel>
-                  <Grid ColumnDefinitions="24,28,*,104,118,104,128,64,56,92" Height="36" Background="Transparent" ToolTip.Tip="{Binding ShortDescription}">
-                    <Grid.ContextMenu>
-                      <ContextMenu>
-                        <MenuItem Header="{x:Static r:Strings.Risks_Edit}"
-                                  Command="{Binding $parent[UserControl].((vm:RisksViewModel)DataContext).EditCommand}" CommandParameter="{Binding}" />
-                        <MenuItem Header="{x:Static r:Strings.Risks_Reassess}"
-                                  Command="{Binding $parent[UserControl].((vm:RisksViewModel)DataContext).ReassessCommand}" CommandParameter="{Binding}" />
-                      </ContextMenu>
-                    </Grid.ContextMenu>
-                    <ToggleButton Classes="expander" IsChecked="{Binding IsExpanded}" Width="24" Height="24" Padding="0" VerticalAlignment="Center"
-                                  ToolTip.Tip="{x:Static r:Strings.Risks_ExpandTip}">
-                      <TextBlock Text="{Binding IsExpanded, Converter={x:Static vm:Converters.Chevron}}" FontSize="14" />
-                    </ToggleButton>
-                    <CheckBox Grid.Column="1" IsChecked="{Binding IsChecked}" VerticalAlignment="Center" MinWidth="0" Padding="0"
-                              ToolTip.Tip="{x:Static r:Strings.Risks_CheckTip}" />
-                    <!-- Título con la barra del color del nivel de riesgo -->
-                    <DockPanel Grid.Column="2" Margin="4,0,12,0">
-                      <Border DockPanel.Dock="Left" Width="4" Height="22" CornerRadius="1" Margin="0,0,8,0"
-                              Background="{Binding RiskLevel.Background, FallbackValue=Transparent}" />
-                      <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-                    </DockPanel>
-                    <ContentControl Grid.Column="3" Content="{Binding RiskLevel}" VerticalAlignment="Center" HorizontalAlignment="Left" />
-                    <ContentControl Grid.Column="4" Content="{Binding ImpactLevel}" VerticalAlignment="Center" HorizontalAlignment="Left" />
-                    <TextBlock Grid.Column="5" Classes="num" Text="{Binding ImpactValue}" />
-                    <ContentControl Grid.Column="6" Content="{Binding ProbabilityLevel}" VerticalAlignment="Center" HorizontalAlignment="Left" />
-                    <TextBlock Grid.Column="7" Classes="num" Text="{Binding ProbabilityValue}" />
-                    <TextBlock Grid.Column="8" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding EntriesCount}" />
-                    <TextBlock Grid.Column="9" VerticalAlignment="Center" Text="{Binding LastDate}" />
-                  </Grid>
-                  <!-- Evaluaciones: sub-filas indentadas (de la más reciente a la más antigua) -->
-                  <ItemsControl ItemsSource="{Binding Entries}" IsVisible="{Binding IsExpanded}">
-                    <ItemsControl.ItemTemplate>
-                      <DataTemplate x:DataType="vm:EntryRow">
-                        <Border Classes="subRow">
-                          <Grid ColumnDefinitions="24,28,*,104,118,104,128,64,56,92" Height="32">
-                            <DockPanel Grid.Column="2" Margin="18,0,12,0">
-                              <CheckBox DockPanel.Dock="Left" IsChecked="{Binding IsChecked}" VerticalAlignment="Center" MinWidth="0" Padding="0" Margin="0,0,8,0"
-                                        ToolTip.Tip="{x:Static r:Strings.Risks_CheckTip}" />
-                              <TextBlock DockPanel.Dock="Left" Text="{Binding Date}" VerticalAlignment="Center" Margin="0,0,8,0"
-                                         FontWeight="{Binding IsCurrent, Converter={x:Static vm:Converters.BoldIf}}" />
-                              <Border DockPanel.Dock="Left" Classes="tag" IsVisible="{Binding IsCurrent}" Margin="0,0,8,0">
-                                <TextBlock Text="{x:Static r:Strings.Risks_Current}" FontSize="11" />
-                              </Border>
-                              <TextBlock Classes="muted" FontSize="12" Text="{Binding Note}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
-                                         ToolTip.Tip="{Binding Note}" />
-                            </DockPanel>
-                            <ContentControl Grid.Column="3" Content="{Binding RiskLevel}" VerticalAlignment="Center" HorizontalAlignment="Left" />
-                            <ContentControl Grid.Column="4" Content="{Binding Impact}" VerticalAlignment="Center" HorizontalAlignment="Left" />
-                            <TextBlock Grid.Column="5" Classes="num" Text="{Binding ImpactValue}" />
-                            <ContentControl Grid.Column="6" Content="{Binding Probability}" VerticalAlignment="Center" HorizontalAlignment="Left" />
-                            <TextBlock Grid.Column="7" Classes="num" Text="{Binding ProbabilityValue}" />
-                          </Grid>
-                        </Border>
-                      </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                  </ItemsControl>
-                </StackPanel>
+                <Grid ColumnDefinitions="30,*,104,118,104,128,64,56,92" Height="36" Background="Transparent" ToolTip.Tip="{Binding ShortDescription}">
+                  <Grid.ContextMenu>
+                    <ContextMenu>
+                      <MenuItem Header="{x:Static r:Strings.Risks_Edit}"
+                                Command="{Binding $parent[UserControl].((vm:RisksViewModel)DataContext).EditCommand}" CommandParameter="{Binding}" />
+                      <MenuItem Header="{x:Static r:Strings.Risks_Reassess}"
+                                Command="{Binding $parent[UserControl].((vm:RisksViewModel)DataContext).ReassessCommand}" CommandParameter="{Binding}" />
+                    </ContextMenu>
+                  </Grid.ContextMenu>
+                  <ToggleButton Classes="expander" IsChecked="{Binding IsExpanded}" Width="26" Height="26" Padding="0" VerticalAlignment="Center"
+                                ToolTip.Tip="{x:Static r:Strings.Risks_ExpandTip}">
+                    <TextBlock Text="{Binding IsExpanded, Converter={x:Static vm:Converters.Chevron}}" FontSize="15" />
+                  </ToggleButton>
+                  <DockPanel Grid.Column="1" Margin="4,0,12,0">
+                    <Border DockPanel.Dock="Left" Width="4" Height="22" CornerRadius="1" Margin="0,0,8,0"
+                            Background="{Binding RiskLevel.Background, FallbackValue=Transparent}" />
+                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                  </DockPanel>
+                  <ContentControl Grid.Column="2" Content="{Binding RiskLevel}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                  <ContentControl Grid.Column="3" Content="{Binding ImpactLevel}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                  <TextBlock Grid.Column="4" Classes="num" Text="{Binding ImpactValue}" />
+                  <ContentControl Grid.Column="5" Content="{Binding ProbabilityLevel}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                  <TextBlock Grid.Column="6" Classes="num" Text="{Binding ProbabilityValue}" />
+                  <TextBlock Grid.Column="7" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding EntriesCount}" />
+                  <TextBlock Grid.Column="8" VerticalAlignment="Center" Text="{Binding LastDate}" />
+                </Grid>
               </DataTemplate>
-            </ListBox.ItemTemplate>
+              <!-- Fila hija: una evaluación del riesgo, indentada bajo el título -->
+              <DataTemplate x:DataType="vm:EntryRow">
+                <Grid ColumnDefinitions="30,*,104,118,104,128,64,56,92" Height="32" Background="Transparent" ToolTip.Tip="{Binding Note}">
+                  <DockPanel Grid.Column="1" Margin="22,0,12,0">
+                    <TextBlock DockPanel.Dock="Left" Text="└" Classes="muted" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <TextBlock DockPanel.Dock="Left" Text="{Binding Date}" VerticalAlignment="Center" Margin="0,0,8,0"
+                               FontWeight="{Binding IsCurrent, Converter={x:Static vm:Converters.BoldIf}}" />
+                    <Border DockPanel.Dock="Left" Classes="tag" IsVisible="{Binding IsCurrent}" Margin="0,0,8,0">
+                      <TextBlock Text="{x:Static r:Strings.Risks_Current}" FontSize="11" />
+                    </Border>
+                    <TextBlock Classes="muted" FontSize="12" Text="{Binding Note}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                  </DockPanel>
+                  <ContentControl Grid.Column="2" Content="{Binding RiskLevel}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                  <ContentControl Grid.Column="3" Content="{Binding Impact}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                  <TextBlock Grid.Column="4" Classes="num" Text="{Binding ImpactValue}" />
+                  <ContentControl Grid.Column="5" Content="{Binding Probability}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                  <TextBlock Grid.Column="6" Classes="num" Text="{Binding ProbabilityValue}" />
+                </Grid>
+              </DataTemplate>
+            </ListBox.DataTemplates>
           </ListBox>
           <StackPanel IsVisible="{Binding !HasRisks}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10" Margin="24">
             <TextBlock Classes="h2" HorizontalAlignment="Center" Text="{x:Static r:Strings.Risks_EmptyTitle}" />

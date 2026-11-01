@@ -3,15 +3,23 @@ using System.Globalization;
 using Auros.Ram.App.Resources;
 using Auros.Ram.Core.Model;
 using Auros.Ram.Core.Services;
+using Avalonia.Controls.Selection;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 namespace Auros.Ram.App.ViewModels;
 
-/// <summary>Una evaluación (entrada) de un riesgo en la grilla jerárquica; se puede marcar para quitarla.</summary>
-public sealed partial class EntryRow(Guid riskId, HistoryStep step, bool isCurrent, Action onCheck) : ObservableObject
+/// <summary>Una fila de la grilla jerárquica: un riesgo (padre) o una de sus evaluaciones (hija).</summary>
+public abstract class GridRow : ObservableObject
 {
-    public Guid RiskId { get; } = riskId;
+    public abstract RiskRow Owner { get; }
+}
+
+/// <summary>Una evaluación de un riesgo: fila hija en la grilla.</summary>
+public sealed class EntryRow(RiskRow parent, HistoryStep step, bool isCurrent) : GridRow
+{
+    public override RiskRow Owner { get; } = parent;
+    public Guid RiskId => Owner.Risk.Id;
     public Guid Id { get; } = step.Assessment.Id;
     public string Date { get; } = step.Assessment.Date.ToString("d", CultureInfo.CurrentCulture);
     public LevelChip Impact { get; } = new(step.Impact);
@@ -23,16 +31,12 @@ public sealed partial class EntryRow(Guid riskId, HistoryStep step, bool isCurre
 
     /// <summary>La vigente (la más reciente): el estado actual del riesgo.</summary>
     public bool IsCurrent { get; } = isCurrent;
-
-    [ObservableProperty]
-    private bool _isChecked;
-
-    partial void OnIsCheckedChanged(bool value) => onCheck();
 }
 
-/// <summary>Un riesgo en la grilla jerárquica: se despliega para ver sus evaluaciones y se puede marcar para eliminarlo.</summary>
-public sealed partial class RiskRow(Risk risk, LevelChip? riskLevel, LevelChip? impactLevel, LevelChip? probabilityLevel) : ObservableObject
+/// <summary>Un riesgo: fila padre en la grilla; al desplegarlo aparecen sus evaluaciones como filas hijas.</summary>
+public sealed partial class RiskRow(Risk risk, LevelChip? riskLevel, LevelChip? impactLevel, LevelChip? probabilityLevel) : GridRow
 {
+    public override RiskRow Owner => this;
     public Risk Risk { get; } = risk;
     public LevelChip? RiskLevel { get; } = riskLevel;
     public LevelChip? ImpactLevel { get; } = impactLevel;
@@ -40,7 +44,7 @@ public sealed partial class RiskRow(Risk risk, LevelChip? riskLevel, LevelChip? 
 
     public string Title => Risk.Title;
 
-    /// <summary>Sin marcas de formato: en la lista se muestra como texto simple de dos líneas.</summary>
+    /// <summary>Sin marcas de formato: se muestra como ayuda emergente de la fila.</summary>
     public string ShortDescription => Auros.Ram.Core.Text.RichText.ToPlain(Risk.ShortDescription);
 
     public string ImpactValue => RangeFormat.Value(Risk.ImpactAmount);
@@ -51,24 +55,28 @@ public sealed partial class RiskRow(Risk risk, LevelChip? riskLevel, LevelChip? 
 
     public string LastDate => Risk.Assessments.Count > 0 ? Risk.Assessments[^1].Date.ToString("d", CultureInfo.CurrentCulture) : "";
 
-    public ObservableCollection<EntryRow> Entries { get; } = [];
+    /// <summary>Evaluaciones del riesgo, de la más reciente a la más antigua.</summary>
+    public List<EntryRow> Entries { get; } = [];
 
+    /// <summary>Lo cambia la grilla (la flecha): agrega o quita las filas hijas.</summary>
     [ObservableProperty]
     private bool _isExpanded;
 
-    [ObservableProperty]
-    private bool _isChecked;
+    public Action<RiskRow>? ExpandedChanged { get; set; }
 
-    public Action? CheckChanged { get; set; }
-
-    partial void OnIsCheckedChanged(bool value) => CheckChanged?.Invoke();
+    partial void OnIsExpandedChanged(bool value) => ExpandedChanged?.Invoke(this);
 }
 
-/// <summary>Lista de riesgos con búsqueda, filtros y orden (RF-10, RF-12).</summary>
+/// <summary>
+/// Grilla jerárquica de riesgos (RF-10, RF-12): cada riesgo con sus evaluaciones como filas hijas, búsqueda, filtros
+/// y orden. Se selecciona la línea completa (Ctrl y Mayús para varias); al seleccionar un riesgo quedan
+/// seleccionadas también todas sus evaluaciones.
+/// </summary>
 public sealed partial class RisksViewModel : ObservableObject
 {
     private readonly DocumentViewModel _owner;
     private bool _loading;
+    private bool _syncing;
 
     public RisksViewModel(DocumentViewModel owner)
     {
@@ -82,10 +90,20 @@ public sealed partial class RisksViewModel : ObservableObject
             new(Strings.Risks_SortCreated, RiskSortField.Created),
         ];
         _sortBy = SortOptions[0];
+        Selection = new SelectionModel<GridRow>(Rows) { SingleSelect = false };
+        Selection.SelectionChanged += OnSelectionChanged;
         Reload();
     }
 
+    /// <summary>Los riesgos que se ven (con el filtro aplicado).</summary>
     public ObservableCollection<RiskRow> Items { get; } = [];
+
+    /// <summary>Las filas de la grilla: cada riesgo seguido de sus evaluaciones si está desplegado.</summary>
+    public ObservableCollection<GridRow> Rows { get; } = [];
+
+    /// <summary>Selección de la grilla (varias filas).</summary>
+    public SelectionModel<GridRow> Selection { get; }
+
     public ObservableCollection<FilterOption> RiskFilters { get; } = [];
     public ObservableCollection<FilterOption> ImpactFilters { get; } = [];
     public ObservableCollection<FilterOption> ProbabilityFilters { get; } = [];
@@ -97,20 +115,24 @@ public sealed partial class RisksViewModel : ObservableObject
     [ObservableProperty] private FilterOption? _probabilityFilter;
     [ObservableProperty] private Choice<RiskSortField> _sortBy;
     [ObservableProperty] private bool _descending = true;
+
+    /// <summary>El riesgo de la fila seleccionada (para Editar y Nueva evaluación).</summary>
     [ObservableProperty] private RiskRow? _selected;
     [ObservableProperty] private string _countText = "";
 
-    /// <summary>Riesgos y evaluaciones marcados para eliminar.</summary>
+    /// <summary>Resumen de lo seleccionado ("2 riesgos y 1 evaluación").</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasChecked))]
-    private string _checkedText = "";
+    [NotifyPropertyChangedFor(nameof(HasSelection))]
+    private string _selectionText = "";
 
-    public bool HasChecked => CheckedRisks.Any() || CheckedEntries.Any();
+    public bool HasSelection => Selection.SelectedItems.Count > 0;
 
-    private IEnumerable<RiskRow> CheckedRisks => Items.Where(r => r.IsChecked);
+    /// <summary>Riesgos seleccionados (se eliminan enteros, con todas sus evaluaciones).</summary>
+    public IReadOnlyList<RiskRow> SelectedRisks => [.. Selection.SelectedItems.OfType<RiskRow>()];
 
-    /// <summary>Evaluaciones marcadas de riesgos que no se eliminan enteros.</summary>
-    private IEnumerable<EntryRow> CheckedEntries => Items.Where(r => !r.IsChecked).SelectMany(r => r.Entries).Where(e => e.IsChecked);
+    /// <summary>Evaluaciones seleccionadas de riesgos que no están seleccionados enteros.</summary>
+    public IReadOnlyList<EntryRow> SelectedEntries =>
+        [.. Selection.SelectedItems.OfType<EntryRow>().Where(e => !Selection.SelectedItems.Contains(e.Owner))];
 
     public bool HasRisks => _owner.Document.Risks.Count > 0;
 
@@ -142,12 +164,13 @@ public sealed partial class RisksViewModel : ObservableObject
         }
 
         var doc = _owner.Document;
-        var selectedId = Selected?.Risk.Id;
 
-        // Se conserva lo desplegado y lo marcado al volver a armar la lista.
+        // Se conserva lo desplegado y lo seleccionado al volver a armar la grilla.
         var expanded = Items.Where(r => r.IsExpanded).Select(r => r.Risk.Id).ToHashSet();
-        var checkedRisks = CheckedRisks.Select(r => r.Risk.Id).ToHashSet();
-        var checkedEntries = Items.SelectMany(r => r.Entries).Where(e => e.IsChecked).Select(e => e.Id).ToHashSet();
+        var selectedRisks = Selection.SelectedItems.OfType<RiskRow>().Select(r => r.Risk.Id).ToHashSet();
+        var selectedEntries = Selection.SelectedItems.OfType<EntryRow>().Select(e => e.Id).ToHashSet();
+        var primary = Selected?.Risk.Id;
+
         var filter = new RiskFilter
         {
             Text = SearchText,
@@ -163,36 +186,167 @@ public sealed partial class RisksViewModel : ObservableObject
         {
             foreach (var l in doc.ProjectScale(type)?.Levels ?? [])
             {
-                levels[l.Id] = new LevelChip(l);
+                levels[l.Id] = new LevelChip(l, RangeFormat.UnitFor(type));
             }
         }
 
-        var rows = RiskQuery.Apply(doc, filter).Select(r => new RiskRow(
-            r,
-            doc.RiskLevelOf(r) is { } level ? levels.GetValueOrDefault(level.Id) : null,
-            levels.GetValueOrDefault(r.ImpactLevelId),
-            levels.GetValueOrDefault(r.ProbabilityLevelId))).ToList();
-
-        Items.Clear();
-        foreach (var row in rows)
+        _syncing = true;
+        try
         {
-            var steps = RiskHistory.Steps(doc, row.Risk);
-            for (var i = steps.Count - 1; i >= 0; i--)
+            Selection.Clear();
+            Items.Clear();
+            Rows.Clear();
+            foreach (var r in RiskQuery.Apply(doc, filter))
             {
-                row.Entries.Add(new EntryRow(row.Risk.Id, steps[i], i == steps.Count - 1, UpdateChecked) { IsChecked = checkedEntries.Contains(steps[i].Assessment.Id) });
+                var row = new RiskRow(
+                    r,
+                    doc.RiskLevelOf(r) is { } level ? levels.GetValueOrDefault(level.Id) : null,
+                    levels.GetValueOrDefault(r.ImpactLevelId),
+                    levels.GetValueOrDefault(r.ProbabilityLevelId));
+                var steps = RiskHistory.Steps(doc, r);
+                for (var i = steps.Count - 1; i >= 0; i--)
+                {
+                    row.Entries.Add(new EntryRow(row, steps[i], i == steps.Count - 1));
+                }
+
+                row.IsExpanded = expanded.Contains(r.Id);
+                row.ExpandedChanged = OnExpandedChanged;
+                Items.Add(row);
+                Rows.Add(row);
+                if (row.IsExpanded)
+                {
+                    foreach (var entry in row.Entries)
+                    {
+                        Rows.Add(entry);
+                    }
+                }
             }
 
-            row.IsExpanded = expanded.Contains(row.Risk.Id);
-            row.IsChecked = checkedRisks.Contains(row.Risk.Id);
-            row.CheckChanged = UpdateChecked;
-            Items.Add(row);
+            for (var i = 0; i < Rows.Count; i++)
+            {
+                if (Rows[i] is RiskRow rr ? selectedRisks.Contains(rr.Risk.Id) : selectedEntries.Contains(((EntryRow)Rows[i]).Id))
+                {
+                    Selection.Select(i);
+                }
+            }
+        }
+        finally
+        {
+            _syncing = false;
         }
 
-        UpdateChecked();
-
-        Selected = Items.FirstOrDefault(i => i.Risk.Id == selectedId);
-        CountText = string.Format(CultureInfo.CurrentCulture, Strings.Risks_Count, rows.Count, doc.Risks.Count);
+        Selected = Items.FirstOrDefault(i => i.Risk.Id == primary);
+        CountText = string.Format(CultureInfo.CurrentCulture, Strings.Risks_Count, Items.Count, doc.Risks.Count);
+        UpdateSelectionText();
         OnPropertyChanged(nameof(HasRisks));
+    }
+
+    /// <summary>
+    /// Al seleccionar un riesgo se seleccionan sus evaluaciones; al quitarlo, también. Si se quita una evaluación de un
+    /// riesgo seleccionado, el riesgo deja de estar seleccionado entero (las demás evaluaciones siguen).
+    /// </summary>
+    private void OnSelectionChanged(object? sender, SelectionModelSelectionChangedEventArgs<GridRow> e)
+    {
+        if (_syncing)
+        {
+            return;
+        }
+
+        // Las listas del evento son vistas de la selección: se copian antes de cambiarla.
+        var selectedRisks = e.SelectedItems.OfType<RiskRow>().ToList();
+        var deselectedRisks = e.DeselectedItems.OfType<RiskRow>().ToList();
+        var deselectedEntries = e.DeselectedItems.OfType<EntryRow>().ToList();
+        _syncing = true;
+        try
+        {
+            foreach (var entry in selectedRisks.SelectMany(r => r.Entries))
+            {
+                SelectRow(entry, true);
+            }
+
+            foreach (var entry in deselectedRisks.SelectMany(r => r.Entries))
+            {
+                SelectRow(entry, false);
+            }
+
+            foreach (var entry in deselectedEntries)
+            {
+                SelectRow(entry.Owner, false);
+            }
+        }
+        finally
+        {
+            _syncing = false;
+        }
+
+        Selected = Selection.SelectedItem?.Owner;
+        UpdateSelectionText();
+    }
+
+    /// <summary>Al desplegar un riesgo se agregan sus evaluaciones debajo (seleccionadas si el riesgo lo está); al plegarlo, se quitan.</summary>
+    private void OnExpandedChanged(RiskRow row)
+    {
+        var index = Rows.IndexOf(row);
+        if (index < 0)
+        {
+            return;
+        }
+
+        _syncing = true;
+        try
+        {
+            if (row.IsExpanded)
+            {
+                var selected = Selection.IsSelected(index);
+                for (var i = 0; i < row.Entries.Count; i++)
+                {
+                    Rows.Insert(index + 1 + i, row.Entries[i]);
+                    if (selected)
+                    {
+                        Selection.Select(index + 1 + i);
+                    }
+                }
+            }
+            else
+            {
+                foreach (var entry in row.Entries)
+                {
+                    Rows.Remove(entry);
+                }
+            }
+        }
+        finally
+        {
+            _syncing = false;
+        }
+
+        UpdateSelectionText();
+    }
+
+    private void SelectRow(GridRow row, bool select)
+    {
+        var index = Rows.IndexOf(row);
+        if (index < 0)
+        {
+            return;
+        }
+
+        if (select)
+        {
+            Selection.Select(index);
+        }
+        else
+        {
+            Selection.Deselect(index);
+        }
+    }
+
+    private void UpdateSelectionText()
+    {
+        var risks = SelectedRisks.Count;
+        var entries = SelectedEntries.Count;
+        SelectionText = risks + entries == 0 ? "" : string.Format(CultureInfo.CurrentCulture, Strings.Risks_SelectionText, risks, entries);
+        OnPropertyChanged(nameof(HasSelection));
     }
 
     [RelayCommand]
@@ -205,42 +359,28 @@ public sealed partial class RisksViewModel : ObservableObject
     [RelayCommand]
     private Task Reassess(RiskRow? row) => (row ?? Selected) is { } r ? _owner.ReassessRiskAsync(r.Risk.Id) : Task.CompletedTask;
 
-    [RelayCommand]
-    private async Task Delete(RiskRow? row)
-    {
-        if ((row ?? Selected) is not { } r)
-        {
-            return;
-        }
-
-        // Se avisa que con el riesgo se borran todas sus evaluaciones.
-        var ok = await _owner.Ui.ConfirmAsync(Strings.Risks_DeleteTitle,
-            string.Format(CultureInfo.CurrentCulture, Strings.Risks_DeleteMessage, r.Title, r.Risk.Assessments.Count), Strings.Common_Delete);
-        if (ok)
-        {
-            _owner.Run(() => _owner.Document.RemoveRisk(r.Risk.Id));
-        }
-    }
-
     /// <summary>
-    /// Elimina los riesgos marcados (con todas sus evaluaciones) y quita las evaluaciones marcadas de los demás,
-    /// después de confirmar. A un riesgo no se le pueden quitar todas sus evaluaciones: para eso se elimina.
+    /// Elimina lo seleccionado después de confirmar: los riesgos seleccionados con todas sus evaluaciones, y las
+    /// evaluaciones seleccionadas de los demás. A un riesgo no se le pueden quitar todas sus evaluaciones.
     /// </summary>
     [RelayCommand]
-    private async Task DeleteChecked()
+    private async Task Delete()
     {
-        var risks = CheckedRisks.ToList();
-        var entries = CheckedEntries.ToList();
+        var risks = SelectedRisks;
+        var entries = SelectedEntries;
         if (risks.Count == 0 && entries.Count == 0)
         {
             return;
         }
 
         var parts = new List<string>();
-        if (risks.Count > 0)
+        if (risks.Count == 1)
         {
-            parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Risks_DeleteCheckedRisks,
-                risks.Count, risks.Sum(r => r.Risk.Assessments.Count)));
+            parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Risks_DeleteMessage, risks[0].Title, risks[0].EntriesCount));
+        }
+        else if (risks.Count > 1)
+        {
+            parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Risks_DeleteCheckedRisks, risks.Count, risks.Sum(r => r.EntriesCount)));
         }
 
         if (entries.Count > 0)
@@ -278,27 +418,8 @@ public sealed partial class RisksViewModel : ObservableObject
         }
     }
 
-    /// <summary>Marca o desmarca todos los riesgos que se ven (con el filtro aplicado).</summary>
     [RelayCommand]
-    private void CheckAll(bool check)
-    {
-        foreach (var row in Items)
-        {
-            row.IsChecked = check;
-            foreach (var entry in row.Entries.Where(e => !check))
-            {
-                entry.IsChecked = false;
-            }
-        }
-    }
-
-    private void UpdateChecked()
-    {
-        var risks = CheckedRisks.Count();
-        var entries = CheckedEntries.Count();
-        CheckedText = risks + entries == 0 ? "" : string.Format(CultureInfo.CurrentCulture, Strings.Risks_CheckedText, risks, entries);
-        OnPropertyChanged(nameof(HasChecked));
-    }
+    private void SelectAll() => Selection.SelectAll();
 
     [RelayCommand]
     private void ClearFilters()

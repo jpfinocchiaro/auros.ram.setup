@@ -425,4 +425,6 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Risks_ColAmount" xml:space="preserve"><value>Monto</value></data>
   <data name="Risks_ColEntries" xml:space="preserve"><value>Eval.</value></data>
   <data name="Risks_ColLast" xml:space="preserve"><value>Última eval.</value></data>
+  <data name="Risks_SelectionText" xml:space="preserve"><value>Seleccionados: {0} riesgo(s) y {1} evaluación(es)</value></data>
+  <data name="Risks_DeleteTip" xml:space="preserve"><value>Elimina lo seleccionado: los riesgos con todas sus evaluaciones y las evaluaciones sueltas (también con la tecla Suprimir)</value></data>
 </root>

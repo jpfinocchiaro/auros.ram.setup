@@ -415,3 +415,5 @@ Matrix_ShowAmountTip=Muestra el monto del impacto junto a cada riesgo. Dentro de
 Risks_ColAmount=Monto
 Risks_ColEntries=Eval.
 Risks_ColLast=Última eval.
+Risks_SelectionText=Seleccionados: {0} riesgo(s) y {1} evaluación(es)
+Risks_DeleteTip=Elimina lo seleccionado: los riesgos con todas sus evaluaciones y las evaluaciones sueltas (también con la tecla Suprimir)

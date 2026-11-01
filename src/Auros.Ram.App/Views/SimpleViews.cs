@@ -1,5 +1,7 @@
 using Auros.Ram.App.ViewModels;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.VisualTree;
 
@@ -107,30 +109,46 @@ public partial class RisksView : UserControl
 {
     public RisksView() => InitializeComponent();
 
+    // Doble clic en un riesgo o en una de sus evaluaciones: se edita el riesgo (no si fue en la flecha).
     private void OnRiskDoubleTapped(object? sender, TappedEventArgs e)
     {
+        if (e.Source is Visual v && v.FindAncestorOfType<ToggleButton>(includeSelf: true) is not null)
+        {
+            return;
+        }
+
         if (DataContext is RisksViewModel vm && vm.Selected is { } row)
         {
             vm.EditCommand.Execute(row);
         }
     }
 
+    // Enter edita; Suprimir elimina lo seleccionado (con confirmación); flechas izquierda/derecha pliegan y despliegan.
     private void OnListKeyDown(object? sender, KeyEventArgs e)
     {
-        if (DataContext is not RisksViewModel vm || vm.Selected is not { } row)
+        if (DataContext is not RisksViewModel vm)
         {
             return;
         }
 
-        if (e.Key == Key.Enter)
+        switch (e.Key)
         {
-            vm.EditCommand.Execute(row);
-            e.Handled = true;
-        }
-        else if (e.Key == Key.Delete)
-        {
-            vm.DeleteCommand.Execute(row);
-            e.Handled = true;
+            case Key.Enter when vm.Selected is { } row:
+                vm.EditCommand.Execute(row);
+                e.Handled = true;
+                break;
+            case Key.Delete when vm.HasSelection:
+                vm.DeleteCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.Right when vm.Selection.SelectedItem is RiskRow { IsExpanded: false } open:
+                open.IsExpanded = true;
+                e.Handled = true;
+                break;
+            case Key.Left when vm.Selection.SelectedItem?.Owner is { IsExpanded: true } close:
+                close.IsExpanded = false;
+                e.Handled = true;
+                break;
         }
     }
 }
