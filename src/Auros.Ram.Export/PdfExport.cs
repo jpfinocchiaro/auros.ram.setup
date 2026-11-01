@@ -269,6 +269,11 @@ public static class PdfExport
                 }
             }
 
+            if (doc.OrganizationName(x.Risk) is { Length: > 0 } organization)
+            {
+                Block(section, ExportText.Col_Organization, organization);
+            }
+
             Block(section, ExportText.Col_Short, x.Risk.ShortDescription);
             Block(section, ExportText.Col_Long, x.Risk.LongDescription);
             if (doc.ConsequenceNames(x.Risk) is { Count: > 0 } consequences)

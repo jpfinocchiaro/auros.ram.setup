@@ -15,7 +15,11 @@
             <TextBlock Text="{x:Static r:Strings.Section_Project}" VerticalAlignment="Center" />
           </StackPanel>
         </TabItem.Header>
-        <views:ProjectView DataContext="{Binding Project}" />
+        <DockPanel>
+          <!-- Empresa y unidad de negocio elegidas: las mismas en todas las vistas e informes del archivo. -->
+          <views:ScopeBar DockPanel.Dock="Top" Margin="24,14,24,0" />
+          <views:ProjectView DataContext="{Binding Project}" />
+        </DockPanel>
       </TabItem>
       <TabItem>
         <TabItem.Header>
@@ -24,7 +28,11 @@
             <TextBlock Text="{x:Static r:Strings.Section_Risks}" VerticalAlignment="Center" />
           </StackPanel>
         </TabItem.Header>
-        <views:RisksView DataContext="{Binding Risks}" />
+        <DockPanel>
+          <!-- Empresa y unidad de negocio elegidas: las mismas en todas las vistas e informes del archivo. -->
+          <views:ScopeBar DockPanel.Dock="Top" Margin="24,14,24,0" />
+          <views:RisksView DataContext="{Binding Risks}" />
+        </DockPanel>
       </TabItem>
       <TabItem>
         <TabItem.Header>
@@ -33,7 +41,11 @@
             <TextBlock Text="{x:Static r:Strings.Section_Matrix}" VerticalAlignment="Center" />
           </StackPanel>
         </TabItem.Header>
-        <views:MatrixView DataContext="{Binding Matrix}" />
+        <DockPanel>
+          <!-- Empresa y unidad de negocio elegidas: las mismas en todas las vistas e informes del archivo. -->
+          <views:ScopeBar DockPanel.Dock="Top" Margin="24,14,24,0" />
+          <views:MatrixView DataContext="{Binding Matrix}" />
+        </DockPanel>
       </TabItem>
       <TabItem>
         <TabItem.Header>
@@ -42,7 +54,11 @@
             <TextBlock Text="{x:Static r:Strings.Section_Reports}" VerticalAlignment="Center" />
           </StackPanel>
         </TabItem.Header>
-        <views:ReportsView DataContext="{Binding Reports}" />
+        <DockPanel>
+          <!-- Empresa y unidad de negocio elegidas: las mismas en todas las vistas e informes del archivo. -->
+          <views:ScopeBar DockPanel.Dock="Top" Margin="24,14,24,0" />
+          <views:ReportsView DataContext="{Binding Reports}" />
+        </DockPanel>
       </TabItem>
       <TabItem>
         <TabItem.Header>

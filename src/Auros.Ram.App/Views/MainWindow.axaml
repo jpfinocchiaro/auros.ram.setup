@@ -73,6 +73,7 @@
         <MenuItem x:Name="MiScales" Header="{x:Static r:Strings.Section_Scales}" Command="{Binding ShowSectionCommand}" CommandParameter="Scales" IsEnabled="{Binding HasActive}">
           <MenuItem.Icon><Path Classes="nav" Data="{StaticResource IconScales}" /></MenuItem.Icon>
         </MenuItem>
+        <MenuItem Header="{x:Static r:Strings.Org_Menu}" Command="{Binding OrganizationsCommand}" IsEnabled="{Binding HasActive}" />
         <MenuItem Header="{x:Static r:Strings.Catalog_Menu}" Command="{Binding CatalogsCommand}" IsEnabled="{Binding HasActive}" />
         <MenuItem Header="{x:Static r:Strings.Menu_Preferences}" Command="{Binding PreferencesCommand}" />
       </MenuItem>

@@ -20,7 +20,8 @@ public static class CsvExport
         Line(sb, ExportText.Col_Number, ExportText.Col_Title, ExportText.Col_Short, ExportText.Col_Long,
             ExportText.Col_Risk, ExportText.Col_Impact, ExportText.Col_Probability,
             ExportText.Col_ImpactJustification, ExportText.Col_ProbabilityJustification,
-            ExportText.Col_ImpactAmount, ExportText.Col_ProbabilityPercent, ExportText.Col_Consequences, ExportText.Col_Materiality);
+            ExportText.Col_ImpactAmount, ExportText.Col_ProbabilityPercent, ExportText.Col_Consequences, ExportText.Col_Materiality,
+            ExportText.Col_Company, ExportText.Col_Unit);
         foreach (var row in Reports.Summary(doc))
         {
             var r = row.Risk;
@@ -28,7 +29,8 @@ public static class CsvExport
                 row.RiskLevel.Name, row.ImpactLevel.Name, row.ProbabilityLevel.Name,
                 r.ImpactJustification, r.ProbabilityJustification,
                 Fmt.Amount(r.ImpactAmount), Fmt.Amount(r.ProbabilityPercent),
-                string.Join(" | ", doc.ConsequenceNames(r)), doc.MaterialityName(r));
+                string.Join(" | ", doc.ConsequenceNames(r)), doc.MaterialityName(r),
+                doc.CompanyName(r), doc.UnitName(r));
         }
 
         File.WriteAllText(path, sb.ToString(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));

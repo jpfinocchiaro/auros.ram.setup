@@ -53,3 +53,6 @@ Col_ImpactAmount=Monto del impacto
 Col_ProbabilityPercent=Probabilidad (%)
 Col_Consequences=Consecuencias potenciales
 Col_Materiality=Criterio de materialidad
+Col_Company=Empresa
+Col_Unit=Unidad de negocio
+Col_Organization=Empresa y unidad de negocio

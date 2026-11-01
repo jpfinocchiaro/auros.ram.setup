@@ -140,6 +140,33 @@ public class UiSmokeTests
         ShowDialog(new SplashWindow(), "15-inicio");
         ShowDialog(new PreferencesWindow(new PreferencesViewModel { AutosaveMinutes = 5, LockMinutes = 15, ShowAbbreviations = true }), "17-preferencias");
         ShowDialog(new CatalogsWindow(new CatalogsViewModel(doc)), "39-catalogos");
+
+        // Varias empresas: maestro, y las vistas filtradas por la empresa y la unidad elegidas en la barra.
+        var north = doc.AddCompany("Filial Norte");
+        var plant = doc.AddUnit(north.Id, "Planta Rosario");
+        foreach (var r in doc.Risks.Take(3).ToList())
+        {
+            var moved = r.Clone();
+            (moved.CompanyId, moved.UnitId) = (north.Id, plant.Id);
+            doc.UpdateRisk(moved);
+        }
+
+        ShowDialog(new OrganizationsWindow(new OrganizationsViewModel(doc, ui)), "41-empresas");
+        Assert.Equal(3, docVm.CompanyOptions.Count);   // "Todas" y las dos empresas
+        docVm.ScopeCompany = docVm.CompanyOptions.First(o => o.Id == north.Id);
+        Assert.Equal(3, docVm.Risks.Items.Count);
+        docVm.ScopeUnit = docVm.UnitOptions.First(o => o.Id == north.Units[0].Id);
+        Assert.Empty(docVm.Risks.Items);
+        docVm.ScopeUnit = docVm.UnitOptions.First(o => o.Id == plant.Id);
+        docVm.SelectedSection = (int)Section.Matrix;
+        Shot(window, "42-matriz-por-empresa");
+        docVm.SelectedSection = (int)Section.Risks;
+        Shot(window, "43-riesgos-por-empresa");
+        var scopedNew = new RiskEditorViewModel(doc, null, new Risk { CompanyId = north.Id, UnitId = plant.Id });
+        Assert.Equal(("Filial Norte", "Planta Rosario"), (scopedNew.Company, scopedNew.Unit));
+        ShowDialog(new RiskEditorWindow(scopedNew), "44-riesgo-empresa");
+        docVm.ScopeCompany = docVm.CompanyOptions[0];
+        Assert.Equal(doc.Risks.Count, docVm.Risks.Items.Count);
         ShowDialog(new RiskEditorWindow(new RiskEditorViewModel(doc, doc.Risks[0])), "40-riesgo-consecuencias", scrollTo: 430);
         ShowDialog(new MessageWindow("Cambios sin guardar", "¿Guardar los cambios?", ["Cancelar", "No guardar", "Guardar"], 2), "14-mensaje");
 

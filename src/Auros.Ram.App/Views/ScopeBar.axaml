@@ -1,0 +1,15 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Auros.Ram.App.ViewModels"
+             xmlns:r="using:Auros.Ram.App.Resources"
+             x:Class="Auros.Ram.App.Views.ScopeBar"
+             x:DataType="vm:DocumentViewModel">
+  <!-- Empresa y unidad de negocio que se miran: se comparten entre todas las vistas e informes del archivo. -->
+  <StackPanel Orientation="Horizontal" Spacing="8">
+    <TextBlock Classes="label" VerticalAlignment="Center" Text="{x:Static r:Strings.Scope_Company}" />
+    <ComboBox ItemsSource="{Binding CompanyOptions}" SelectedItem="{Binding ScopeCompany}" MinWidth="200" MaxWidth="320" />
+    <TextBlock Classes="label" VerticalAlignment="Center" Margin="10,0,0,0" Text="{x:Static r:Strings.Scope_Unit}" />
+    <ComboBox ItemsSource="{Binding UnitOptions}" SelectedItem="{Binding ScopeUnit}" MinWidth="180" MaxWidth="300"
+              IsEnabled="{Binding HasScopeCompany}" />
+  </StackPanel>
+</UserControl>

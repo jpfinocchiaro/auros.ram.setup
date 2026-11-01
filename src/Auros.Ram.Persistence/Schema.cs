@@ -128,6 +128,33 @@ internal static class Schema
                     UNION ALL SELECT 2, 4, 'Afecta la continuidad del negocio')
                 WHERE NOT EXISTS (SELECT 1 FROM catalog_item);
             """),
+
+        // v7: varias empresas, cada una con sus unidades de negocio, y la empresa y unidad de cada riesgo. Los archivos
+        // anteriores reciben una empresa (la del proyecto, con su logo) con la unidad "General", y todos sus riesgos.
+        (7, """
+            CREATE TABLE IF NOT EXISTS company (
+                id        TEXT PRIMARY KEY,
+                position  INTEGER NOT NULL,
+                name      TEXT NOT NULL,
+                logo      BLOB
+            );
+            CREATE TABLE IF NOT EXISTS business_unit (
+                id          TEXT PRIMARY KEY,
+                company_id  TEXT NOT NULL REFERENCES company(id) ON DELETE CASCADE,
+                position    INTEGER NOT NULL,
+                name        TEXT NOT NULL
+            );
+            ALTER TABLE risk ADD COLUMN company_id TEXT;
+            ALTER TABLE risk ADD COLUMN unit_id TEXT;
+            INSERT INTO company (id, position, name, logo)
+                SELECT lower(hex(randomblob(16))), 0, CASE WHEN trim(company) = '' THEN 'Empresa' ELSE trim(company) END, company_logo
+                FROM project WHERE NOT EXISTS (SELECT 1 FROM company);
+            INSERT INTO business_unit (id, company_id, position, name)
+                SELECT lower(hex(randomblob(16))), id, 0, 'General' FROM company WHERE NOT EXISTS (SELECT 1 FROM business_unit);
+            UPDATE risk SET company_id = (SELECT id FROM company ORDER BY position LIMIT 1),
+                            unit_id = (SELECT id FROM business_unit ORDER BY position LIMIT 1)
+                WHERE company_id IS NULL;
+            """),
     ];
 
     /// <summary>Archivos con un esquema anterior a este no se abren (versiones de prueba sin migración).</summary>

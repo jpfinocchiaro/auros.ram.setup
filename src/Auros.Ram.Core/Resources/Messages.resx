@@ -128,4 +128,18 @@
   <data name="Undo_RemoveCatalogItem" xml:space="preserve"><value>Quitar «{0}» del catálogo</value></data>
   <data name="Undo_RemoveRisks" xml:space="preserve"><value>Eliminar {0} riesgos</value></data>
   <data name="Undo_RemoveAssessments" xml:space="preserve"><value>Quitar {0} evaluación(es)</value></data>
+  <data name="Default_Company" xml:space="preserve"><value>Empresa</value></data>
+  <data name="Default_Unit" xml:space="preserve"><value>General</value></data>
+  <data name="Error_RiskCompanyRequired" xml:space="preserve"><value>Elija la empresa del riesgo.</value></data>
+  <data name="Error_RiskUnitRequired" xml:space="preserve"><value>Elija una unidad de negocio de «{0}».</value></data>
+  <data name="Error_CompanyNotFound" xml:space="preserve"><value>La empresa ya no existe en la matriz.</value></data>
+  <data name="Error_UnitNotFound" xml:space="preserve"><value>La unidad de negocio ya no existe en la matriz.</value></data>
+  <data name="Error_LastCompany" xml:space="preserve"><value>La matriz necesita al menos una empresa.</value></data>
+  <data name="Error_LastUnit" xml:space="preserve"><value>«{0}» necesita al menos una unidad de negocio.</value></data>
+  <data name="Undo_AddCompany" xml:space="preserve"><value>Agregar la empresa «{0}»</value></data>
+  <data name="Undo_EditCompany" xml:space="preserve"><value>Modificar la empresa «{0}»</value></data>
+  <data name="Undo_RemoveCompany" xml:space="preserve"><value>Quitar la empresa «{0}»</value></data>
+  <data name="Undo_AddUnit" xml:space="preserve"><value>Agregar la unidad «{0}» a «{1}»</value></data>
+  <data name="Undo_EditUnit" xml:space="preserve"><value>Renombrar la unidad «{0}»</value></data>
+  <data name="Undo_RemoveUnit" xml:space="preserve"><value>Quitar la unidad «{0}»</value></data>
 </root>

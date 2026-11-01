@@ -98,7 +98,7 @@ public sealed partial class ReportsViewModel : ObservableObject
     {
         get
         {
-            var (from, to) = RiskHistory.DefaultPeriod(_owner.Document);
+            var (from, to) = RiskHistory.DefaultPeriod(_owner.View);
             return (FromDate is { } f ? DateOnly.FromDateTime(f) : from, ToDate is { } t ? DateOnly.FromDateTime(t) : to);
         }
     }
@@ -109,7 +109,7 @@ public sealed partial class ReportsViewModel : ObservableObject
 
     public void Reload()
     {
-        var doc = _owner.Document;
+        var doc = _owner.View;
         var selectedId = Selected?.RiskId;
         Items.Clear();
         foreach (var row in Reports.Summary(doc))
@@ -139,7 +139,7 @@ public sealed partial class ReportsViewModel : ObservableObject
 
     private void ReloadEvolution()
     {
-        var doc = _owner.Document;
+        var doc = _owner.View;
         var (from, to) = Period;
         Evolution.Clear();
         foreach (var x in RiskHistory.Evolution(doc, from, to))

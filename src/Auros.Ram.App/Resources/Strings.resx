@@ -159,11 +159,11 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Print_SaveTitle" xml:space="preserve"><value>Guardar el PDF para imprimir</value></data>
   <data name="Print_Title" xml:space="preserve"><value>Imprimir</value></data>
   <data name="Project_AssignedScales" xml:space="preserve"><value>Escalas del proyecto</value></data>
-  <data name="Project_Company" xml:space="preserve"><value>Empresa</value></data>
+  <data name="Project_Company" xml:space="preserve"><value>Organización (consolidado)</value></data>
   <data name="Project_Date" xml:space="preserve"><value>Fecha</value></data>
   <data name="Project_Distribution" xml:space="preserve"><value>Distribución por nivel de riesgo</value></data>
-  <data name="Project_Logo" xml:space="preserve"><value>Logo de la empresa</value></data>
-  <data name="Project_LogoHint" xml:space="preserve"><value>Aparece en la matriz de riesgo y en el encabezado de los informes PDF.</value></data>
+  <data name="Project_Logo" xml:space="preserve"><value>Logo del consolidado</value></data>
+  <data name="Project_LogoHint" xml:space="preserve"><value>Aparece en la matriz y en los informes cuando se miran todas las empresas, y en las empresas que no tienen logo propio.</value></data>
   <data name="Project_LogoInvalid" xml:space="preserve"><value>La imagen no se pudo leer. Use un archivo PNG o JPG.</value></data>
   <data name="Project_LogoTooLarge" xml:space="preserve"><value>La imagen supera los 2 MB. Use una versión más liviana.</value></data>
   <data name="Project_Name" xml:space="preserve"><value>Nombre del proyecto</value></data>
@@ -433,4 +433,25 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Clone_Assessment" xml:space="preserve"><value>Nueva evaluación a partir de esta</value></data>
   <data name="Clone_Title" xml:space="preserve"><value>{0} (copia)</value></data>
   <data name="Clone_Note" xml:space="preserve"><value>Copia de «{0}»</value></data>
+  <data name="Scope_Company" xml:space="preserve"><value>Empresa</value></data>
+  <data name="Scope_Unit" xml:space="preserve"><value>Unidad de negocio</value></data>
+  <data name="Scope_AllCompanies" xml:space="preserve"><value>Todas las empresas</value></data>
+  <data name="Scope_AllUnits" xml:space="preserve"><value>Todas las unidades</value></data>
+  <data name="Risk_Company" xml:space="preserve"><value>Empresa</value></data>
+  <data name="Risk_CompanyHint" xml:space="preserve"><value>Elegir o escribir una empresa</value></data>
+  <data name="Risk_Unit" xml:space="preserve"><value>Unidad de negocio</value></data>
+  <data name="Risk_UnitHint" xml:space="preserve"><value>Elegir o escribir una unidad</value></data>
+  <data name="Org_Menu" xml:space="preserve"><value>Empresas y unidades de negocio…</value></data>
+  <data name="Org_Title" xml:space="preserve"><value>Empresas y unidades de negocio</value></data>
+  <data name="Org_Hint" xml:space="preserve"><value>Cada riesgo pertenece a una empresa y a una unidad de negocio de esa empresa. Elija una empresa para ver sus unidades. El logo de la empresa aparece en la matriz y en los informes cuando se mira esa empresa. Una empresa o unidad con riesgos no se puede quitar. Los cambios se pueden deshacer (Edición → Deshacer).</value></data>
+  <data name="Org_Companies" xml:space="preserve"><value>Empresas</value></data>
+  <data name="Org_Units" xml:space="preserve"><value>Unidades de negocio</value></data>
+  <data name="Org_UnitsOf" xml:space="preserve"><value>Unidades de negocio de {0}</value></data>
+  <data name="Org_NewCompany" xml:space="preserve"><value>Nueva empresa</value></data>
+  <data name="Org_NewUnit" xml:space="preserve"><value>Nueva unidad de negocio</value></data>
+  <data name="Org_PickLogo" xml:space="preserve"><value>Elegir el logo de la empresa</value></data>
+  <data name="Org_ClearLogo" xml:space="preserve"><value>Quitar el logo de la empresa</value></data>
+  <data name="Org_RemoveCompany" xml:space="preserve"><value>Quitar esta empresa</value></data>
+  <data name="Org_RemoveUnit" xml:space="preserve"><value>Quitar esta unidad de negocio</value></data>
+  <data name="Risks_ColOrganization" xml:space="preserve"><value>Empresa · Unidad</value></data>
 </root>

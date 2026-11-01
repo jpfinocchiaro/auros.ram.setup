@@ -48,5 +48,7 @@ public interface IUiService
     Task ShowAboutAsync();
 
     Task EditCatalogsAsync(CatalogsViewModel vm);
+
+    Task EditOrganizationsAsync(OrganizationsViewModel vm);
     Task OpenWithSystemAsync(string path);
 }

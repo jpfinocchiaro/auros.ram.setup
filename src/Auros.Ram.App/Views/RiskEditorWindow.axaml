@@ -65,6 +65,19 @@
              Los combos permiten elegir una opción o escribir una nueva, que se agrega al catálogo. -->
         <Border Classes="card" Padding="12" IsVisible="{Binding CanEditTexts}">
           <StackPanel Spacing="10">
+            <!-- Empresa y unidad de negocio (obligatorias), de los maestros de la matriz; se puede escribir una nueva. -->
+            <Grid ColumnDefinitions="*,12,*">
+              <StackPanel Spacing="6">
+                <TextBlock Classes="label" Text="{x:Static r:Strings.Risk_Company}" />
+                <ComboBox x:Name="CompanyBox" IsEditable="True" HorizontalAlignment="Stretch" ItemsSource="{Binding CompanyOptions}"
+                          Text="{Binding Company}" PlaceholderText="{x:Static r:Strings.Risk_CompanyHint}" />
+              </StackPanel>
+              <StackPanel Grid.Column="2" Spacing="6">
+                <TextBlock Classes="label" Text="{x:Static r:Strings.Risk_Unit}" />
+                <ComboBox x:Name="UnitBox" IsEditable="True" HorizontalAlignment="Stretch" ItemsSource="{Binding UnitOptions}"
+                          Text="{Binding Unit}" PlaceholderText="{x:Static r:Strings.Risk_UnitHint}" />
+              </StackPanel>
+            </Grid>
             <StackPanel Spacing="6">
               <TextBlock Classes="label" Text="{x:Static r:Strings.Risk_Consequences}" />
               <ItemsControl ItemsSource="{Binding Consequences}" IsVisible="{Binding HasConsequences}">

@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Globalization;
 using Auros.Ram.App.Resources;
 using Auros.Ram.App.Services;
@@ -26,6 +27,12 @@ public enum ExportKind
     Print,
 }
 
+/// <summary>Una opción de los combos de empresa y unidad de negocio (Id null: "Todas").</summary>
+public sealed record ScopeOption(Guid? Id, string Name)
+{
+    public override string ToString() => Name;
+}
+
 public enum Section
 {
     Project = 0,
@@ -50,6 +57,8 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
         Document.EntryPolicy = DisplayOptions.Current.EntryPolicy;
         Key = key;
         Ui = ui;
+        View = Document;
+        RebuildScopeOptions();
         Project = new ProjectViewModel(this);
         Risks = new RisksViewModel(this);
         Matrix = new MatrixViewModel(this);
@@ -63,6 +72,96 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
     }
 
     public RiskMatrixDocument Document { get; }
+
+    // ---- Empresa y unidad de negocio que se miran ------------------------------
+
+    /// <summary>
+    /// Lo que muestran las vistas y los informes: el documento filtrado por la empresa y la unidad elegidas
+    /// (o todo, en el consolidado). Las modificaciones siempre van a <see cref="Document"/>.
+    /// </summary>
+    public RiskMatrixDocument View { get; private set; }
+
+    /// <summary>Opciones del combo de empresas: "Todas" y cada empresa.</summary>
+    public ObservableCollection<ScopeOption> CompanyOptions { get; } = [];
+
+    /// <summary>Opciones del combo de unidades: "Todas" y las unidades de la empresa elegida.</summary>
+    public ObservableCollection<ScopeOption> UnitOptions { get; } = [];
+
+    [ObservableProperty]
+    private ScopeOption? _scopeCompany;
+
+    [ObservableProperty]
+    private ScopeOption? _scopeUnit;
+
+    private bool _scopeLoading;
+
+    public RiskScope Scope => new(ScopeCompany?.Id, ScopeUnit?.Id);
+
+    /// <summary>Hay una empresa elegida: el combo de unidades tiene sentido.</summary>
+    public bool HasScopeCompany => ScopeCompany?.Id is not null;
+
+    partial void OnScopeCompanyChanged(ScopeOption? value)
+    {
+        OnPropertyChanged(nameof(HasScopeCompany));
+        if (_scopeLoading)
+        {
+            return;
+        }
+
+        _scopeLoading = true;
+        RebuildUnits(null);
+        _scopeLoading = false;
+        ApplyScope();
+    }
+
+    partial void OnScopeUnitChanged(ScopeOption? value)
+    {
+        if (!_scopeLoading)
+        {
+            ApplyScope();
+        }
+    }
+
+    /// <summary>Vuelve a armar las vistas con la empresa y la unidad elegidas.</summary>
+    private void ApplyScope()
+    {
+        View = Document.ScopedTo(Scope);
+        Project.ReloadDistribution();
+        Risks.Reload();
+        Matrix.Reload();
+        Reports.Reload();
+    }
+
+    /// <summary>Las opciones de los combos (las empresas pueden haber cambiado); se conserva lo elegido si sigue existiendo.</summary>
+    private void RebuildScopeOptions()
+    {
+        _scopeLoading = true;
+        var company = ScopeCompany?.Id;
+        var unit = ScopeUnit?.Id;
+        CompanyOptions.Clear();
+        CompanyOptions.Add(new ScopeOption(null, Strings.Scope_AllCompanies));
+        foreach (var c in Document.Project.Companies)
+        {
+            CompanyOptions.Add(new ScopeOption(c.Id, c.Name));
+        }
+
+        ScopeCompany = CompanyOptions.FirstOrDefault(o => o.Id == company) ?? CompanyOptions[0];
+        RebuildUnits(unit);
+        _scopeLoading = false;
+        View = Document.ScopedTo(Scope);
+    }
+
+    private void RebuildUnits(Guid? keep)
+    {
+        UnitOptions.Clear();
+        UnitOptions.Add(new ScopeOption(null, Strings.Scope_AllUnits));
+        foreach (var u in (ScopeCompany?.Id is { } id ? Document.Project.FindCompany(id)?.Units : null) ?? [])
+        {
+            UnitOptions.Add(new ScopeOption(u.Id, u.Name));
+        }
+
+        ScopeUnit = UnitOptions.FirstOrDefault(o => o.Id == keep) ?? UnitOptions[0];
+    }
     public FileKey Key { get; private set; }
     public IUiService Ui { get; }
 
@@ -155,8 +254,15 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
             return;
         }
 
-        await Ui.EditRiskAsync(new RiskEditorViewModel(Document, risk));
+        await Ui.EditRiskAsync(new RiskEditorViewModel(Document, risk, risk is null ? ScopePreset() : null));
     }
+
+    /// <summary>Para un riesgo nuevo: la empresa y la unidad elegidas en la barra (si hay).</summary>
+    private Risk ScopePreset() => new()
+    {
+        CompanyId = ScopeCompany?.Id ?? Guid.Empty,
+        UnitId = ScopeUnit?.Id ?? Guid.Empty,
+    };
 
     /// <summary>Riesgo nuevo con impacto y probabilidad ya elegidos (doble clic en una celda de la matriz).</summary>
     public async Task NewRiskAtAsync(Guid impactLevelId, Guid probabilityLevelId)
@@ -166,7 +272,9 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
             return;
         }
 
-        var preset = new Risk { ImpactLevelId = impactLevelId, ProbabilityLevelId = probabilityLevelId };
+        var preset = ScopePreset();
+        preset.ImpactLevelId = impactLevelId;
+        preset.ProbabilityLevelId = probabilityLevelId;
         await Ui.EditRiskAsync(new RiskEditorViewModel(Document, null, preset));
     }
 
@@ -203,9 +311,19 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
 
     private void OnDocumentChanged(object? sender, DocumentChangedEventArgs e)
     {
+        if (e.Kind.HasFlag(DocumentChangeKind.Project))
+        {
+            RebuildScopeOptions();
+        }
+
+        View = Document.ScopedTo(Scope);
         if (e.Kind.HasFlag(DocumentChangeKind.Project) || e.Kind.HasFlag(DocumentChangeKind.Scales) || !Project.HasChanges)
         {
             Project.Reload();
+        }
+        else
+        {
+            Project.ReloadDistribution();
         }
 
         Risks.Reload();
@@ -427,7 +545,8 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
             return;
         }
 
-        var snapshot = Document.Snapshot();
+        // Lo que se exporta es lo que se mira (empresa y unidad elegidas); el JSON es siempre el archivo completo.
+        var snapshot = (kind == ExportKind.Json ? Document : View).Snapshot();
         var period = Reports.Period;
         var password = confirmation.PdfPassword;
         IsBusy = true;

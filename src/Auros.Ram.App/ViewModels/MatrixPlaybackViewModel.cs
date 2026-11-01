@@ -99,7 +99,7 @@ public sealed partial class MatrixPlaybackViewModel : ObservableObject
     /// <summary>Vuelve a armar las fotos (cambió el período o el archivo); conserva la fecha que se estaba viendo.</summary>
     public void Reload()
     {
-        var doc = _owner.Document;
+        var doc = _owner.View;
         var (defaultFrom, defaultTo) = RiskHistory.DefaultPeriod(doc);
         var from = FromDate is { } f ? DateOnly.FromDateTime(f) : defaultFrom;
         var to = ToDate is { } t ? DateOnly.FromDateTime(t) : defaultTo;

@@ -44,6 +44,9 @@ public sealed partial class RiskRow(Risk risk, LevelChip? riskLevel, LevelChip? 
 
     public string Title => Risk.Title;
 
+    /// <summary>"Empresa · Unidad de negocio" del riesgo.</summary>
+    public string Organization { get; init; } = "";
+
     /// <summary>Sin marcas de formato: se muestra como ayuda emergente de la fila.</summary>
     public string ShortDescription => Auros.Ram.Core.Text.RichText.ToPlain(Risk.ShortDescription);
 
@@ -134,7 +137,7 @@ public sealed partial class RisksViewModel : ObservableObject
     public IReadOnlyList<EntryRow> SelectedEntries =>
         [.. Selection.SelectedItems.OfType<EntryRow>().Where(e => !Selection.SelectedItems.Contains(e.Owner))];
 
-    public bool HasRisks => _owner.Document.Risks.Count > 0;
+    public bool HasRisks => _owner.View.Risks.Count > 0;
 
     partial void OnSearchTextChanged(string value) => Refresh();
     partial void OnRiskFilterChanged(FilterOption? value) => Refresh();
@@ -147,7 +150,7 @@ public sealed partial class RisksViewModel : ObservableObject
     public void Reload()
     {
         _loading = true;
-        var doc = _owner.Document;
+        var doc = _owner.View;
         RiskFilter = Rebuild(RiskFilters, doc.ProjectScale(ScaleType.Risk), RiskFilter);
         ImpactFilter = Rebuild(ImpactFilters, doc.ProjectScale(ScaleType.Impact), ImpactFilter);
         ProbabilityFilter = Rebuild(ProbabilityFilters, doc.ProjectScale(ScaleType.Probability), ProbabilityFilter);
@@ -163,7 +166,7 @@ public sealed partial class RisksViewModel : ObservableObject
             return;
         }
 
-        var doc = _owner.Document;
+        var doc = _owner.View;
 
         // Se conserva lo desplegado y lo seleccionado al volver a armar la grilla.
         var expanded = Items.Where(r => r.IsExpanded).Select(r => r.Risk.Id).ToHashSet();
@@ -202,7 +205,10 @@ public sealed partial class RisksViewModel : ObservableObject
                     r,
                     doc.RiskLevelOf(r) is { } level ? levels.GetValueOrDefault(level.Id) : null,
                     levels.GetValueOrDefault(r.ImpactLevelId),
-                    levels.GetValueOrDefault(r.ProbabilityLevelId));
+                    levels.GetValueOrDefault(r.ProbabilityLevelId))
+                {
+                    Organization = doc.OrganizationName(r),
+                };
                 var steps = RiskHistory.Steps(doc, r);
                 for (var i = steps.Count - 1; i >= 0; i--)
                 {

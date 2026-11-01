@@ -84,7 +84,6 @@ public sealed partial class ProjectViewModel : ObservableObject
         ProbabilityScale = ProbabilityScales.FirstOrDefault(s => s.Id == p.ProbabilityScaleId);
         CompanyLogo = p.CompanyLogo;
         CanChangeScales = doc.CanChangeProjectScales;
-        RiskCount = doc.Risks.Count;
 
         Fill(AssignedScales, new[] { ScaleType.Impact, ScaleType.Probability, ScaleType.Risk }.Select(t =>
         {
@@ -92,13 +91,20 @@ public sealed partial class ProjectViewModel : ObservableObject
             return new ScalePreview(t.DisplayName(), s?.Name ?? "—", [.. (s?.OrderedLevels ?? []).Select(l => new LevelChip(l))]);
         }));
 
-        var dist = Reports.Distribution(doc);
-        var max = Math.Max(1, dist.Count == 0 ? 1 : dist.Max(d => d.Count));
-        Fill(Distribution, dist.Select(d => new DistributionRow(new LevelChip(d.Level), d.Count, d.Share.ToString("P0", System.Globalization.CultureInfo.CurrentCulture), 140.0 * d.Count / max)));
-
+        ReloadDistribution();
         Error = null;
         HasChanges = false;
         _loading = false;
+    }
+
+    /// <summary>Cantidad y distribución de riesgos de lo que se mira (empresa y unidad elegidas, o todo).</summary>
+    public void ReloadDistribution()
+    {
+        var view = _owner.View;
+        RiskCount = view.Risks.Count;
+        var dist = Reports.Distribution(view);
+        var max = Math.Max(1, dist.Count == 0 ? 1 : dist.Max(d => d.Count));
+        Fill(Distribution, dist.Select(d => new DistributionRow(new LevelChip(d.Level), d.Count, d.Share.ToString("P0", System.Globalization.CultureInfo.CurrentCulture), 140.0 * d.Count / max)));
     }
 
     [RelayCommand]

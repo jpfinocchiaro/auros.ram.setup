@@ -247,6 +247,11 @@ public sealed partial class RiskEditorViewModel : ObservableObject
 
         _materiality = risk?.MaterialityId is { } m ? doc.Project.MaterialityCriteria.FirstOrDefault(c => c.Id == m)?.Name ?? "" : "";
 
+        // Empresa y unidad: las del riesgo (o las elegidas en la barra, para uno nuevo); si no, la primera.
+        var company = (source is not null ? doc.Project.FindCompany(source.CompanyId) : null) ?? doc.Project.Companies.FirstOrDefault();
+        _company = company?.Name ?? "";
+        _unit = (company?.Units.FirstOrDefault(u => u.Id == source?.UnitId) ?? company?.Units.FirstOrDefault())?.Name ?? "";
+
         _currentImpact = risk?.ImpactLevelId ?? Guid.Empty;
         _currentProbability = risk?.ProbabilityLevelId ?? Guid.Empty;
         UpdateRiskLevel();
@@ -303,6 +308,49 @@ public sealed partial class RiskEditorViewModel : ObservableObject
 
         vm.AssessmentNote = source.Note;
         return vm;
+    }
+
+    // ---- Empresa y unidad de negocio --------------------------------------
+
+    /// <summary>Empresa del riesgo (obligatoria): se elige del maestro o se escribe una nueva, que se agrega.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(UnitOptions))]
+    private string _company;
+
+    /// <summary>Unidad de negocio de la empresa (obligatoria): se elige o se escribe una nueva, que se agrega.</summary>
+    [ObservableProperty]
+    private string _unit;
+
+    public IReadOnlyList<string> CompanyOptions => [.. _doc.Project.Companies.Select(c => c.Name)];
+
+    /// <summary>Las unidades de la empresa elegida.</summary>
+    public IReadOnlyList<string> UnitOptions => [.. (FindCompany(Company)?.Units ?? []).Select(u => u.Name)];
+
+    partial void OnCompanyChanged(string value)
+    {
+        // Al cambiar de empresa, la unidad pasa a la primera de la nueva si la escrita no es de ella.
+        if (FindCompany(value) is { } company && company.Units.All(u => !Same(u.Name, Unit)))
+        {
+            Unit = company.Units.FirstOrDefault()?.Name ?? "";
+        }
+    }
+
+    private Company? FindCompany(string? name) =>
+        _doc.Project.Companies.FirstOrDefault(c => Same(c.Name, (name ?? "").Trim()));
+
+    private static bool Same(string a, string? b) => string.Equals(a.Trim(), (b ?? "").Trim(), StringComparison.CurrentCultureIgnoreCase);
+
+    /// <summary>Ids de la empresa y la unidad; las escritas que no están en el maestro se agregan a él.</summary>
+    private (Guid Company, Guid Unit) ResolveOrganization()
+    {
+        if (string.IsNullOrWhiteSpace(Company))
+        {
+            return (Guid.Empty, Guid.Empty);
+        }
+
+        var company = FindCompany(Company) ?? _doc.AddCompany(Company);
+        var unit = string.IsNullOrWhiteSpace(Unit) ? null : company.Units.FirstOrDefault(u => Same(u.Name, Unit)) ?? _doc.AddUnit(company.Id, Unit);
+        return (company.Id, unit?.Id ?? Guid.Empty);
     }
 
     // ---- Consecuencias y criterio de materialidad --------------------------
@@ -659,6 +707,7 @@ public sealed partial class RiskEditorViewModel : ObservableObject
         {
             if (CanEditTexts)
             {
+                (risk.CompanyId, risk.UnitId) = ResolveOrganization();
                 (risk.ConsequenceIds, risk.MaterialityId) = ResolveCatalogs();
             }
 

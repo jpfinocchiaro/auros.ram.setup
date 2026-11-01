@@ -1,4 +1,4 @@
-# Formato de archivo `.rmx` / `.rmt` (contenedor v1, esquema v6)
+# Formato de archivo `.rmx` / `.rmt` (contenedor v1, esquema v7)
 
 Cada matriz (`.rmx`) y cada plantilla de escalas (`.rmt`) es un único archivo autocontenido,
 independiente del sistema operativo (RNF-11, RNF-53). Implementación: `src/Auros.Ram.Persistence`.
@@ -67,16 +67,18 @@ La base se arma en un archivo de trabajo cifrado, se le antepone la cabecera y s
 temporal junto al original (`.nombre.rmx.<guid>.tmp`, con *write-through*). Luego un renombrado
 reemplaza el original. En ningún momento el original queda a medio escribir.
 
-## Esquema v6
+## Esquema v7
 
 | Tabla | Contenido |
 |---|---|
 | `meta` | clave/valor (`app_version`) |
-| `project` | una fila: nombre, empresa, fecha, estado, logo de la empresa (BLOB) y las escalas de riesgo, impacto y probabilidad |
+| `project` | una fila: nombre, organización (consolidado), fecha, estado, logo del consolidado (BLOB) y las escalas de riesgo, impacto y probabilidad |
+| `company` | empresas (id, posición, nombre, logo BLOB opcional) |
+| `business_unit` | unidades de negocio (id, empresa, posición, nombre); cada empresa tiene al menos una |
 | `scale` | escalas (id, posición, nombre, tipo 1 Nivel de riesgo / 2 Impacto / 3 Probabilidad) |
 | `level` | niveles (id, escala, nombre, color de fondo `#RRGGBB`, color de fuente `text_color` `#RRGGBB`, orden 0–100, rango opcional `range_from`–`range_to`: monto en Impacto, porcentaje en Probabilidad) |
 | `heat_cell` | mapa de calor: nivel de riesgo elegido para una combinación de impacto y probabilidad (las que faltan usan el valor por omisión) |
-| `risk` | riesgos (id, posición, título, descripciones, nivel de impacto y de probabilidad actuales, sus justificaciones, fechas UTC ISO-8601, monto del impacto y probabilidad en % opcionales) |
+| `risk` | riesgos (id, posición, título, descripciones, nivel de impacto y de probabilidad actuales, sus justificaciones, fechas UTC ISO-8601, monto del impacto y probabilidad en % opcionales, empresa `company_id` y unidad de negocio `unit_id`) |
 | `catalog_item` | catálogos de la matriz (id, tipo 1 consecuencia / 2 criterio de materialidad, posición, nombre) |
 | `risk_consequence` | consecuencias potenciales de cada riesgo (riesgo, opción del catálogo, posición); el criterio de materialidad está en `risk.materiality_id` |
 | `risk_assessment` | historial de evaluaciones de cada riesgo (id, riesgo, fecha `yyyy-MM-dd`, nivel de impacto y de probabilidad, comentario, momento del registro UTC); la última es el estado actual |
@@ -92,6 +94,7 @@ El nivel de riesgo de cada riesgo no se guarda: se calcula con el mapa de calor.
 | 3 | Impacto y probabilidad de ocurrencia; nivel de riesgo por mapa de calor; una empresa por matriz; color de fuente por nivel |
 | 4 | Historial de evaluaciones (`risk_assessment`). Al migrar, cada riesgo empieza su historial con su estado actual fechado el día en que se creó |
 | 6 | Catálogos de consecuencias potenciales y criterios de materialidad (`catalog_item`), consecuencias de cada riesgo (`risk_consequence`) y su criterio (`risk.materiality_id`). Al migrar, la matriz recibe la lista sugerida |
+| 7 | Varias empresas (`company`, con su logo) y sus unidades de negocio (`business_unit`); empresa y unidad de cada riesgo (`risk.company_id`, `risk.unit_id`). Al migrar, la matriz recibe una empresa con el nombre y el logo del proyecto y la unidad «General», y todos los riesgos pasan a ella |
 | 5 | Rangos de los niveles (`range_from`, `range_to`) y monto del impacto y probabilidad en % en riesgos y evaluaciones (`impact_amount`, `probability_percent`). Decimales como texto invariante con 2 decimales |
 
 ## Cómo agregar una versión del esquema (RNF-69)

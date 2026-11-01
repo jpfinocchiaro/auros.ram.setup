@@ -87,11 +87,12 @@ internal static class DocumentStore
 
         using (var cmd = Command(c, tx, """
             INSERT INTO risk (id, position, title, short_description, long_description, impact_level_id, probability_level_id,
-                              impact_justification, probability_justification, created_utc, modified_utc, impact_amount, probability_percent, materiality_id)
-            VALUES ($id, $pos, $title, $short, $long, $il, $pl, $ij, $pj, $created, $modified, $amount, $percent, $materiality);
+                              impact_justification, probability_justification, created_utc, modified_utc, impact_amount, probability_percent, materiality_id,
+                              company_id, unit_id)
+            VALUES ($id, $pos, $title, $short, $long, $il, $pl, $ij, $pj, $created, $modified, $amount, $percent, $materiality, $company, $unit);
             """))
         {
-            var names = new[] { "$id", "$pos", "$title", "$short", "$long", "$il", "$pl", "$ij", "$pj", "$created", "$modified", "$amount", "$percent", "$materiality" };
+            var names = new[] { "$id", "$pos", "$title", "$short", "$long", "$il", "$pl", "$ij", "$pj", "$created", "$modified", "$amount", "$percent", "$materiality", "$company", "$unit" };
             var prm = names.Select(n => cmd.Parameters.Add(n, SqliteType.Text)).ToArray();
             prm[1].SqliteType = SqliteType.Integer;
             for (var i = 0; i < doc.Risks.Count; i++)
@@ -111,6 +112,8 @@ internal static class DocumentStore
                 prm[11].Value = Dec(r.ImpactAmount);
                 prm[12].Value = Dec(r.ProbabilityPercent);
                 prm[13].Value = Id(r.MaterialityId);
+                prm[14].Value = Id(r.CompanyId == Guid.Empty ? null : r.CompanyId);
+                prm[15].Value = Id(r.UnitId == Guid.Empty ? null : r.UnitId);
                 cmd.ExecuteNonQuery();
             }
         }
@@ -136,6 +139,32 @@ internal static class DocumentStore
                     prm[7].Value = Dec(a.ImpactAmount);
                     prm[8].Value = Dec(a.ProbabilityPercent);
                     cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        // Empresas y unidades de negocio (el paso v7 del esquema puede haber dejado una por omisión: se reemplazan).
+        Sql.Execute(c, "DELETE FROM business_unit; DELETE FROM company;", tx);
+        using (var companyCmd = Command(c, tx, "INSERT INTO company (id, position, name, logo) VALUES ($id, $pos, $name, $logo);"))
+        using (var unitCmd = Command(c, tx, "INSERT INTO business_unit (id, company_id, position, name) VALUES ($id, $company, $pos, $name);"))
+        {
+            for (var i = 0; i < p.Companies.Count; i++)
+            {
+                var company = p.Companies[i];
+                companyCmd.Parameters.Clear();
+                companyCmd.Parameters.AddWithValue("$id", company.Id.ToString());
+                companyCmd.Parameters.AddWithValue("$pos", i);
+                companyCmd.Parameters.AddWithValue("$name", company.Name);
+                companyCmd.Parameters.AddWithValue("$logo", (object?)company.Logo ?? DBNull.Value);
+                companyCmd.ExecuteNonQuery();
+                for (var j = 0; j < company.Units.Count; j++)
+                {
+                    unitCmd.Parameters.Clear();
+                    unitCmd.Parameters.AddWithValue("$id", company.Units[j].Id.ToString());
+                    unitCmd.Parameters.AddWithValue("$company", company.Id.ToString());
+                    unitCmd.Parameters.AddWithValue("$pos", j);
+                    unitCmd.Parameters.AddWithValue("$name", company.Units[j].Name);
+                    unitCmd.ExecuteNonQuery();
                 }
             }
         }
@@ -266,10 +295,40 @@ internal static class DocumentStore
         project.Consequences = consequences;
         project.MaterialityCriteria = materiality;
 
+        var units = new Dictionary<Guid, List<BusinessUnit>>();
+        using (var cmd = Command(c, null, "SELECT id, company_id, name FROM business_unit ORDER BY position;"))
+        using (var r = cmd.ExecuteReader())
+        {
+            while (r.Read())
+            {
+                var companyId = Guid.Parse(r.GetString(1));
+                if (!units.TryGetValue(companyId, out var list))
+                {
+                    units[companyId] = list = [];
+                }
+
+                list.Add(new BusinessUnit(Guid.Parse(r.GetString(0)), r.GetString(2)));
+            }
+        }
+
+        var companies = new List<Company>();
+        using (var cmd = Command(c, null, "SELECT id, name, logo FROM company ORDER BY position;"))
+        using (var r = cmd.ExecuteReader())
+        {
+            while (r.Read())
+            {
+                var id = Guid.Parse(r.GetString(0));
+                companies.Add(new Company(id, r.GetString(1), r.IsDBNull(2) ? null : (byte[])r[2], units.GetValueOrDefault(id) ?? []));
+            }
+        }
+
+        project.Companies = companies;
+
         var risks = new List<Risk>();
         using (var cmd = Command(c, null, """
             SELECT id, title, short_description, long_description, impact_level_id, probability_level_id,
-                   impact_justification, probability_justification, created_utc, modified_utc, impact_amount, probability_percent, materiality_id
+                   impact_justification, probability_justification, created_utc, modified_utc, impact_amount, probability_percent, materiality_id,
+                   company_id, unit_id
             FROM risk ORDER BY position;
             """))
         using (var r = cmd.ExecuteReader())
@@ -291,6 +350,8 @@ internal static class DocumentStore
                     ImpactAmount = Dec(r, 10),
                     ProbabilityPercent = Dec(r, 11),
                     MaterialityId = OptionalGuid(r, 12),
+                    CompanyId = OptionalGuid(r, 13) ?? Guid.Empty,
+                    UnitId = OptionalGuid(r, 14) ?? Guid.Empty,
                 });
             }
         }

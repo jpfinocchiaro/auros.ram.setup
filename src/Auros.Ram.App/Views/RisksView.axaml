@@ -101,15 +101,16 @@
     <Border Classes="card" Padding="0">
       <DockPanel>
         <Border DockPanel.Dock="Top" Classes="gridHeader">
-          <Grid ColumnDefinitions="30,*,104,118,104,128,64,56,92" Margin="8,0,8,0">
+          <Grid ColumnDefinitions="30,*,170,104,118,104,128,64,56,92" Margin="8,0,8,0">
             <TextBlock Grid.Column="1" Classes="col" Margin="10,0,0,0" Text="{x:Static r:Strings.Risks_ColRisk}" />
-            <TextBlock Grid.Column="2" Classes="col" Text="{x:Static r:Strings.ScaleType_Risk}" />
-            <TextBlock Grid.Column="3" Classes="col" Text="{x:Static r:Strings.ScaleType_Impact}" />
-            <TextBlock Grid.Column="4" Classes="col" HorizontalAlignment="Right" Margin="0,0,12,0" Text="{x:Static r:Strings.Risks_ColAmount}" />
-            <TextBlock Grid.Column="5" Classes="col" Text="{x:Static r:Strings.Risks_ProbabilityShort}" />
-            <TextBlock Grid.Column="6" Classes="col" HorizontalAlignment="Right" Margin="0,0,12,0" Text="%" />
-            <TextBlock Grid.Column="7" Classes="col" HorizontalAlignment="Center" Text="{x:Static r:Strings.Risks_ColEntries}" />
-            <TextBlock Grid.Column="8" Classes="col" Text="{x:Static r:Strings.Risks_ColLast}" />
+            <TextBlock Grid.Column="2" Classes="col" Text="{x:Static r:Strings.Risks_ColOrganization}" />
+            <TextBlock Grid.Column="3" Classes="col" Text="{x:Static r:Strings.ScaleType_Risk}" />
+            <TextBlock Grid.Column="4" Classes="col" Text="{x:Static r:Strings.ScaleType_Impact}" />
+            <TextBlock Grid.Column="5" Classes="col" HorizontalAlignment="Right" Margin="0,0,12,0" Text="{x:Static r:Strings.Risks_ColAmount}" />
+            <TextBlock Grid.Column="6" Classes="col" Text="{x:Static r:Strings.Risks_ProbabilityShort}" />
+            <TextBlock Grid.Column="7" Classes="col" HorizontalAlignment="Right" Margin="0,0,12,0" Text="%" />
+            <TextBlock Grid.Column="8" Classes="col" HorizontalAlignment="Center" Text="{x:Static r:Strings.Risks_ColEntries}" />
+            <TextBlock Grid.Column="9" Classes="col" Text="{x:Static r:Strings.Risks_ColLast}" />
           </Grid>
         </Border>
         <Panel>
@@ -118,7 +119,7 @@
             <ListBox.DataTemplates>
               <!-- Fila padre: el riesgo -->
               <DataTemplate x:DataType="vm:RiskRow">
-                <Grid ColumnDefinitions="30,*,104,118,104,128,64,56,92" Height="36" Background="Transparent" ToolTip.Tip="{Binding ShortDescription}">
+                <Grid ColumnDefinitions="30,*,170,104,118,104,128,64,56,92" Height="36" Background="Transparent" ToolTip.Tip="{Binding ShortDescription}">
                   <Grid.ContextMenu>
                     <ContextMenu>
                       <MenuItem Header="{x:Static r:Strings.Risks_Edit}"
@@ -144,18 +145,20 @@
                             Background="{Binding RiskLevel.Background, FallbackValue=Transparent}" />
                     <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                   </DockPanel>
-                  <ContentControl Grid.Column="2" Content="{Binding RiskLevel}" VerticalAlignment="Center" HorizontalAlignment="Left" />
-                  <ContentControl Grid.Column="3" Content="{Binding ImpactLevel}" VerticalAlignment="Center" HorizontalAlignment="Left" />
-                  <TextBlock Grid.Column="4" Classes="num" Text="{Binding ImpactValue}" />
-                  <ContentControl Grid.Column="5" Content="{Binding ProbabilityLevel}" VerticalAlignment="Center" HorizontalAlignment="Left" />
-                  <TextBlock Grid.Column="6" Classes="num" Text="{Binding ProbabilityValue}" />
-                  <TextBlock Grid.Column="7" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding EntriesCount}" />
-                  <TextBlock Grid.Column="8" VerticalAlignment="Center" Text="{Binding LastDate}" />
+                  <TextBlock Grid.Column="2" Classes="muted" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                             Text="{Binding Organization}" ToolTip.Tip="{Binding Organization}" />
+                  <ContentControl Grid.Column="3" Content="{Binding RiskLevel}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                  <ContentControl Grid.Column="4" Content="{Binding ImpactLevel}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                  <TextBlock Grid.Column="5" Classes="num" Text="{Binding ImpactValue}" />
+                  <ContentControl Grid.Column="6" Content="{Binding ProbabilityLevel}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                  <TextBlock Grid.Column="7" Classes="num" Text="{Binding ProbabilityValue}" />
+                  <TextBlock Grid.Column="8" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding EntriesCount}" />
+                  <TextBlock Grid.Column="9" VerticalAlignment="Center" Text="{Binding LastDate}" />
                 </Grid>
               </DataTemplate>
               <!-- Fila hija: una evaluación del riesgo, indentada bajo el título -->
               <DataTemplate x:DataType="vm:EntryRow">
-                <Grid ColumnDefinitions="30,*,104,118,104,128,64,56,92" Height="32" Background="Transparent" ToolTip.Tip="{Binding Note}">
+                <Grid ColumnDefinitions="30,*,170,104,118,104,128,64,56,92" Height="32" Background="Transparent" ToolTip.Tip="{Binding Note}">
                   <Grid.ContextMenu>
                     <ContextMenu>
                       <MenuItem Header="{x:Static r:Strings.Clone_Assessment}"
@@ -173,11 +176,11 @@
                     </Border>
                     <TextBlock Classes="muted" FontSize="12" Text="{Binding Note}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                   </DockPanel>
-                  <ContentControl Grid.Column="2" Content="{Binding RiskLevel}" VerticalAlignment="Center" HorizontalAlignment="Left" />
-                  <ContentControl Grid.Column="3" Content="{Binding Impact}" VerticalAlignment="Center" HorizontalAlignment="Left" />
-                  <TextBlock Grid.Column="4" Classes="num" Text="{Binding ImpactValue}" />
-                  <ContentControl Grid.Column="5" Content="{Binding Probability}" VerticalAlignment="Center" HorizontalAlignment="Left" />
-                  <TextBlock Grid.Column="6" Classes="num" Text="{Binding ProbabilityValue}" />
+                  <ContentControl Grid.Column="3" Content="{Binding RiskLevel}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                  <ContentControl Grid.Column="4" Content="{Binding Impact}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                  <TextBlock Grid.Column="5" Classes="num" Text="{Binding ImpactValue}" />
+                  <ContentControl Grid.Column="6" Content="{Binding Probability}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                  <TextBlock Grid.Column="7" Classes="num" Text="{Binding ProbabilityValue}" />
                 </Grid>
               </DataTemplate>
             </ListBox.DataTemplates>

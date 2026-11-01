@@ -594,6 +594,11 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private Task Catalogs() =>
         Active is { IsLocked: false } doc ? _ui.EditCatalogsAsync(new CatalogsViewModel(doc.Document)) : Task.CompletedTask;
 
+    /// <summary>Configuración → Empresas y unidades de negocio: el maestro de la matriz activa.</summary>
+    [RelayCommand]
+    private Task Organizations() =>
+        Active is { IsLocked: false } doc ? _ui.EditOrganizationsAsync(new OrganizationsViewModel(doc.Document, _ui)) : Task.CompletedTask;
+
     private void RefreshRecent()
     {
         Recent.Clear();

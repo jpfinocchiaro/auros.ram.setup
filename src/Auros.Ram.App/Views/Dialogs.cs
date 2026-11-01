@@ -189,6 +189,23 @@ public partial class CatalogsWindow : Window
     }
 }
 
+/// <summary>Maestro de empresas y unidades de negocio.</summary>
+public partial class OrganizationsWindow : Window
+{
+    public OrganizationsWindow() => InitializeComponent();
+
+    public OrganizationsWindow(OrganizationsViewModel vm) : this() => DataContext = vm;
+
+    // Al cerrar se aplican los nombres corregidos; si alguno no se puede, queda abierta con el motivo.
+    private void OnClose(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not OrganizationsViewModel vm || vm.Close())
+        {
+            Close();
+        }
+    }
+}
+
 /// <summary>Íconos de los botones de los mensajes, según su texto.</summary>
 internal static class MessageIcons
 {

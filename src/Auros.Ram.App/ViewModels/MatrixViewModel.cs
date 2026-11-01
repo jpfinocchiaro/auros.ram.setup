@@ -80,7 +80,7 @@ public sealed partial class MatrixViewModel : ObservableObject
 
     public void Reload()
     {
-        var doc = _owner.Document;
+        var doc = _owner.View;
         var m = PriorityMatrix.Build(doc, AsOf);
         // RF-14: todas las celdas con la altura de la que más riesgos tiene, más el rótulo del nivel de la celda.
         var height = (Math.Max(1, m.MaxCellCount) * ItemHeight) + 12 + CellHeaderHeight;
@@ -138,7 +138,7 @@ public sealed partial class MatrixViewModel : ObservableObject
     /// <summary>Celdas por las que pasó el riesgo elegido (hasta la fecha de la matriz), en orden.</summary>
     private void UpdatePath()
     {
-        var doc = _owner.Document;
+        var doc = _owner.View;
         if (PathRisk is not { RiskId: var id } || doc.FindRisk(id) is not { } risk)
         {
             PathMarkers = [];

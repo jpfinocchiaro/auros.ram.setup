@@ -1,0 +1,79 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:ui="using:Auros.Ram.App.Views"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Auros.Ram.App.ViewModels"
+        xmlns:r="using:Auros.Ram.App.Resources"
+        x:Class="Auros.Ram.App.Views.OrganizationsWindow"
+        x:DataType="vm:OrganizationsViewModel"
+        Title="{x:Static r:Strings.Org_Title}"
+        Width="1000" Height="620" MinWidth="780" MinHeight="440"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource SurfaceAltBrush}">
+  <!-- Maestro de empresas (con su logo) y de las unidades de negocio de cada una. -->
+  <DockPanel Margin="16">
+    <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,12">
+      <TextBlock Classes="h1" Text="{x:Static r:Strings.Org_Title}" />
+      <TextBlock Classes="muted" TextWrapping="Wrap" Text="{x:Static r:Strings.Org_Hint}" />
+    </StackPanel>
+    <StackPanel DockPanel.Dock="Bottom" Spacing="8" Margin="0,12,0,0">
+      <TextBlock Classes="error" TextWrapping="Wrap" Text="{Binding Error}" IsVisible="{Binding Error, Converter={x:Static ObjectConverters.IsNotNull}}" />
+      <Button ui:ButtonIcon.Icon="{StaticResource IconClose}" Classes="accent" HorizontalAlignment="Right" Content="{x:Static r:Strings.Common_Close}" Click="OnClose" />
+    </StackPanel>
+    <Grid ColumnDefinitions="3*,12,2*">
+      <!-- Empresas: se elige una para ver sus unidades. -->
+      <Border Classes="card" Padding="12">
+        <DockPanel>
+          <TextBlock DockPanel.Dock="Top" Classes="h2" Margin="0,0,0,8" Text="{x:Static r:Strings.Org_Companies}" />
+          <DockPanel DockPanel.Dock="Bottom" Margin="0,10,0,0">
+            <Button ui:ButtonIcon.Icon="{StaticResource IconAdd}" DockPanel.Dock="Right" Margin="8,0,0,0" Content="{x:Static r:Strings.Risk_AddConsequence}" Command="{Binding AddCompanyCommand}" />
+            <TextBox Text="{Binding NewCompany}" MaxLength="80" Watermark="{x:Static r:Strings.Org_NewCompany}" />
+          </DockPanel>
+          <ListBox ItemsSource="{Binding Companies}" SelectedItem="{Binding Selected}" Background="Transparent">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:CompanyRow">
+                <Grid ColumnDefinitions="44,*,96,Auto,Auto,Auto">
+                  <Border Width="36" Height="28" CornerRadius="4" Background="{DynamicResource SurfaceAltBrush}" VerticalAlignment="Center">
+                    <Image Source="{Binding LogoImage}" Stretch="Uniform" Margin="2" />
+                  </Border>
+                  <TextBox Grid.Column="1" Text="{Binding Name}" MaxLength="80" />
+                  <TextBlock Grid.Column="2" Classes="muted" FontSize="12" Margin="8,0" VerticalAlignment="Center" Text="{Binding Usage}" />
+                  <Button Grid.Column="3" ui:ButtonIcon.Icon="{StaticResource IconImage}" ToolTip.Tip="{x:Static r:Strings.Org_PickLogo}" Margin="0,0,4,0"
+                          Command="{Binding Owner.PickLogoCommand}" CommandParameter="{Binding}" />
+                  <Button Grid.Column="4" Content="⌫" ToolTip.Tip="{x:Static r:Strings.Org_ClearLogo}" Margin="0,0,4,0" IsEnabled="{Binding HasLogo}"
+                          Command="{Binding Owner.ClearLogoCommand}" CommandParameter="{Binding}" />
+                  <Button Grid.Column="5" Content="✕" ToolTip.Tip="{x:Static r:Strings.Org_RemoveCompany}"
+                          Command="{Binding Owner.RemoveCompanyCommand}" CommandParameter="{Binding}" />
+                </Grid>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </DockPanel>
+      </Border>
+
+      <!-- Unidades de negocio de la empresa elegida. -->
+      <Border Grid.Column="2" Classes="card" Padding="12">
+        <DockPanel>
+          <TextBlock DockPanel.Dock="Top" Classes="h2" Margin="0,0,0,8" Text="{Binding UnitsTitle}" TextTrimming="CharacterEllipsis" />
+          <DockPanel DockPanel.Dock="Bottom" Margin="0,10,0,0" IsEnabled="{Binding HasSelected}">
+            <Button ui:ButtonIcon.Icon="{StaticResource IconAdd}" DockPanel.Dock="Right" Margin="8,0,0,0" Content="{x:Static r:Strings.Risk_AddConsequence}" Command="{Binding AddUnitCommand}" />
+            <TextBox Text="{Binding NewUnit}" MaxLength="80" Watermark="{x:Static r:Strings.Org_NewUnit}" />
+          </DockPanel>
+          <ScrollViewer>
+            <ItemsControl ItemsSource="{Binding Units}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:UnitRow">
+                  <Grid ColumnDefinitions="*,96,Auto" Margin="0,0,0,6">
+                    <TextBox Text="{Binding Name}" MaxLength="80" />
+                    <TextBlock Grid.Column="1" Classes="muted" FontSize="12" Margin="8,0" VerticalAlignment="Center" Text="{Binding Usage}" />
+                    <Button Grid.Column="2" Content="✕" ToolTip.Tip="{x:Static r:Strings.Org_RemoveUnit}"
+                            Command="{Binding Owner.RemoveUnitCommand}" CommandParameter="{Binding}" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </DockPanel>
+      </Border>
+    </Grid>
+  </DockPanel>
+</Window>

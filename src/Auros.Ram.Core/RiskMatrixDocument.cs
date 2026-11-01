@@ -23,7 +23,7 @@ public sealed class DocumentChangedEventArgs(DocumentChangeKind kind) : EventArg
 /// Contenido de un archivo de matriz: proyecto, escalas y riesgos (RN-12).
 /// Toda modificación pasa por aquí, se valida y queda en el historial de deshacer.
 /// </summary>
-public sealed class RiskMatrixDocument
+public sealed partial class RiskMatrixDocument
 {
     private readonly List<Scale> _scales;
     private readonly List<Risk> _risks;
@@ -60,6 +60,12 @@ public sealed class RiskMatrixDocument
         {
             info.Consequences = SuggestedCatalog(CatalogKind.Consequence);
             info.MaterialityCriteria = SuggestedCatalog(CatalogKind.Materiality);
+        }
+
+        // Una matriz arranca con la empresa del proyecto y una unidad de negocio "General".
+        if (info.Companies.Count == 0)
+        {
+            info.Companies = [DefaultCompany(info)];
         }
 
         return new RiskMatrixDocument(info, scaleList, []);
@@ -196,6 +202,16 @@ public sealed class RiskMatrixDocument
     /// <summary>Nombres de las consecuencias potenciales del riesgo, en el orden en que se cargaron.</summary>
     public IReadOnlyList<string> ConsequenceNames(Risk risk) =>
         [.. risk.ConsequenceIds.Select(id => Project.Consequences.FirstOrDefault(c => c.Id == id)?.Name).OfType<string>()];
+
+    /// <summary>Nombre de la empresa del riesgo (vacío si no tiene).</summary>
+    public string CompanyName(Risk risk) => Project.FindCompany(risk.CompanyId)?.Name ?? "";
+
+    /// <summary>Nombre de la unidad de negocio del riesgo (vacío si no tiene).</summary>
+    public string UnitName(Risk risk) => Project.FindUnit(risk.UnitId)?.Unit.Name ?? "";
+
+    /// <summary>"Empresa · Unidad" del riesgo, para las grillas y los informes.</summary>
+    public string OrganizationName(Risk risk) =>
+        string.Join(" · ", new[] { CompanyName(risk), UnitName(risk) }.Where(s => s.Length > 0));
 
     /// <summary>Nombre del criterio de materialidad del riesgo (vacío si no tiene).</summary>
     public string MaterialityName(Risk risk) =>
@@ -380,6 +396,7 @@ public sealed class RiskMatrixDocument
         }
 
         copy.CreatedUtc = copy.ModifiedUtc = DateTime.UtcNow;
+        AssignDefaultUnit(copy);
         Validation.ValidateRisk(copy, this);
 
         // Un riesgo nuevo empieza su historial con la evaluación de hoy (o de la fecha indicada).

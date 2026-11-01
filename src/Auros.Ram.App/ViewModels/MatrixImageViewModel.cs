@@ -75,7 +75,7 @@ public sealed partial class MatrixImageViewModel : ObservableObject
 
     public void Reload()
     {
-        var doc = _owner.Document;
+        var doc = _owner.View;
         var asOf = AsOfDate is { } d ? DateOnly.FromDateTime(d) : (DateOnly?)null;
         var m = PriorityMatrix.Build(doc, asOf);
         var height = ShowRisks ? (Math.Max(1, m.MaxCellCount) * 24) + 34 : 64;

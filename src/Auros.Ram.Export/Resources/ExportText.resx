@@ -58,4 +58,7 @@
   <data name="Col_ProbabilityPercent" xml:space="preserve"><value>Probabilidad (%)</value></data>
   <data name="Col_Consequences" xml:space="preserve"><value>Consecuencias potenciales</value></data>
   <data name="Col_Materiality" xml:space="preserve"><value>Criterio de materialidad</value></data>
+  <data name="Col_Company" xml:space="preserve"><value>Empresa</value></data>
+  <data name="Col_Unit" xml:space="preserve"><value>Unidad de negocio</value></data>
+  <data name="Col_Organization" xml:space="preserve"><value>Empresa y unidad de negocio</value></data>
 </root>

@@ -90,6 +90,31 @@ public sealed record CatalogItem(Guid Id, string Name)
     public override string ToString() => Name;
 }
 
+/// <summary>Una unidad de negocio de una empresa.</summary>
+public sealed record BusinessUnit(Guid Id, string Name)
+{
+    public override string ToString() => Name;
+}
+
+/// <summary>Una empresa de la matriz, con su logo (opcional) y sus unidades de negocio.</summary>
+public sealed record Company(Guid Id, string Name, byte[]? Logo, IReadOnlyList<BusinessUnit> Units)
+{
+    public override string ToString() => Name;
+}
+
+/// <summary>
+/// Qué riesgos se miran: los de una empresa, los de una unidad de negocio, o todos (consolidado, ambos null).
+/// </summary>
+public sealed record RiskScope(Guid? CompanyId, Guid? UnitId)
+{
+    public static RiskScope All { get; } = new(null, null);
+
+    public bool IsAll => CompanyId is null && UnitId is null;
+
+    public bool Includes(Risk risk) =>
+        (CompanyId is null || risk.CompanyId == CompanyId) && (UnitId is null || risk.UnitId == UnitId);
+}
+
 /// <summary>Una celda del mapa de calor: qué nivel de riesgo corresponde a un impacto y una probabilidad.</summary>
 public sealed record HeatCell(Guid ImpactLevelId, Guid ProbabilityLevelId, Guid RiskLevelId);
 
@@ -113,6 +138,20 @@ public sealed class ProjectInfo
     /// nivel por omisión (ver <see cref="Services.HeatMap"/>).
     /// </summary>
     public IReadOnlyList<HeatCell> HeatMap { get; set; } = [];
+
+    /// <summary>
+    /// Empresas de la matriz (maestro), cada una con sus unidades de negocio. Cada riesgo pertenece a una empresa y a
+    /// una de sus unidades. <see cref="Company"/> y <see cref="CompanyLogo"/> quedan como los del proyecto (consolidado).
+    /// </summary>
+    public IReadOnlyList<Company> Companies { get; set; } = [];
+
+    public Company? FindCompany(Guid id) => Companies.FirstOrDefault(c => c.Id == id);
+
+    /// <summary>La unidad de negocio y su empresa.</summary>
+    public (Company Company, BusinessUnit Unit)? FindUnit(Guid unitId) =>
+        Companies.SelectMany(c => c.Units.Select(u => (c, u))).FirstOrDefault(x => x.u.Id == unitId) is { u: not null } found
+            ? found
+            : null;
 
     /// <summary>Catálogo de consecuencias potenciales de la matriz (se elige de él en cada riesgo).</summary>
     public IReadOnlyList<CatalogItem> Consequences { get; set; } = [];
@@ -197,6 +236,12 @@ public sealed class Risk
 
     public Guid ImpactLevelId { get; set; }
     public Guid ProbabilityLevelId { get; set; }
+
+    /// <summary>Empresa del riesgo (del maestro de la matriz).</summary>
+    public Guid CompanyId { get; set; }
+
+    /// <summary>Unidad de negocio del riesgo (de su empresa).</summary>
+    public Guid UnitId { get; set; }
 
     /// <summary>Consecuencias potenciales del riesgo (del catálogo de la matriz), en el orden en que se cargaron.</summary>
     public IReadOnlyList<Guid> ConsequenceIds { get; set; } = [];

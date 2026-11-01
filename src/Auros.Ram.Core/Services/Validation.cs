@@ -230,6 +230,20 @@ internal static class Validation
             throw new DomainException(Messages.Error_PercentRequired, nameof(Risk.ProbabilityPercent));
         }
 
+        // Empresa y unidad de negocio: del maestro de la matriz, y la unidad de esa empresa.
+        if (doc.Project.Companies.Count > 0)
+        {
+            if (doc.Project.FindCompany(risk.CompanyId) is not { } company)
+            {
+                throw new DomainException(Messages.Error_RiskCompanyRequired, nameof(Risk.CompanyId));
+            }
+
+            if (company.Units.All(u => u.Id != risk.UnitId))
+            {
+                throw new DomainException(Validation.Format(Messages.Error_RiskUnitRequired, company.Name), nameof(Risk.UnitId));
+            }
+        }
+
         // Consecuencias y criterio de materialidad: del catálogo de la matriz.
         if (risk.ConsequenceIds.Any(id => doc.Project.Consequences.All(c => c.Id != id)) ||
             (risk.MaterialityId is { } m && doc.Project.MaterialityCriteria.All(c => c.Id != m)))

@@ -13,13 +13,14 @@ namespace Auros.Ram.Core.Serialization;
 /// evaluaciones de cada riesgo (un JSON de la versión 3 se importa con una sola evaluación por riesgo).
 /// Versión 5: rangos de los niveles (monto o porcentaje) y monto del impacto y probabilidad en porcentaje.
 /// Versión 6: catálogos de consecuencias y de criterios de materialidad, y su uso en cada riesgo (un JSON anterior
-/// se importa con los catálogos sugeridos).
+/// se importa con los catálogos sugeridos). Versión 7: varias empresas con sus unidades de negocio, y la empresa y
+/// unidad de cada riesgo (un JSON anterior se importa con la empresa del proyecto y la unidad "General").
 /// Las versiones 1 y 2 (valor agregado y dificultad) fueron de prueba y ya no se importan.
 /// </summary>
 public static class JsonExchange
 {
     public const string FormatId = "auros.ram/matrix";
-    public const int FormatVersion = 6;
+    public const int FormatVersion = 7;
     public const int OldestSupportedVersion = 3;
 
     private static readonly JsonSerializerOptions Options = new()
@@ -48,6 +49,13 @@ public static class JsonExchange
                 RiskScaleId = p.RiskScaleId,
                 ImpactScaleId = p.ImpactScaleId,
                 ProbabilityScaleId = p.ProbabilityScaleId,
+                Companies = [.. p.Companies.Select(c => new CompanyDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Logo = c.Logo,
+                    Units = [.. c.Units.Select(u => new CatalogItemDto { Id = u.Id, Name = u.Name })],
+                })],
                 Consequences = [.. p.Consequences.Select(i => new CatalogItemDto { Id = i.Id, Name = i.Name })],
                 MaterialityCriteria = [.. p.MaterialityCriteria.Select(i => new CatalogItemDto { Id = i.Id, Name = i.Name })],
                 HeatMap = [.. p.HeatMap.Select(c => new HeatCellDto
@@ -81,6 +89,8 @@ public static class JsonExchange
                 ModifiedUtc = r.ModifiedUtc,
                 ImpactAmount = r.ImpactAmount,
                 ProbabilityPercent = r.ProbabilityPercent,
+                CompanyId = r.CompanyId == Guid.Empty ? null : r.CompanyId,
+                UnitId = r.UnitId == Guid.Empty ? null : r.UnitId,
                 ConsequenceIds = [.. r.ConsequenceIds],
                 MaterialityId = r.MaterialityId,
                 Assessments = [.. r.Assessments.Select(a => new AssessmentDto
@@ -169,6 +179,17 @@ public static class JsonExchange
             project.MaterialityCriteria = Catalog(p.MaterialityCriteria);
         }
 
+        // Empresas: las del JSON; uno anterior a la versión 7 recibe la del proyecto con la unidad "General".
+        project.Companies = p.Companies is { Count: > 0 } companies
+            ? [.. companies.Select(c =>
+            {
+                Validation.ValidateCatalogName((c.Name ?? "").Trim());
+                return new Company(c.Id == Guid.Empty ? Guid.NewGuid() : c.Id, (c.Name ?? "").Trim(), c.Logo, Catalog(c.Units) is { Count: > 0 } u
+                    ? u.Select(i => new BusinessUnit(i.Id, i.Name)).ToList()
+                    : [new BusinessUnit(Guid.NewGuid(), Messages.Default_Unit)]);
+            })]
+            : [RiskMatrixDocument.DefaultCompany(project)];
+
         var doc = new RiskMatrixDocument(project, scales, []);
         Validation.ValidateProject(project, doc);
         project.HeatMap = HeatMap.Prune(
@@ -189,6 +210,8 @@ public static class JsonExchange
             ModifiedUtc = r.ModifiedUtc ?? DateTime.UtcNow,
             ImpactAmount = r.ImpactAmount,
             ProbabilityPercent = r.ProbabilityPercent,
+            CompanyId = r.CompanyId ?? project.Companies[0].Id,
+            UnitId = r.UnitId ?? (project.FindCompany(r.CompanyId ?? project.Companies[0].Id)?.Units.FirstOrDefault()?.Id ?? Guid.Empty),
             ConsequenceIds = [.. (r.ConsequenceIds ?? []).Distinct()],
             MaterialityId = r.MaterialityId,
         })).ToList();
@@ -259,8 +282,17 @@ public static class JsonExchange
         public Guid? ImpactScaleId { get; set; }
         public Guid? ProbabilityScaleId { get; set; }
         public List<HeatCellDto>? HeatMap { get; set; }
+        public List<CompanyDto>? Companies { get; set; }
         public List<CatalogItemDto>? Consequences { get; set; }
         public List<CatalogItemDto>? MaterialityCriteria { get; set; }
+    }
+
+    private sealed class CompanyDto
+    {
+        public Guid Id { get; set; }
+        public string? Name { get; set; }
+        public byte[]? Logo { get; set; }
+        public List<CatalogItemDto>? Units { get; set; }
     }
 
     private sealed class CatalogItemDto
@@ -309,6 +341,8 @@ public static class JsonExchange
         public DateTime? ModifiedUtc { get; set; }
         public decimal? ImpactAmount { get; set; }
         public decimal? ProbabilityPercent { get; set; }
+        public Guid? CompanyId { get; set; }
+        public Guid? UnitId { get; set; }
         public List<Guid>? ConsequenceIds { get; set; }
         public Guid? MaterialityId { get; set; }
         public List<AssessmentDto>? Assessments { get; set; }
