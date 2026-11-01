@@ -66,6 +66,7 @@ public class UiSmokeTests
 
         var doc = SampleDocument();
         var docVm = new DocumentViewModel(Path.Combine(Path.GetTempPath(), "Relevamiento ACME.rmx"), doc, FileKey.CreateNew("contraseña-de-prueba"), ui);
+        vm.Documents.Add(new DocumentViewModel(Path.Combine(Path.GetTempPath(), "Auditoría 2025.rmx"), SampleDocument(), FileKey.CreateNew("contraseña-de-prueba"), ui));
         vm.Documents.Add(docVm);
         vm.Active = docVm;
 

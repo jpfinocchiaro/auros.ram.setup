@@ -189,6 +189,35 @@
       <Setter Property="FontSize" Value="13" />
       <Setter Property="MinHeight" Value="36" />
       <Setter Property="Padding" Value="14,0,6,0" />
+      <Setter Property="Margin" Value="0,0,4,0" />
+      <Setter Property="Foreground" Value="{DynamicResource InkBrush}" />
+    </Style>
+    <!-- Archivos abiertos: el activo en azul con fuente blanca y en negrita; los demás, transparentes con la fuente normal. -->
+    <Style Selector="TabControl.files > TabItem /template/ Border#PART_LayoutRoot">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="CornerRadius" Value="6,6,0,0" />
+    </Style>
+    <Style Selector="TabControl.files > TabItem:pointerover /template/ Border#PART_LayoutRoot">
+      <Setter Property="Background" Value="{DynamicResource RailBrush}" />
+    </Style>
+    <Style Selector="TabControl.files > TabItem:selected">
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="TabControl.files > TabItem:selected /template/ Border#PART_LayoutRoot">
+      <Setter Property="Background" Value="{StaticResource BrandBlueBrush}" />
+    </Style>
+    <Style Selector="TabControl.files > TabItem /template/ Border#PART_SelectedPipe">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="TabControl.files > TabItem:pointerover /template/ Border#PART_LayoutRoot > ContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource InkBrush}" />
+    </Style>
+    <Style Selector="TabControl.files > TabItem:selected:pointerover /template/ Border#PART_LayoutRoot">
+      <Setter Property="Background" Value="{StaticResource BrandBlueBrush}" />
+    </Style>
+    <Style Selector="TabControl.files > TabItem:selected:pointerover /template/ Border#PART_LayoutRoot > ContentPresenter">
+      <Setter Property="Foreground" Value="White" />
     </Style>
 
     <!-- Pestañas internas de una sección (informes): del tamaño del texto, no de un título. -->
