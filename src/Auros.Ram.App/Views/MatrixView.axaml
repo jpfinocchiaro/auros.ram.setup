@@ -103,7 +103,7 @@
           <LayoutTransformControl.LayoutTransform>
             <RotateTransform Angle="-90" />
           </LayoutTransformControl.LayoutTransform>
-          <TextBlock Classes="muted" FontSize="15" Text="{x:Static r:Strings.Matrix_AxisImpact}" />
+          <TextBlock Classes="muted" FontSize="15" FontWeight="SemiBold" Text="{x:Static r:Strings.Matrix_AxisImpact}" />
         </LayoutTransformControl>
 
         <StackPanel Grid.Column="1">
@@ -201,7 +201,7 @@
           </DockPanel>
         </StackPanel>
 
-        <TextBlock Grid.Row="1" Grid.Column="1" Classes="muted" FontSize="15" Margin="132,10,0,0" HorizontalAlignment="Center" Text="{x:Static r:Strings.Matrix_AxisProbability}" />
+        <TextBlock Grid.Row="1" Grid.Column="1" Classes="muted" FontSize="15" FontWeight="SemiBold" Margin="132,10,0,0" HorizontalAlignment="Center" Text="{x:Static r:Strings.Matrix_AxisProbability}" />
       </Grid>
     </DockPanel>
   </ScrollViewer>
