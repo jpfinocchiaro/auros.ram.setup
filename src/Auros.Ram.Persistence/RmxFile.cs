@@ -159,11 +159,29 @@ public static class RmxFile
         Save(doc, path, key, RmxFileKind.Template);
     }
 
-    public static IReadOnlyList<Scale> OpenTemplate(string path, string? password)
+    public static IReadOnlyList<Scale> OpenTemplate(string path, string? password) => OpenParameters(path, password).Scales;
+
+    /// <summary>
+    /// Plantilla de parámetros: todos los de la matriz (escalas, escalas asignadas, mapa de calor, empresas con sus
+    /// logos y unidades de negocio, consecuencias y criterios de materialidad), sin riesgos ni datos del proyecto.
+    /// </summary>
+    public static void SaveParameters(RiskMatrixDocument source, string path, FileKey key)
+    {
+        var info = new ProjectInfo { Name = Path.GetFileNameWithoutExtension(path) };
+        info.CopyParametersFrom(source.Project);
+        Save(new RiskMatrixDocument(info, source.Scales.Select(s => s.Clone()), []), path, key, RmxFileKind.Template);
+    }
+
+    /// <summary>
+    /// Abre una plantilla. Las de versiones anteriores solo traen escalas (<see cref="MatrixTemplate.Parameters"/>
+    /// es null): el resto de los parámetros de la matriz nueva son los de siempre.
+    /// </summary>
+    public static MatrixTemplate OpenParameters(string path, string? password)
     {
         var result = Open(path, password, RmxFileKind.Template);
         result.Key.Dispose();
-        return result.Document.Scales;
+        var p = result.Document.Project;
+        return new MatrixTemplate(result.Document.Scales, p.ImpactScaleId is null ? null : p);
     }
 
     // ---- Interno -----------------------------------------------------------
@@ -331,3 +349,6 @@ internal static class AtomicFile
         }
     }
 }
+
+/// <summary>Contenido de una plantilla: las escalas y, si es completa, los demás parámetros de la matriz.</summary>
+public sealed record MatrixTemplate(IReadOnlyList<Scale> Scales, ProjectInfo? Parameters);

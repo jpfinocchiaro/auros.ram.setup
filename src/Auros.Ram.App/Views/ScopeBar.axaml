@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Auros.Ram.App.ViewModels"
              xmlns:r="using:Auros.Ram.App.Resources"
+             xmlns:ui="using:Auros.Ram.App.Views"
              x:Class="Auros.Ram.App.Views.ScopeBar"
              x:DataType="vm:DocumentViewModel">
   <!-- Empresa y unidad de negocio que se miran: se comparten entre todas las vistas e informes del archivo. -->
@@ -11,5 +12,7 @@
     <TextBlock Classes="label" VerticalAlignment="Center" Margin="10,0,0,0" Text="{x:Static r:Strings.Scope_Unit}" />
     <ComboBox ItemsSource="{Binding UnitOptions}" SelectedItem="{Binding ScopeUnit}" MinWidth="180" MaxWidth="300"
               IsEnabled="{Binding HasScopeCompany}" />
+    <Button ui:ButtonIcon.Icon="{StaticResource IconEdit}" Content="{x:Static r:Strings.Org_EditButton}"
+            ToolTip.Tip="{x:Static r:Strings.Org_EditTip}" Command="{Binding EditOrganizationsCommand}" />
   </StackPanel>
 </UserControl>

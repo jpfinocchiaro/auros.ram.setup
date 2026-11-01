@@ -122,6 +122,11 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
         }
     }
 
+    /// <summary>Abre el maestro de empresas y unidades de negocio (desde la barra de arriba).</summary>
+    [RelayCommand]
+    private Task EditOrganizations() =>
+        IsLocked ? Task.CompletedTask : Ui.EditOrganizationsAsync(new OrganizationsViewModel(Document, Ui));
+
     /// <summary>Vuelve a armar las vistas con la empresa y la unidad elegidas.</summary>
     private void ApplyScope()
     {
@@ -495,14 +500,15 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
             return;
         }
 
-        var scales = Document.Scales.Select(s => s.Clone()).ToList();
+        // Se guarda lo que hay ahora (todos los parámetros de la matriz), aunque se siga editando mientras se elige la contraseña.
+        var snapshot = Document.Snapshot();
         var vm = new PasswordDialogViewModel(PasswordMode.Create, Strings.Template_PasswordTitle, System.IO.Path.GetFileName(path));
         vm.Submit = async d =>
         {
             try
             {
                 using var key = await Task.Run(() => FileKey.Create(d.NewPassword));
-                await Task.Run(() => RmxFile.SaveTemplate(scales, path, key));
+                await Task.Run(() => RmxFile.SaveParameters(snapshot, path, key));
                 return null;
             }
             catch (RmxFileException ex)

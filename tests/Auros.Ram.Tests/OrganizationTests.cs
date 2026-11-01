@@ -133,4 +133,58 @@ public class OrganizationTests
         Assert.Equal("General", Assert.Single(company.Units).Name);
         Assert.All(result.Document.Risks, r => Assert.Equal("Cliente S.A. · General", result.Document.OrganizationName(r)));
     }
+
+    [Fact]
+    public void A_parameters_template_carries_every_parameter_into_a_new_matrix()
+    {
+        using var dir = new TempDir();
+        var source = Sample.Document(3);
+        var north = source.AddCompany("Norte");
+        source.AddUnit(north.Id, "Planta");
+        source.SetCompanyLogo(north.Id, [4, 5, 6]);
+        source.AddCatalogItem(CatalogKind.Consequence, "Multa regulatoria");
+        source.AddCatalogItem(CatalogKind.Materiality, "Afecta el balance");
+        var impact = Sample.Level(source, ScaleType.Impact, 0);
+        var probability = Sample.Level(source, ScaleType.Probability, 0);
+        var high = source.ProjectScale(ScaleType.Risk)!.OrderedLevels[^1];
+        source.SetHeatCell(impact.Id, probability.Id, high.Id);
+
+        var path = dir.File("parametros.rmt");
+        using (var key = FileKey.CreateNew("clave-plantilla"))
+        {
+            RmxFile.SaveParameters(source, path, key);
+        }
+
+        var template = RmxFile.OpenParameters(path, "clave-plantilla");
+        Assert.NotNull(template.Parameters);
+        var project = new ProjectInfo { Name = "Matriz nueva", Company = "Grupo" };
+        project.CopyParametersFrom(template.Parameters);
+        var doc = RiskMatrixDocument.CreateNew(project, template.Scales);
+
+        Assert.Empty(doc.Risks);
+        Assert.Equal("Matriz nueva", doc.Project.Name);
+        Assert.Equal(source.Project.Companies.Select(c => c.Name), doc.Project.Companies.Select(c => c.Name));
+        Assert.Equal(["General", "Planta"], doc.Project.FindCompany(north.Id)!.Units.Select(u => u.Name));
+        Assert.Equal([4, 5, 6], doc.Project.FindCompany(north.Id)!.Logo);
+        Assert.Contains(doc.Project.Consequences, c => c.Name == "Multa regulatoria");
+        Assert.Contains(doc.Project.MaterialityCriteria, c => c.Name == "Afecta el balance");
+        Assert.Equal(source.Scales.Select(s => s.Name), doc.Scales.Select(s => s.Name));
+        Assert.Equal(source.Project.ImpactScaleId, doc.Project.ImpactScaleId);
+        Assert.Equal(high.Id, Auros.Ram.Core.Services.HeatMap.Resolve(doc, impact.Id, probability.Id)!.Id);
+    }
+
+    [Fact]
+    public void Older_templates_bring_only_the_scales()
+    {
+        using var dir = new TempDir();
+        var path = dir.File("escalas.rmt");
+        using (var key = FileKey.CreateUnprotected())
+        {
+            RmxFile.SaveTemplate(Sample.Document(0).Scales, path, key);
+        }
+
+        var template = RmxFile.OpenParameters(path, null);
+        Assert.Equal(3, template.Scales.Count);
+        Assert.Null(template.Parameters);
+    }
 }

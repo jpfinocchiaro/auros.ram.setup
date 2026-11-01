@@ -27,6 +27,7 @@
         <MenuItem x:Name="MiSave" Header="{x:Static r:Strings.Menu_Save}" Command="{Binding SaveCommand}" IsEnabled="{Binding CanEdit}" />
         <MenuItem x:Name="MiSaveAs" Header="{x:Static r:Strings.Menu_SaveAs}" Command="{Binding SaveAsCommand}" IsEnabled="{Binding CanEdit}" />
         <MenuItem Header="{x:Static r:Strings.Menu_ChangePassword}" Command="{Binding ChangePasswordCommand}" IsEnabled="{Binding CanEdit}" />
+        <MenuItem Header="{x:Static r:Strings.Menu_SaveTemplate}" Command="{Binding SaveTemplateCommand}" IsEnabled="{Binding CanEdit}" />
         <Separator />
         <MenuItem Header="{x:Static r:Strings.Menu_ImportJson}" Command="{Binding ImportJsonCommand}" />
         <MenuItem Header="{x:Static r:Strings.Menu_Export}" IsEnabled="{Binding CanEdit}">

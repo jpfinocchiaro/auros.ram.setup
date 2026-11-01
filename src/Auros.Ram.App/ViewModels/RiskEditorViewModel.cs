@@ -323,6 +323,30 @@ public sealed partial class RiskEditorViewModel : ObservableObject
 
     public IReadOnlyList<string> CompanyOptions => [.. _doc.Project.Companies.Select(c => c.Name)];
 
+    /// <summary>Abre el maestro de empresas y unidades (lo provee quien muestra el editor); null = sin botón.</summary>
+    public Func<RiskMatrixDocument, Task>? OrganizationsEditor { get; set; }
+
+    public bool CanEditOrganizations => OrganizationsEditor is not null;
+
+    [RelayCommand]
+    private async Task EditOrganizations()
+    {
+        if (OrganizationsEditor is null)
+        {
+            return;
+        }
+
+        await OrganizationsEditor(_doc);
+
+        // Los nombres pudieron cambiar: se vuelven a leer las opciones y se conserva lo elegido si sigue existiendo.
+        var company = Company;
+        var unit = Unit;
+        OnPropertyChanged(nameof(CompanyOptions));
+        OnPropertyChanged(nameof(UnitOptions));
+        Company = company;
+        Unit = unit;
+    }
+
     /// <summary>Las unidades de la empresa elegida.</summary>
     public IReadOnlyList<string> UnitOptions => [.. (FindCompany(Company)?.Units ?? []).Select(u => u.Name)];
 

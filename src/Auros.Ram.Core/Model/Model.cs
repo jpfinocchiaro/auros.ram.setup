@@ -171,6 +171,21 @@ public sealed class ProjectInfo
     };
 
     public ProjectInfo Clone() => (ProjectInfo)MemberwiseClone();
+
+    /// <summary>
+    /// Toma los parámetros de otra matriz (los de una plantilla): escalas asignadas, mapa de calor, empresas con sus
+    /// unidades de negocio, consecuencias y criterios de materialidad. No cambia nombre, organización, fecha ni estado.
+    /// </summary>
+    public void CopyParametersFrom(ProjectInfo source)
+    {
+        RiskScaleId = source.RiskScaleId;
+        ImpactScaleId = source.ImpactScaleId;
+        ProbabilityScaleId = source.ProbabilityScaleId;
+        HeatMap = source.HeatMap;
+        Companies = source.Companies;
+        Consequences = source.Consequences;
+        MaterialityCriteria = source.MaterialityCriteria;
+    }
 }
 
 /// <summary>

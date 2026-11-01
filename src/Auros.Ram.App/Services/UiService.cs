@@ -90,7 +90,11 @@ public sealed class UiService(Window owner) : IUiService
         return ok ? new ExportConfirmation(isPdf && vm.ProtectPdf ? vm.Password : null) : null;
     }
 
-    public Task EditRiskAsync(RiskEditorViewModel vm) => new RiskEditorWindow(vm).ShowDialog(Top());
+    public Task EditRiskAsync(RiskEditorViewModel vm)
+    {
+        vm.OrganizationsEditor ??= doc => EditOrganizationsAsync(new OrganizationsViewModel(doc, this));
+        return new RiskEditorWindow(vm).ShowDialog(Top());
+    }
 
     public Task EditScaleAsync(ScaleEditorViewModel vm) => new ScaleEditorWindow(vm).ShowDialog(Top());
 

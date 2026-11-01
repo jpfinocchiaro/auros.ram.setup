@@ -138,6 +138,11 @@ public sealed partial class MainWindowViewModel : ObservableObject
             return;
         }
 
+        var project = new ProjectInfo
+        {
+            Name = request.Name.Trim(),
+            Company = request.Company.Trim(),
+        };
         IReadOnlyList<Scale>? scales;
         if (request.Preset is { } preset)
         {
@@ -145,18 +150,20 @@ public sealed partial class MainWindowViewModel : ObservableObject
         }
         else
         {
-            scales = await LoadTemplateAsync();
-            if (scales is null)
+            if (await LoadTemplateAsync() is not { } template)
             {
                 return;
             }
+
+            // Plantilla completa: también empresas y unidades, catálogos, escalas asignadas y mapa de calor.
+            scales = template.Scales;
+            if (template.Parameters is { } parameters)
+            {
+                project.CopyParametersFrom(parameters);
+            }
         }
 
-        var doc = RiskMatrixDocument.CreateNew(new ProjectInfo
-        {
-            Name = request.Name.Trim(),
-            Company = request.Company.Trim(),
-        }, scales);
+        var doc = RiskMatrixDocument.CreateNew(project, scales);
         await CreateFileAsync(doc, FileNameFor(request.Name));
     }
 
@@ -172,6 +179,11 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     [RelayCommand]
     private Task OpenRecent(RecentItem item) => OpenPathAsync(item.Path);
+
+    /// <summary>Archivo → Guardar parámetros como plantilla: todos los parámetros de la matriz activa.</summary>
+    [RelayCommand]
+    private Task SaveTemplate() =>
+        Active is { IsLocked: false } doc ? doc.SaveTemplateAsync() : Task.CompletedTask;
 
     [RelayCommand]
     private async Task ImportJson()
@@ -309,7 +321,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         RefreshRecent();
     }
 
-    private async Task<IReadOnlyList<Scale>?> LoadTemplateAsync()
+    private async Task<MatrixTemplate?> LoadTemplateAsync()
     {
         var path = await _ui.PickOpenFileAsync(Strings.Template_OpenTitle, FileKind.Template);
         if (path is null)
@@ -317,13 +329,13 @@ public sealed partial class MainWindowViewModel : ObservableObject
             return null;
         }
 
-        IReadOnlyList<Scale>? scales = null;
+        MatrixTemplate? scales = null;
         RmxFileException? failure = null;
         try
         {
             if (!RmxFile.ReadHeader(path).IsProtected)
             {
-                scales = await Task.Run(() => RmxFile.OpenTemplate(path, null));
+                scales = await Task.Run(() => RmxFile.OpenParameters(path, null));
             }
         }
         catch (RmxFileException ex)
@@ -338,7 +350,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
             {
                 try
                 {
-                    scales = await Task.Run(() => RmxFile.OpenTemplate(path, d.Current));
+                    scales = await Task.Run(() => RmxFile.OpenParameters(path, d.Current));
                     return null;
                 }
                 catch (RmxFileException ex) when (ex.Kind == RmxErrorKind.WrongPassword)

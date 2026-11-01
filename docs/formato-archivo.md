@@ -1,6 +1,6 @@
 # Formato de archivo `.rmx` / `.rmt` (contenedor v1, esquema v7)
 
-Cada matriz (`.rmx`) y cada plantilla de escalas (`.rmt`) es un único archivo autocontenido,
+Cada matriz (`.rmx`) y cada plantilla de parámetros (`.rmt`: el mismo esquema, sin riesgos; las escalas asignadas, el mapa de calor, las empresas y unidades y los catálogos van en `project` y sus tablas; en las plantillas anteriores, solo de escalas, `project` no tiene escalas asignadas) es un único archivo autocontenido,
 independiente del sistema operativo (RNF-11, RNF-53). Implementación: `src/Auros.Ram.Persistence`.
 
 ```

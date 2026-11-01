@@ -66,7 +66,7 @@
         <Border Classes="card" Padding="12" IsVisible="{Binding CanEditTexts}">
           <StackPanel Spacing="10">
             <!-- Empresa y unidad de negocio (obligatorias), de los maestros de la matriz; se puede escribir una nueva. -->
-            <Grid ColumnDefinitions="*,12,*">
+            <Grid ColumnDefinitions="*,12,*,Auto">
               <StackPanel Spacing="6">
                 <TextBlock Classes="label" Text="{x:Static r:Strings.Risk_Company}" />
                 <ComboBox x:Name="CompanyBox" IsEditable="True" HorizontalAlignment="Stretch" ItemsSource="{Binding CompanyOptions}"
@@ -77,6 +77,9 @@
                 <ComboBox x:Name="UnitBox" IsEditable="True" HorizontalAlignment="Stretch" ItemsSource="{Binding UnitOptions}"
                           Text="{Binding Unit}" PlaceholderText="{x:Static r:Strings.Risk_UnitHint}" />
               </StackPanel>
+              <Button Grid.Column="3" ui:ButtonIcon.Icon="{StaticResource IconEdit}" VerticalAlignment="Bottom" Margin="8,0,0,0"
+                      ToolTip.Tip="{x:Static r:Strings.Org_EditTip}" Command="{Binding EditOrganizationsCommand}"
+                      IsVisible="{Binding CanEditOrganizations}" />
             </Grid>
             <StackPanel Spacing="6">
               <TextBlock Classes="label" Text="{x:Static r:Strings.Risk_Consequences}" />
