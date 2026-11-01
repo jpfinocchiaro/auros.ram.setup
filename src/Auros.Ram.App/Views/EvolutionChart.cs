@@ -9,8 +9,9 @@ namespace Auros.Ram.App.Views;
 public sealed record ChartPoint(DateOnly Date, int LevelIndex, IBrush Color, string Tooltip);
 
 /// <summary>
-/// Evolución del nivel de riesgo en el tiempo: una línea escalonada (el nivel se mantiene hasta la evaluación
-/// siguiente) con un punto del color del nivel en cada evaluación. El último estado llega hasta hoy.
+/// Evolución del nivel de riesgo: una línea escalonada (el nivel se mantiene hasta la evaluación siguiente) con un
+/// punto del color del nivel en cada evaluación. Las evaluaciones van una al lado de la otra, a distancia fija
+/// desde la izquierda (no proporcional al tiempo transcurrido), con su fecha debajo.
 /// </summary>
 public sealed class EvolutionChart : Control
 {
@@ -24,6 +25,8 @@ public sealed class EvolutionChart : Control
     private const double LeftAxis = 92;
     private const double BottomAxis = 22;
     private const double Pad = 10;
+    private const double Step = 96;
+    private const double Inset = 26;
 
     static EvolutionChart()
     {
@@ -42,8 +45,6 @@ public sealed class EvolutionChart : Control
         set => SetValue(LevelNamesProperty, value);
     }
 
-    public DateOnly Today { get; set; } = DateOnly.FromDateTime(DateTime.Today);
-
     public override void Render(DrawingContext context)
     {
         var points = Points ?? [];
@@ -59,10 +60,10 @@ public sealed class EvolutionChart : Control
         var typeface = new Typeface(Avalonia.Controls.Documents.TextElement.GetFontFamily(this));
 
         var plot = new Rect(LeftAxis, Pad, Bounds.Width - LeftAxis - Pad, Bounds.Height - Pad - BottomAxis);
-        var first = points[0].Date;
-        var last = points[^1].Date > Today ? points[^1].Date : Today;
-        var days = Math.Max(1, last.DayNumber - first.DayNumber);
-        double X(DateOnly d) => plot.Left + (plot.Width * (d.DayNumber - first.DayNumber) / days);
+        // Distancia fija entre evaluaciones; si no entran todas, se achica para que quepan.
+        var start = plot.Left + Inset;
+        var step = points.Count < 2 ? 0 : Math.Min(Step, (plot.Width - (2 * Inset)) / (points.Count - 1));
+        double X(int index) => start + (index * step);
         double Y(int level) => levels.Count == 1
             ? plot.Center.Y
             : plot.Bottom - (plot.Height * level / (levels.Count - 1));
@@ -76,25 +77,22 @@ public sealed class EvolutionChart : Control
             context.DrawText(label, new Point(LeftAxis - 8 - Math.Min(label.Width, LeftAxis - 12), y - (label.Height / 2)));
         }
 
-        // Línea escalonada: el nivel se mantiene hasta la evaluación siguiente; el último, hasta hoy.
+        // Línea escalonada: el nivel se mantiene hasta la evaluación siguiente.
         var line = new Pen(ink, 2);
-        for (var i = 0; i < points.Count; i++)
+        for (var i = 0; i + 1 < points.Count; i++)
         {
-            var x = X(points[i].Date);
             var y = Y(points[i].LevelIndex);
-            var nextX = i + 1 < points.Count ? X(points[i + 1].Date) : X(last);
-            context.DrawLine(line, new Point(x, y), new Point(nextX, y));
-            if (i + 1 < points.Count)
-            {
-                context.DrawLine(line, new Point(nextX, y), new Point(nextX, Y(points[i + 1].LevelIndex)));
-            }
+            var nextX = X(i + 1);
+            context.DrawLine(line, new Point(X(i), y), new Point(nextX, y));
+            context.DrawLine(line, new Point(nextX, y), new Point(nextX, Y(points[i + 1].LevelIndex)));
         }
 
         // Puntos y fechas (se omiten las que se superpondrían con la anterior).
         var lastLabelRight = double.NegativeInfinity;
-        foreach (var p in points)
+        for (var i = 0; i < points.Count; i++)
         {
-            var center = new Point(X(p.Date), Y(p.LevelIndex));
+            var p = points[i];
+            var center = new Point(X(i), Y(p.LevelIndex));
             context.DrawEllipse(p.Color, new Pen(ink, 1.5), center, 6, 6);
             var date = Text(p.Date.ToString("dd/MM/yy", CultureInfo.CurrentCulture), typeface, 10, muted);
             var left = Math.Clamp(center.X - (date.Width / 2), plot.Left - 20, Bounds.Width - date.Width);
