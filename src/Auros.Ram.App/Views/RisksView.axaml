@@ -82,6 +82,8 @@
         <Button Content="{x:Static r:Strings.Risks_Reassess}" Command="{Binding ReassessCommand}" CommandParameter="{Binding Selected}"
                 ToolTip.Tip="{x:Static r:Strings.Risks_ReassessTip}"
                 IsEnabled="{Binding Selected, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        <Button Content="{x:Static r:Strings.Clone_Button}" Command="{Binding CloneCommand}" IsEnabled="{Binding HasSelection}"
+                ToolTip.Tip="{x:Static r:Strings.Clone_Tip}" />
         <Button Content="{x:Static r:Strings.Common_Delete}" Command="{Binding DeleteCommand}" IsEnabled="{Binding HasSelection}"
                 ToolTip.Tip="{x:Static r:Strings.Risks_DeleteTip}" />
         <Button Classes="accent" Content="{x:Static r:Strings.Risks_Add}" Command="{Binding AddCommand}" />
@@ -121,6 +123,8 @@
                                 Command="{Binding $parent[UserControl].((vm:RisksViewModel)DataContext).EditCommand}" CommandParameter="{Binding}" />
                       <MenuItem Header="{x:Static r:Strings.Risks_Reassess}"
                                 Command="{Binding $parent[UserControl].((vm:RisksViewModel)DataContext).ReassessCommand}" CommandParameter="{Binding}" />
+                      <MenuItem Header="{x:Static r:Strings.Clone_Risk}"
+                                Command="{Binding $parent[UserControl].((vm:RisksViewModel)DataContext).CloneCommand}" CommandParameter="{Binding}" />
                     </ContextMenu>
                   </Grid.ContextMenu>
                   <ToggleButton Classes="expander" IsChecked="{Binding IsExpanded}" Width="26" Height="26" Padding="0" VerticalAlignment="Center"
@@ -144,6 +148,12 @@
               <!-- Fila hija: una evaluación del riesgo, indentada bajo el título -->
               <DataTemplate x:DataType="vm:EntryRow">
                 <Grid ColumnDefinitions="30,*,104,118,104,128,64,56,92" Height="32" Background="Transparent" ToolTip.Tip="{Binding Note}">
+                  <Grid.ContextMenu>
+                    <ContextMenu>
+                      <MenuItem Header="{x:Static r:Strings.Clone_Assessment}"
+                                Command="{Binding $parent[UserControl].((vm:RisksViewModel)DataContext).CloneCommand}" CommandParameter="{Binding}" />
+                    </ContextMenu>
+                  </Grid.ContextMenu>
                   <DockPanel Grid.Column="1" Margin="22,0,12,0">
                     <TextBlock DockPanel.Dock="Left" Text="└" Classes="muted" VerticalAlignment="Center" Margin="0,0,8,0" />
                     <TextBlock DockPanel.Dock="Left" Text="{Binding Date}" VerticalAlignment="Center" Margin="0,0,8,0"

@@ -160,6 +160,10 @@ public sealed partial class MatrixViewModel : ObservableObject
     [RelayCommand]
     private Task Open(MatrixItem item) => _owner.EditRiskAsync(item.RiskId);
 
+    /// <summary>Clic derecho en un riesgo de la matriz: clonarlo.</summary>
+    [RelayCommand]
+    private Task Clone(MatrixItem item) => _owner.CloneRiskAsync(item.RiskId);
+
     /// <summary>Clic derecho en un riesgo de la matriz: nueva evaluación.</summary>
     [RelayCommand]
     private Task Reassess(MatrixItem item) => _owner.ReassessRiskAsync(item.RiskId);

@@ -331,6 +331,40 @@ public class UiSmokeTests
         risks.Selection.Clear();
         Assert.False(risks.HasSelection);
 
+        // Clonar un riesgo: "Nuevo riesgo" con todo copiado; al guardar es otro riesgo con una sola evaluación.
+        var original = doc.Risks.First(r => r.ConsequenceIds.Count > 0 && r.Assessments.Count > 1);
+        var clone = RiskEditorViewModel.CloneOf(doc, original);
+        Assert.True(clone.IsNew);
+        Assert.Equal(original.Title + " (copia)", clone.Title);
+        Assert.Equal(original.ImpactLevelId, clone.Dimensions[0].SelectedId);
+        Assert.Equal(doc.ConsequenceNames(original), clone.Consequences.Select(c => c.Name));
+        var risksBefore = doc.Risks.Count;
+        clone.SaveCommand.Execute(null);
+        Assert.Null(clone.Error);
+        Assert.Equal(risksBefore + 1, doc.Risks.Count);
+        var copy = doc.Risks.Single(r => r.Title == original.Title + " (copia)");
+        Assert.NotEqual(original.Id, copy.Id);
+        Assert.Single(copy.Assessments);
+        Assert.Equal((original.ImpactLevelId, original.ProbabilityLevelId, original.ImpactAmount),
+            (copy.ImpactLevelId, copy.ProbabilityLevelId, copy.ImpactAmount));
+        Assert.Equal(original.ConsequenceIds, copy.ConsequenceIds);
+        Assert.Equal(original.LongDescription, copy.LongDescription);
+
+        // Clonar una evaluación: "Nueva evaluación" del mismo riesgo con los valores de esa evaluación.
+        var firstEval = original.Assessments[0];
+        var fromEntry = RiskEditorViewModel.ReassessFrom(doc, original, firstEval);
+        Assert.True(fromEntry.IsReassess);
+        Assert.Equal(firstEval.ImpactLevelId, fromEntry.Dimensions[0].SelectedId);
+        Assert.Equal(firstEval.ProbabilityLevelId, fromEntry.Dimensions[1].SelectedId);
+        Assert.Equal(firstEval.Note, fromEntry.AssessmentNote);
+        var evalsBefore = original.Assessments.Count;
+        fromEntry.SaveCommand.Execute(null);
+        Assert.Null(fromEntry.Error);
+        var reassessed = doc.FindRisk(original.Id)!;
+        Assert.Equal(evalsBefore + 1, reassessed.Assessments.Count);
+        Assert.Equal(firstEval.ImpactLevelId, reassessed.ImpactLevelId);
+        Assert.Equal(DateOnly.FromDateTime(DateTime.Today), reassessed.Assessments[^1].Date);
+
         docVm.Project.Name = "Proyecto renombrado";
         docVm.Project.ApplyCommand.Execute(null);
         Assert.Equal("Proyecto renombrado", doc.Project.Name);

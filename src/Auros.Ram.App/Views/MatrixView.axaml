@@ -142,6 +142,8 @@
                                                   Command="{Binding $parent[UserControl].((vm:MatrixViewModel)DataContext).OpenCommand}" />
                                         <MenuItem Header="{x:Static r:Strings.Risks_Reassess}" CommandParameter="{Binding}"
                                                   Command="{Binding $parent[UserControl].((vm:MatrixViewModel)DataContext).ReassessCommand}" />
+                                        <MenuItem Header="{x:Static r:Strings.Clone_Risk}" CommandParameter="{Binding}"
+                                                  Command="{Binding $parent[UserControl].((vm:MatrixViewModel)DataContext).CloneCommand}" />
                                       </ContextMenu>
                                     </Button.ContextMenu>
                                     <!-- Monto del impacto a la derecha (opcional); dentro de la celda, el mayor arriba. -->

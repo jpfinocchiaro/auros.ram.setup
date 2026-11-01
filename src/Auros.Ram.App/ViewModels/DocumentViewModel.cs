@@ -116,6 +116,24 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>Nueva evaluación de un riesgo existente (ventana en modo "Nueva evaluación").</summary>
+    /// <summary>Clonar un riesgo: ventana "Nuevo riesgo" con todo copiado del original.</summary>
+    public async Task CloneRiskAsync(Guid riskId)
+    {
+        if (Document.FindRisk(riskId) is { } risk)
+        {
+            await Ui.EditRiskAsync(RiskEditorViewModel.CloneOf(Document, risk));
+        }
+    }
+
+    /// <summary>Clonar una evaluación: ventana "Nueva evaluación" del mismo riesgo con sus valores ya cargados.</summary>
+    public async Task CloneAssessmentAsync(Guid riskId, Guid assessmentId)
+    {
+        if (Document.FindRisk(riskId) is { } risk && risk.Assessments.FirstOrDefault(a => a.Id == assessmentId) is { } assessment)
+        {
+            await Ui.EditRiskAsync(RiskEditorViewModel.ReassessFrom(Document, risk, assessment));
+        }
+    }
+
     public async Task ReassessRiskAsync(Guid riskId)
     {
         if (Document.FindRisk(riskId) is { } risk)

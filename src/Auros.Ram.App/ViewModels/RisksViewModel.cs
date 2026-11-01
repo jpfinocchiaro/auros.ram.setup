@@ -409,6 +409,18 @@ public sealed partial class RisksViewModel : ObservableObject
         });
     }
 
+    /// <summary>
+    /// Clonar lo seleccionado: un riesgo abre "Nuevo riesgo" con todo copiado; una evaluación abre "Nueva evaluación"
+    /// del mismo riesgo a partir de ella.
+    /// </summary>
+    [RelayCommand]
+    private Task Clone(GridRow? row) => (row ?? Selection.SelectedItem) switch
+    {
+        EntryRow entry => _owner.CloneAssessmentAsync(entry.RiskId, entry.Id),
+        RiskRow risk => _owner.CloneRiskAsync(risk.Risk.Id),
+        _ => Task.CompletedTask,
+    };
+
     [RelayCommand]
     private void ExpandAll(bool expand)
     {

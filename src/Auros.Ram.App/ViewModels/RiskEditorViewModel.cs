@@ -253,6 +253,58 @@ public sealed partial class RiskEditorViewModel : ObservableObject
         LoadHistory();
     }
 
+    // ---- Clonar ----------------------------------------------------------------
+
+    /// <summary>
+    /// Alta de un riesgo nuevo copiado de otro: título con "(copia)", descripciones, consecuencias, criterio,
+    /// niveles, justificaciones, monto y porcentaje. Arranca con una sola evaluación (la fecha se elige al guardar).
+    /// </summary>
+    public static RiskEditorViewModel CloneOf(RiskMatrixDocument doc, Risk source)
+    {
+        var vm = new RiskEditorViewModel(doc, null, source);
+        var title = string.Format(CultureInfo.CurrentCulture, Strings.Clone_Title, source.Title);
+        vm.Title = title.Length <= Limits.RiskTitleMax ? title : source.Title;
+        vm.ShortDescription = source.ShortDescription;
+        vm.LongDescription = source.LongDescription;
+        foreach (var d in vm.Dimensions)
+        {
+            d.Justification = source.JustificationFor(d.Type);
+            d.SetValueQuietly(source.ValueFor(d.Type));
+        }
+
+        foreach (var name in doc.ConsequenceNames(source))
+        {
+            vm.NewConsequence = name;
+            vm.AddConsequence();
+        }
+
+        vm.Materiality = doc.MaterialityName(source);
+        vm.AssessmentNote = string.Format(CultureInfo.CurrentCulture, Strings.Clone_Note, source.Title);
+        return vm;
+    }
+
+    /// <summary>
+    /// Nueva evaluación del riesgo a partir de una registrada: sus niveles, monto, porcentaje y comentario ya
+    /// cargados; la fecha es la de hoy (se puede cambiar) y se ajusta lo que cambió.
+    /// </summary>
+    public static RiskEditorViewModel ReassessFrom(RiskMatrixDocument doc, Risk risk, RiskAssessment source)
+    {
+        var vm = new RiskEditorViewModel(doc, risk, mode: RiskEditorMode.Reassess);
+        foreach (var d in vm.Dimensions)
+        {
+            var levelId = d.Type == ScaleType.Impact ? source.ImpactLevelId : source.ProbabilityLevelId;
+            if (d.Options.FirstOrDefault(o => o.Chip.Id == levelId) is { } option)
+            {
+                d.Select(option);
+            }
+
+            d.SetValueQuietly(d.Type == ScaleType.Impact ? source.ImpactAmount : source.ProbabilityPercent);
+        }
+
+        vm.AssessmentNote = source.Note;
+        return vm;
+    }
+
     // ---- Consecuencias y criterio de materialidad --------------------------
 
     /// <summary>Consecuencias potenciales elegidas para el riesgo.</summary>
@@ -275,7 +327,7 @@ public sealed partial class RiskEditorViewModel : ObservableObject
 
     /// <summary>Agrega la consecuencia del combo. Si no está en el catálogo, se agrega a él al guardar el riesgo.</summary>
     [RelayCommand]
-    private void AddConsequence()
+    public void AddConsequence()
     {
         var name = (NewConsequence ?? "").Trim();
         if (name.Length == 0)
