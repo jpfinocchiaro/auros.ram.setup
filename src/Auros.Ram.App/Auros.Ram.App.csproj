@@ -7,6 +7,8 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\Brand\auros_ram.ico</ApplicationIcon>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <!-- Las llamadas a Windows generadas con LibraryImport (portapapeles de imágenes) usan código no seguro. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <!-- RNF-10: ejecutable autocontenido de un solo archivo por plataforma (dotnet publish -r <rid>). -->

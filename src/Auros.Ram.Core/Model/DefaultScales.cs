@@ -6,22 +6,26 @@ namespace Auros.Ram.Core.Model;
 /// <summary>Tamaños estándar de matriz para una matriz nueva (impacto × probabilidad).</summary>
 public enum ScalePreset
 {
+    Matrix2x2 = 2,
     Matrix3x3 = 3,
+    Matrix4x4 = 4,
     Matrix5x5 = 5,
+    Matrix6x6 = 6,
     Matrix7x7 = 7,
+    Matrix8x8 = 8,
     Matrix9x9 = 9,
+    Matrix10x10 = 10,
 }
 
 /// <summary>
 /// Las tres escalas estándar que se cargan en un archivo nuevo (F1, F2): impacto y probabilidad con
-/// 3, 5, 7 o 9 niveles, y el nivel de riesgo en semáforo (Bajo verde, Medio amarillo, Alto rojo).
+/// 2 a 10 niveles, y el nivel de riesgo en semáforo (Bajo verde, Medio amarillo, Alto rojo).
 /// Impacto y probabilidad también van del verde al rojo: en 3 × 3 son los mismos tres colores y en
 /// los tamaños mayores, una escala de verdes, amarillos y rojos.
 /// </summary>
 public static class DefaultScales
 {
-    public static IReadOnlyList<ScalePreset> Presets { get; } =
-        [ScalePreset.Matrix3x3, ScalePreset.Matrix5x5, ScalePreset.Matrix7x7, ScalePreset.Matrix9x9];
+    public static IReadOnlyList<ScalePreset> Presets { get; } = Enum.GetValues<ScalePreset>();
 
     public static IReadOnlyList<Scale> Create(ScalePreset preset = ScalePreset.Matrix5x5)
     {
@@ -33,13 +37,27 @@ public static class DefaultScales
                 [(Messages.Level_Low, Palette.Green), (Messages.Level_Medium, Palette.Yellow), (Messages.Level_High, Palette.Red)]),
             Build(Format(Messages.DefaultScale_Impact, size), ScaleType.Impact,
                 [.. ImpactNames(size).Select((n, i) => (n, ramp[i]))]),
-            Build(Format(Messages.DefaultScale_Probability, size), ScaleType.Probability,
-                [.. ProbabilityNames(size).Select((n, i) => (n, ramp[i]))]),
+            WithPercentRanges(Build(Format(Messages.DefaultScale_Probability, size), ScaleType.Probability,
+                [.. ProbabilityNames(size).Select((n, i) => (n, ramp[i]))])),
         ];
+    }
+
+    /// <summary>Rangos de porcentaje parejos de 0 a 100 (p. ej., en 5 niveles: 0–20, 20,01–40, …, 80,01–100).</summary>
+    public static Scale WithPercentRanges(Scale scale)
+    {
+        var levels = scale.OrderedLevels;
+        for (var i = 0; i < levels.Count; i++)
+        {
+            levels[i].RangeFrom = i == 0 ? 0m : Math.Round(100m * i / levels.Count, 2) + 0.01m;
+            levels[i].RangeTo = i == levels.Count - 1 ? 100m : Math.Round(100m * (i + 1) / levels.Count, 2);
+        }
+
+        return scale;
     }
 
     private static string[] ImpactNames(int size) => size switch
     {
+        2 => [Messages.Level_Low, Messages.Level_High],
         3 => [Messages.Level_Low, Messages.Level_Medium, Messages.Level_High],
         5 => [Messages.Impact_Insignificant, Messages.Impact_Minor, Messages.Impact_Moderate, Messages.Impact_Major, Messages.Impact_Catastrophic],
         _ => GradedNames(size),
@@ -47,21 +65,43 @@ public static class DefaultScales
 
     private static string[] ProbabilityNames(int size) => size switch
     {
+        2 => [Messages.Level_Low, Messages.Level_High],
         3 => [Messages.Level_Low, Messages.Level_Medium, Messages.Level_High],
         5 => [Messages.Probability_Rare, Messages.Probability_Unlikely, Messages.Probability_Possible, Messages.Probability_Likely, Messages.Probability_AlmostCertain],
         _ => GradedNames(size),
     };
 
-    /// <summary>Escala graduada de 7 o 9 niveles: de "Muy bajo" a "Muy alto" (con "Mínimo" y "Extremo" en 9).</summary>
-    private static string[] GradedNames(int size)
+    /// <summary>
+    /// Escala graduada de 4 a 10 niveles, de menor a mayor: con número impar hay un nivel "Moderado" al medio;
+    /// con número par, el medio se parte en "Moderadamente bajo" y "Moderadamente alto" (en 10, además,
+    /// "Moderado bajo" y "Moderado alto"). Los extremos crecen con el tamaño: "Muy bajo"/"Muy alto" y
+    /// "Mínimo"/"Extremo".
+    /// </summary>
+    private static string[] GradedNames(int size) => size switch
     {
-        string[] seven =
+        4 => [Messages.Level_Low, Messages.Graded_FairlyLow, Messages.Graded_FairlyHigh, Messages.Level_High],
+        6 => [Messages.Graded_VeryLow, Messages.Level_Low, Messages.Graded_FairlyLow, Messages.Graded_FairlyHigh, Messages.Level_High, Messages.Graded_VeryHigh],
+        7 =>
         [
             Messages.Graded_VeryLow, Messages.Level_Low, Messages.Graded_FairlyLow, Messages.Graded_Moderate,
             Messages.Graded_FairlyHigh, Messages.Level_High, Messages.Graded_VeryHigh,
-        ];
-        return size == 9 ? [Messages.Graded_Minimal, .. seven, Messages.Graded_Extreme] : seven;
-    }
+        ],
+        8 =>
+        [
+            Messages.Graded_Minimal, Messages.Graded_VeryLow, Messages.Level_Low, Messages.Graded_FairlyLow,
+            Messages.Graded_FairlyHigh, Messages.Level_High, Messages.Graded_VeryHigh, Messages.Graded_Extreme,
+        ],
+        9 =>
+        [
+            Messages.Graded_Minimal, Messages.Graded_VeryLow, Messages.Level_Low, Messages.Graded_FairlyLow, Messages.Graded_Moderate,
+            Messages.Graded_FairlyHigh, Messages.Level_High, Messages.Graded_VeryHigh, Messages.Graded_Extreme,
+        ],
+        _ =>
+        [
+            Messages.Graded_Minimal, Messages.Graded_VeryLow, Messages.Level_Low, Messages.Graded_FairlyLow, Messages.Graded_ModerateLow,
+            Messages.Graded_ModerateHigh, Messages.Graded_FairlyHigh, Messages.Level_High, Messages.Graded_VeryHigh, Messages.Graded_Extreme,
+        ],
+    };
 
     /// <summary>
     /// Escala de verde (nivel más bajo) a amarillo (medio) y rojo (más alto), con tantos tonos como niveles.

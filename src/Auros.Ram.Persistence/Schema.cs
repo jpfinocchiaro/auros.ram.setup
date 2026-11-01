@@ -83,6 +83,17 @@ internal static class Schema
                 FROM risk
                 WHERE id NOT IN (SELECT risk_id FROM risk_assessment);
             """),
+
+        // v5: rangos de los niveles (monto en Impacto, porcentaje en Probabilidad) y, en cada riesgo y evaluación,
+        // el monto del impacto y la probabilidad en porcentaje. Decimales como texto invariante ("1234.50").
+        (5, """
+            ALTER TABLE level ADD COLUMN range_from TEXT;
+            ALTER TABLE level ADD COLUMN range_to TEXT;
+            ALTER TABLE risk ADD COLUMN impact_amount TEXT;
+            ALTER TABLE risk ADD COLUMN probability_percent TEXT;
+            ALTER TABLE risk_assessment ADD COLUMN impact_amount TEXT;
+            ALTER TABLE risk_assessment ADD COLUMN probability_percent TEXT;
+            """),
     ];
 
     /// <summary>Archivos con un esquema anterior a este no se abren (versiones de prueba sin migración).</summary>

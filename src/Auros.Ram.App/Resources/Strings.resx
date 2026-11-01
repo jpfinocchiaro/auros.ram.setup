@@ -349,4 +349,49 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Playback_Moved" xml:space="preserve"><value>{0}: {1} → {2} (impacto {3} · probabilidad {4})</value></data>
   <data name="Playback_Appeared" xml:space="preserve"><value>{0}: nuevo, {1} (impacto {2} · probabilidad {3})</value></data>
   <data name="Playback_Axes" xml:space="preserve"><value>Filas: impacto (el mayor arriba) · Columnas: probabilidad de ocurrencia (de menor a mayor)</value></data>
+  <data name="Prefs_Entry" xml:space="preserve"><value>Carga de impacto y probabilidad de los riesgos</value></data>
+  <data name="Prefs_EntryLevel" xml:space="preserve"><value>Se ingresa el nivel (el valor es opcional)</value></data>
+  <data name="Prefs_EntryAmount" xml:space="preserve"><value>Se ingresa el monto (obligatorio)</value></data>
+  <data name="Prefs_EntryPercent" xml:space="preserve"><value>Se ingresa el porcentaje (obligatorio)</value></data>
+  <data name="Prefs_EntryEither" xml:space="preserve"><value>Cualquiera de los dos (el nivel o el valor)</value></data>
+  <data name="Prefs_ImpactAuto" xml:space="preserve"><value>Ajustar el nivel automáticamente según el monto (se puede cambiar)</value></data>
+  <data name="Prefs_ProbabilityAuto" xml:space="preserve"><value>Ajustar el nivel automáticamente según el porcentaje (se puede cambiar)</value></data>
+  <data name="Prefs_EntryHint" xml:space="preserve"><value>El ajuste usa los rangos de cada nivel (Configuración → Escalas). El nivel siempre hace falta para ubicar el riesgo en la matriz.</value></data>
+  <data name="Scale_RangeFrom" xml:space="preserve"><value>Desde</value></data>
+  <data name="Scale_RangeTo" xml:space="preserve"><value>Hasta</value></data>
+  <data name="Scale_RangeHintAmount" xml:space="preserve"><value>Rango de monto de cada nivel (opcional, 2 decimales, desde y hasta incluidos, sin superponerse). Sirve para elegir el nivel a partir del monto del impacto.</value></data>
+  <data name="Scale_RangeHintPercent" xml:space="preserve"><value>Rango de probabilidad de cada nivel, de 0 a 100 % (opcional, 2 decimales, desde y hasta incluidos, sin superponerse). Sirve para elegir el nivel a partir del porcentaje.</value></data>
+  <data name="Scale_SplitPercent" xml:space="preserve"><value>Repartir 0–100 % en partes iguales</value></data>
+  <data name="Risk_AmountLabel" xml:space="preserve"><value>Monto del impacto</value></data>
+  <data name="Risk_PercentLabel" xml:space="preserve"><value>Probabilidad de ocurrencia (%)</value></data>
+  <data name="Risk_Required" xml:space="preserve"><value>(obligatorio)</value></data>
+  <data name="Risk_Optional" xml:space="preserve"><value>(opcional)</value></data>
+  <data name="Risk_OrLevel" xml:space="preserve"><value>(este dato o el nivel)</value></data>
+  <data name="Risk_AutoHint" xml:space="preserve"><value>Al ingresarlo se elige el nivel según los rangos de la escala; después se puede cambiar.</value></data>
+  <data name="Risk_ManualHint" xml:space="preserve"><value>El nivel se elige a mano (el ajuste automático está apagado en Preferencias).</value></data>
+  <data name="Risk_NoRanges" xml:space="preserve"><value>La escala no tiene rangos por nivel: el nivel se elige a mano (los rangos se cargan en Configuración → Escalas).</value></data>
+  <data name="Risk_ValueOutOfRanges" xml:space="preserve"><value>{0} no está en el rango de ningún nivel de la escala.</value></data>
+  <data name="Risk_ValueOtherLevel" xml:space="preserve"><value>{0} corresponde al nivel «{1}», pero está elegido «{2}».</value></data>
+  <data name="Image_Tab" xml:space="preserve"><value>Imagen de la matriz</value></data>
+  <data name="Image_ShowTitle" xml:space="preserve"><value>Título</value></data>
+  <data name="Image_ShowLegend" xml:space="preserve"><value>Leyenda (nivel de riesgo)</value></data>
+  <data name="Image_ShowAbbreviations" xml:space="preserve"><value>Abreviaturas de nivel</value></data>
+  <data name="Image_Resolution" xml:space="preserve"><value>Resolución</value></data>
+  <data name="Image_Scale1" xml:space="preserve"><value>Normal (1280 px de ancho)</value></data>
+  <data name="Image_Scale2" xml:space="preserve"><value>Alta (2560 px)</value></data>
+  <data name="Image_Scale3" xml:space="preserve"><value>Muy alta (3840 px)</value></data>
+  <data name="Image_Copy" xml:space="preserve"><value>Copiar imagen</value></data>
+  <data name="Image_CopyTip" xml:space="preserve"><value>Copia la imagen al portapapeles para pegarla en PowerPoint, Word u otro programa (Ctrl+V)</value></data>
+  <data name="Image_Save" xml:space="preserve"><value>Guardar imagen (PNG)…</value></data>
+  <data name="Image_SaveTitle" xml:space="preserve"><value>Guardar la imagen de la matriz</value></data>
+  <data name="Image_Saved" xml:space="preserve"><value>Imagen guardada: {0} ({1} × {2} px).</value></data>
+  <data name="Image_SaveError" xml:space="preserve"><value>No se pudo guardar la imagen. Revise que la carpeta exista y que tenga permiso para escribir en ella.</value></data>
+  <data name="Image_Copied" xml:space="preserve"><value>Imagen copiada al portapapeles ({0} × {1} px). Pegala con Ctrl+V en PowerPoint, Word u otro programa.</value></data>
+  <data name="Image_CopyError" xml:space="preserve"><value>No se pudo copiar la imagen al portapapeles (puede que otro programa lo esté usando). Probá de nuevo o guardala como archivo.</value></data>
+  <data name="Image_Show" xml:space="preserve"><value>Mostrar:</value></data>
+  <data name="Image_ShowSubtitle" xml:space="preserve"><value>Proyecto, empresa y fecha</value></data>
+  <data name="Image_ShowLogo" xml:space="preserve"><value>Logo</value></data>
+  <data name="Image_ShowLevelLabels" xml:space="preserve"><value>Niveles de impacto y probabilidad</value></data>
+  <data name="Image_ShowAxisNames" xml:space="preserve"><value>Nombres de los ejes</value></data>
+  <data name="Image_ShowRisks" xml:space="preserve"><value>Riesgos en las celdas</value></data>
 </root>

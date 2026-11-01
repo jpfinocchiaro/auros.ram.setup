@@ -16,4 +16,7 @@ public sealed partial class DisplayOptions : ObservableObject
 
     /// <summary>Qué fechas de evaluación se aceptan (Preferencias); se aplica a todos los archivos abiertos.</summary>
     public Auros.Ram.Core.Model.AssessmentDatePolicy DatePolicy { get; set; } = Auros.Ram.Core.Model.AssessmentDatePolicy.AllowAll;
+
+    /// <summary>Cómo se cargan impacto y probabilidad (Preferencias); se aplica a todos los archivos abiertos.</summary>
+    public Auros.Ram.Core.Model.RiskEntryPolicy EntryPolicy { get; set; } = Auros.Ram.Core.Model.RiskEntryPolicy.Default;
 }

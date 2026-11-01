@@ -32,6 +32,18 @@ public sealed class Level
 
     public int Order { get; set; }
 
+    /// <summary>
+    /// Rango del nivel (opcional), con 2 decimales y ambos extremos incluidos: en Impacto, un monto desde–hasta;
+    /// en Probabilidad, un porcentaje de 0 a 100. Permite elegir el nivel a partir del monto o del porcentaje.
+    /// </summary>
+    public decimal? RangeFrom { get; set; }
+
+    public decimal? RangeTo { get; set; }
+
+    public bool HasRange => RangeFrom is not null && RangeTo is not null;
+
+    public bool Contains(decimal value) => HasRange && value >= RangeFrom && value <= RangeTo;
+
     public Level Clone() => (Level)MemberwiseClone();
 
     public override string ToString() => Name;
@@ -103,7 +115,40 @@ public sealed class ProjectInfo
 /// </summary>
 /// <param name="Note">Comentario opcional del cambio (por qué se reevaluó).</param>
 /// <param name="RecordedUtc">Cuándo se registró (ordena dos evaluaciones del mismo día).</param>
-public sealed record RiskAssessment(Guid Id, DateOnly Date, Guid ImpactLevelId, Guid ProbabilityLevelId, string Note, DateTime RecordedUtc);
+public sealed record RiskAssessment(Guid Id, DateOnly Date, Guid ImpactLevelId, Guid ProbabilityLevelId, string Note, DateTime RecordedUtc)
+{
+    /// <summary>Monto del impacto en esa evaluación (opcional, 2 decimales).</summary>
+    public decimal? ImpactAmount { get; init; }
+
+    /// <summary>Probabilidad de ocurrencia en esa evaluación, de 0 a 100 % (opcional, 2 decimales).</summary>
+    public decimal? ProbabilityPercent { get; init; }
+}
+
+/// <summary>Qué se pide al cargar el impacto o la probabilidad de un riesgo (Preferencias).</summary>
+public enum EntryMode
+{
+    /// <summary>El nivel es obligatorio; el monto o porcentaje, opcional.</summary>
+    Level = 0,
+
+    /// <summary>El monto o porcentaje es obligatorio (el nivel sale del rango o se elige).</summary>
+    Value = 1,
+
+    /// <summary>Alcanza con uno de los dos (el nivel sale del rango si se ingresó el valor).</summary>
+    Either = 2,
+}
+
+/// <summary>
+/// Cómo se cargan impacto y probabilidad (Preferencias): qué dato es obligatorio y si el nivel se ajusta
+/// automáticamente al monto o porcentaje según los rangos de la escala.
+/// </summary>
+public sealed record RiskEntryPolicy(EntryMode Impact, bool ImpactAuto, EntryMode Probability, bool ProbabilityAuto)
+{
+    public static RiskEntryPolicy Default { get; } = new(EntryMode.Level, true, EntryMode.Level, true);
+
+    public EntryMode ModeFor(ScaleType type) => type == ScaleType.Impact ? Impact : Probability;
+
+    public bool AutoFor(ScaleType type) => type == ScaleType.Impact ? ImpactAuto : ProbabilityAuto;
+}
 
 /// <summary>
 /// Qué fechas se aceptan para las evaluaciones (Preferencias). Una fecha futura nunca se acepta; las anteriores a
@@ -127,6 +172,20 @@ public sealed class Risk
 
     public Guid ImpactLevelId { get; set; }
     public Guid ProbabilityLevelId { get; set; }
+
+    /// <summary>Monto del impacto (opcional, 2 decimales): el de la evaluación vigente.</summary>
+    public decimal? ImpactAmount { get; set; }
+
+    /// <summary>Probabilidad de ocurrencia de 0 a 100 % (opcional, 2 decimales): la de la evaluación vigente.</summary>
+    public decimal? ProbabilityPercent { get; set; }
+
+    /// <summary>El monto (Impacto) o el porcentaje (Probabilidad).</summary>
+    public decimal? ValueFor(ScaleType type) => type switch
+    {
+        ScaleType.Impact => ImpactAmount,
+        ScaleType.Probability => ProbabilityPercent,
+        _ => null,
+    };
 
     public string ImpactJustification { get; set; } = "";
     public string ProbabilityJustification { get; set; } = "";

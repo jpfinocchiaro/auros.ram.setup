@@ -66,11 +66,15 @@ public sealed partial class ReportsViewModel : ObservableObject
     {
         _owner = owner;
         Playback = new MatrixPlaybackViewModel(owner);
+        Image = new MatrixImageViewModel(owner);
         Reload();
     }
 
     /// <summary>Película de la matriz entre dos fechas.</summary>
     public MatrixPlaybackViewModel Playback { get; }
+
+    /// <summary>Imagen de la matriz para guardar o copiar.</summary>
+    public MatrixImageViewModel Image { get; }
 
     public ObservableCollection<ReportItem> Items { get; } = [];
     public ObservableCollection<EvolutionItem> Evolution { get; } = [];
@@ -121,6 +125,7 @@ public sealed partial class ReportsViewModel : ObservableObject
         CompanyName = doc.Project.Company;
         ReloadEvolution();
         Playback.Reload();
+        Image.Reload();
     }
 
     private void ReloadEvolution()

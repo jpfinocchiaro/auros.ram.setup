@@ -11,12 +11,13 @@ namespace Auros.Ram.Core.Serialization;
 /// El esquema está documentado en docs/formato-json.md y se versiona con <see cref="FormatVersion"/>.
 /// Versión 3: riesgos clasificados por impacto y probabilidad, con mapa de calor. Versión 4: historial de
 /// evaluaciones de cada riesgo (un JSON de la versión 3 se importa con una sola evaluación por riesgo).
+/// Versión 5: rangos de los niveles (monto o porcentaje) y monto del impacto y probabilidad en porcentaje.
 /// Las versiones 1 y 2 (valor agregado y dificultad) fueron de prueba y ya no se importan.
 /// </summary>
 public static class JsonExchange
 {
     public const string FormatId = "auros.ram/matrix";
-    public const int FormatVersion = 4;
+    public const int FormatVersion = 5;
     public const int OldestSupportedVersion = 3;
 
     private static readonly JsonSerializerOptions Options = new()
@@ -57,7 +58,10 @@ public static class JsonExchange
                 Id = s.Id,
                 Name = s.Name,
                 Type = s.Type,
-                Levels = [.. s.OrderedLevels.Select(l => new LevelDto { Id = l.Id, Name = l.Name, Color = l.Color, TextColor = l.TextColor, Order = l.Order })],
+                Levels = [.. s.OrderedLevels.Select(l => new LevelDto
+                {
+                    Id = l.Id, Name = l.Name, Color = l.Color, TextColor = l.TextColor, Order = l.Order, RangeFrom = l.RangeFrom, RangeTo = l.RangeTo,
+                })],
             })],
             Risks = [.. doc.Risks.Select(r => new RiskDto
             {
@@ -71,6 +75,8 @@ public static class JsonExchange
                 ProbabilityJustification = r.ProbabilityJustification,
                 CreatedUtc = r.CreatedUtc,
                 ModifiedUtc = r.ModifiedUtc,
+                ImpactAmount = r.ImpactAmount,
+                ProbabilityPercent = r.ProbabilityPercent,
                 Assessments = [.. r.Assessments.Select(a => new AssessmentDto
                 {
                     Id = a.Id,
@@ -79,6 +85,8 @@ public static class JsonExchange
                     ProbabilityLevelId = a.ProbabilityLevelId,
                     Note = a.Note,
                     RecordedUtc = a.RecordedUtc,
+                    ImpactAmount = a.ImpactAmount,
+                    ProbabilityPercent = a.ProbabilityPercent,
                 })],
             })],
         };
@@ -122,7 +130,7 @@ public static class JsonExchange
             {
                 var color = Palette.Normalize(l.Color ?? "");
                 var text = l.TextColor is null ? Palette.ContrastingText(color) : Palette.Normalize(l.TextColor);
-                return new Level { Id = l.Id, Name = l.Name ?? "", Color = color, TextColor = text, Order = l.Order };
+                return new Level { Id = l.Id, Name = l.Name ?? "", Color = color, TextColor = text, Order = l.Order, RangeFrom = l.RangeFrom, RangeTo = l.RangeTo };
             })],
         }).ToList();
         foreach (var scale in scales)
@@ -161,6 +169,8 @@ public static class JsonExchange
             ProbabilityJustification = r.ProbabilityJustification ?? "",
             CreatedUtc = r.CreatedUtc ?? DateTime.UtcNow,
             ModifiedUtc = r.ModifiedUtc ?? DateTime.UtcNow,
+            ImpactAmount = r.ImpactAmount,
+            ProbabilityPercent = r.ProbabilityPercent,
         })).ToList();
 
         foreach (var risk in risks)
@@ -187,9 +197,11 @@ public static class JsonExchange
         risk.Assessments = dto.Assessments is { Count: > 0 } list
             ? [.. list.Select(a => new RiskAssessment(
                 a.Id == Guid.Empty ? Guid.NewGuid() : a.Id, a.Date, a.ImpactLevelId, a.ProbabilityLevelId,
-                a.Note ?? "", a.RecordedUtc ?? risk.ModifiedUtc))]
+                a.Note ?? "", a.RecordedUtc ?? risk.ModifiedUtc)
+                { ImpactAmount = a.ImpactAmount, ProbabilityPercent = a.ProbabilityPercent })]
             : [new RiskAssessment(Guid.NewGuid(), DateOnly.FromDateTime(risk.CreatedUtc.ToLocalTime()),
-                risk.ImpactLevelId, risk.ProbabilityLevelId, "", risk.CreatedUtc)];
+                risk.ImpactLevelId, risk.ProbabilityLevelId, "", risk.CreatedUtc)
+                { ImpactAmount = risk.ImpactAmount, ProbabilityPercent = risk.ProbabilityPercent }];
         RiskMatrixDocument.WithCurrentFromHistory(risk);
         return risk;
     }
@@ -240,6 +252,8 @@ public static class JsonExchange
         public string? Color { get; set; }
         public string? TextColor { get; set; }
         public int Order { get; set; }
+        public decimal? RangeFrom { get; set; }
+        public decimal? RangeTo { get; set; }
     }
 
     private sealed class RiskDto
@@ -254,6 +268,8 @@ public static class JsonExchange
         public string? ProbabilityJustification { get; set; }
         public DateTime? CreatedUtc { get; set; }
         public DateTime? ModifiedUtc { get; set; }
+        public decimal? ImpactAmount { get; set; }
+        public decimal? ProbabilityPercent { get; set; }
         public List<AssessmentDto>? Assessments { get; set; }
     }
 
@@ -265,5 +281,7 @@ public static class JsonExchange
         public Guid ProbabilityLevelId { get; set; }
         public string? Note { get; set; }
         public DateTime? RecordedUtc { get; set; }
+        public decimal? ImpactAmount { get; set; }
+        public decimal? ProbabilityPercent { get; set; }
     }
 }

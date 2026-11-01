@@ -9,6 +9,10 @@ internal static class Fmt
 
     public static string Format(string template, params object[] args) => string.Format(Culture, template, args);
 
+    /// <summary>Monto o porcentaje con 2 decimales y separador de miles (vacío si no se cargó).</summary>
+    public static string Amount(decimal? value, string unit = "") =>
+        value is { } v ? v.ToString("N2", Culture) + unit : "";
+
     /// <summary>Abreviatura del nivel, para leer la matriz sin depender del color (RNF-46).</summary>
     public static string Abbrev(Level level)
     {

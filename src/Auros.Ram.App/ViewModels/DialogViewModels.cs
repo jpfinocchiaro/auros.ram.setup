@@ -121,7 +121,7 @@ public sealed partial class PasswordDialogViewModel : ObservableObject
 /// <summary>Un tamaño de matriz para elegir al crearla, con la miniatura de su mapa de calor por omisión.</summary>
 public sealed partial class MatrixSizeOption : ObservableObject
 {
-    public const double PreviewSize = 76;
+    public const double PreviewSize = 64;
 
     public MatrixSizeOption(ScalePreset preset)
     {
@@ -150,7 +150,7 @@ public sealed partial class NewMatrixViewModel : ObservableObject
         SizeOptions.First(o => o.Preset == ScalePreset.Matrix5x5).IsSelected = true;
     }
 
-    /// <summary>3 × 3, 5 × 5, 7 × 7 y 9 × 9; junto con "plantilla" forman un único grupo de opciones.</summary>
+    /// <summary>De 2 × 2 a 10 × 10; junto con "plantilla" forman un único grupo de opciones.</summary>
     public IReadOnlyList<MatrixSizeOption> SizeOptions { get; }
 
     /// <summary>Tamaño elegido, o null si se cargan las escalas de una plantilla.</summary>
@@ -216,4 +216,38 @@ public sealed partial class PreferencesViewModel : ObservableObject
     /// <summary>Fechas anteriores a hoy al modificar un riesgo o corregir una evaluación.</summary>
     [ObservableProperty]
     private bool _allowPastDateOnEdit = true;
+
+    public IReadOnlyList<Choice<EntryMode>> ImpactEntries { get; } =
+    [
+        new(Strings.Prefs_EntryLevel, EntryMode.Level),
+        new(Strings.Prefs_EntryAmount, EntryMode.Value),
+        new(Strings.Prefs_EntryEither, EntryMode.Either),
+    ];
+
+    public IReadOnlyList<Choice<EntryMode>> ProbabilityEntries { get; } =
+    [
+        new(Strings.Prefs_EntryLevel, EntryMode.Level),
+        new(Strings.Prefs_EntryPercent, EntryMode.Value),
+        new(Strings.Prefs_EntryEither, EntryMode.Either),
+    ];
+
+    /// <summary>Impacto: qué dato es obligatorio al cargar un riesgo.</summary>
+    [ObservableProperty]
+    private Choice<EntryMode> _impactEntry = null!;
+
+    /// <summary>Impacto: el nivel se ajusta solo según el monto (y se puede cambiar).</summary>
+    [ObservableProperty]
+    private bool _impactAuto = true;
+
+    [ObservableProperty]
+    private Choice<EntryMode> _probabilityEntry = null!;
+
+    [ObservableProperty]
+    private bool _probabilityAuto = true;
+
+    public PreferencesViewModel()
+    {
+        _impactEntry = ImpactEntries[0];
+        _probabilityEntry = ProbabilityEntries[0];
+    }
 }

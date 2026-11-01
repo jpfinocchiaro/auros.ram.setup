@@ -87,7 +87,7 @@ public sealed partial class ScalesViewModel : ObservableObject
             };
             Groups.Add(new ScaleGroup(type, type.DisplayName(), purpose, [.. doc.Scales
                 .Where(s => s.Type == type)
-                .Select(s => new ScaleItem(s, [.. s.OrderedLevels.Select(l => new LevelChip(l))], doc.IsScaleAssigned(s.Id)))]));
+                .Select(s => new ScaleItem(s, [.. s.OrderedLevels.Select(l => new LevelChip(l, RangeFormat.UnitFor(s.Type)))], doc.IsScaleAssigned(s.Id)))]));
         }
     }
 

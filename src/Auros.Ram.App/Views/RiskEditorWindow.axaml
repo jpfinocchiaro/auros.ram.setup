@@ -81,14 +81,30 @@
                         <ToggleButton IsChecked="{Binding IsSelected, Mode=OneWay}" Command="{Binding SelectCommand}"
                                       Background="{Binding Chip.Background}" Margin="0,0,8,6" Padding="12,6" MinWidth="96"
                                       BorderThickness="3" Classes="levelOption">
-                          <StackPanel Orientation="Horizontal" Spacing="6">
-                            <TextBlock Text="✓" FontWeight="Bold" Foreground="{Binding Chip.Foreground}" IsVisible="{Binding IsSelected}" />
-                            <TextBlock Text="{Binding Chip.Name}" FontWeight="SemiBold" Foreground="{Binding Chip.Foreground}" />
+                          <StackPanel Spacing="1">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                              <TextBlock Text="✓" FontWeight="Bold" Foreground="{Binding Chip.Foreground}" IsVisible="{Binding IsSelected}" />
+                              <TextBlock Text="{Binding Chip.Name}" FontWeight="SemiBold" Foreground="{Binding Chip.Foreground}" />
+                            </StackPanel>
+                            <!-- Rango del nivel, si tiene -->
+                            <TextBlock Text="{Binding Chip.RangeText}" FontSize="11" Foreground="{Binding Chip.Foreground}" Opacity="0.85"
+                                       IsVisible="{Binding Chip.RangeText, Converter={x:Static ObjectConverters.IsNotNull}}" />
                           </StackPanel>
                         </ToggleButton>
                       </DataTemplate>
                     </ItemsControl.ItemTemplate>
                   </ItemsControl>
+                  <!-- Monto del impacto o probabilidad en %: con ajuste automático elige el nivel según los rangos. -->
+                  <Grid ColumnDefinitions="Auto,12,*" RowDefinitions="Auto,Auto">
+                    <TextBlock Classes="label" Text="{Binding ValueLabel}" Grid.ColumnSpan="3" />
+                    <NumericUpDown Grid.Row="1" Value="{Binding Value}" Minimum="0" Maximum="{Binding ValueMax}" Increment="1"
+                                   FormatString="N2" ShowButtonSpinner="False" Width="200" />
+                    <StackPanel Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" Spacing="2">
+                      <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{Binding ValueHint}" />
+                      <TextBlock FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource ErrorBrush}" Text="{Binding ValueWarning}"
+                                 IsVisible="{Binding ValueWarning, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                    </StackPanel>
+                  </Grid>
                   <TextBox Text="{Binding Justification}" AcceptsReturn="True" TextWrapping="Wrap" Height="56"
                            Watermark="{x:Static r:Strings.Risk_JustificationHint}" />
                 </StackPanel>
@@ -162,8 +178,14 @@
                     <CalendarDatePicker SelectedDate="{Binding Date}" Width="140" HorizontalAlignment="Left" VerticalAlignment="Center"
                                         DisplayDateEnd="{x:Static sys:DateTime.Today}" ToolTip.Tip="{x:Static r:Strings.History_DateEditTip}"
                                         FontWeight="{Binding IsCurrent, Converter={x:Static vm:Converters.BoldIf}}" />
-                    <ContentControl Grid.Column="1" Content="{Binding Impact}" VerticalAlignment="Center" Margin="0,0,8,0" />
-                    <ContentControl Grid.Column="2" Content="{Binding Probability}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0" Spacing="1">
+                      <ContentControl Content="{Binding Impact}" HorizontalAlignment="Left" />
+                      <TextBlock Classes="muted" FontSize="11" Text="{Binding ImpactValue}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,8,0" Spacing="1">
+                      <ContentControl Content="{Binding Probability}" HorizontalAlignment="Left" />
+                      <TextBlock Classes="muted" FontSize="11" Text="{Binding ProbabilityValue}" />
+                    </StackPanel>
                     <ContentControl Grid.Column="3" Content="{Binding RiskLevel}" VerticalAlignment="Center" Margin="0,0,8,0" />
                     <TextBlock Grid.Column="4" Text="{Binding Note}" TextWrapping="Wrap" VerticalAlignment="Center" />
                     <Button Grid.Column="5" Content="✕" Padding="8,2" VerticalAlignment="Center" IsVisible="{Binding CanRemove}"

@@ -54,4 +54,6 @@
   <data name="Label_NoChanges" xml:space="preserve"><value>Sin cambios en el período</value></data>
   <data name="Label_NotAssessed" xml:space="preserve"><value>Sin evaluar</value></data>
   <data name="Label_Change" xml:space="preserve"><value>impacto {0} · probabilidad {1} → {2}</value></data>
+  <data name="Col_ImpactAmount" xml:space="preserve"><value>Monto del impacto</value></data>
+  <data name="Col_ProbabilityPercent" xml:space="preserve"><value>Probabilidad (%)</value></data>
 </root>

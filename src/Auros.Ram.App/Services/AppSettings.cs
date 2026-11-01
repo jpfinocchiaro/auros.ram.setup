@@ -30,6 +30,16 @@ public sealed class AppSettings
 
     public AssessmentDatePolicy DatePolicy => new(AllowPastDateOnCreate, AllowDateBeforeRecorded, AllowPastDateOnEdit);
 
+    /// <summary>Impacto: qué dato se pide (nivel, monto o cualquiera) y si el nivel se ajusta solo al monto.</summary>
+    public EntryMode ImpactEntry { get; set; } = EntryMode.Level;
+    public bool ImpactAuto { get; set; } = true;
+
+    /// <summary>Probabilidad: qué dato se pide (nivel, porcentaje o cualquiera) y si el nivel se ajusta solo al porcentaje.</summary>
+    public EntryMode ProbabilityEntry { get; set; } = EntryMode.Level;
+    public bool ProbabilityAuto { get; set; } = true;
+
+    public RiskEntryPolicy EntryPolicy => new(ImpactEntry, ImpactAuto, ProbabilityEntry, ProbabilityAuto);
+
     public static AppSettings Load()
     {
         try

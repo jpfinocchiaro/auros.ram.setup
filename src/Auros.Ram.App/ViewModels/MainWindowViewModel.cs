@@ -36,6 +36,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         _settings = settings;
         DisplayOptions.Current.ShowLevelAbbreviations = settings.ShowLevelAbbreviations;
         DisplayOptions.Current.DatePolicy = settings.DatePolicy;
+        DisplayOptions.Current.EntryPolicy = settings.EntryPolicy;
         RefreshRecent();
 
         _autosaveTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(settings.AutosaveMinutes) };
@@ -546,7 +547,11 @@ public sealed partial class MainWindowViewModel : ObservableObject
             AllowPastDateOnCreate = _settings.AllowPastDateOnCreate,
             AllowDateBeforeRecorded = _settings.AllowDateBeforeRecorded,
             AllowPastDateOnEdit = _settings.AllowPastDateOnEdit,
+            ImpactAuto = _settings.ImpactAuto,
+            ProbabilityAuto = _settings.ProbabilityAuto,
         };
+        vm.ImpactEntry = vm.ImpactEntries.First(c => c.Value == _settings.ImpactEntry);
+        vm.ProbabilityEntry = vm.ProbabilityEntries.First(c => c.Value == _settings.ProbabilityEntry);
         if (await _ui.EditPreferencesAsync(vm))
         {
             _settings.AutosaveMinutes = (int)Math.Clamp(vm.AutosaveMinutes ?? 5, 1, 60);
@@ -556,10 +561,16 @@ public sealed partial class MainWindowViewModel : ObservableObject
             _settings.AllowPastDateOnCreate = vm.AllowPastDateOnCreate;
             _settings.AllowDateBeforeRecorded = vm.AllowDateBeforeRecorded;
             _settings.AllowPastDateOnEdit = vm.AllowPastDateOnEdit;
+            _settings.ImpactEntry = vm.ImpactEntry.Value;
+            _settings.ImpactAuto = vm.ImpactAuto;
+            _settings.ProbabilityEntry = vm.ProbabilityEntry.Value;
+            _settings.ProbabilityAuto = vm.ProbabilityAuto;
             DisplayOptions.Current.DatePolicy = _settings.DatePolicy;
+            DisplayOptions.Current.EntryPolicy = _settings.EntryPolicy;
             foreach (var doc in Documents)
             {
                 doc.Document.DatePolicy = _settings.DatePolicy;
+                doc.Document.EntryPolicy = _settings.EntryPolicy;
             }
             _settings.Save();
             _autosaveTimer.Interval = TimeSpan.FromMinutes(_settings.AutosaveMinutes);

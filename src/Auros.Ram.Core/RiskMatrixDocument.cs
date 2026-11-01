@@ -193,8 +193,7 @@ public sealed class RiskMatrixDocument
         copy.Name = copy.Name.Trim();
         foreach (var level in copy.Levels)
         {
-            level.Name = level.Name.Trim();
-            level.Color = Palette.Normalize(level.Color);
+            NormalizeLevel(level);
         }
 
         Validation.ValidateScale(copy);
@@ -228,8 +227,7 @@ public sealed class RiskMatrixDocument
         next.Name = next.Name.Trim();
         foreach (var level in next.Levels)
         {
-            level.Name = level.Name.Trim();
-            level.Color = Palette.Normalize(level.Color);
+            NormalizeLevel(level);
         }
 
         Validation.ValidateScale(next);
@@ -273,6 +271,9 @@ public sealed class RiskMatrixDocument
 
     /// <summary>Qué fechas de evaluación se aceptan (la aplicación la toma de las Preferencias).</summary>
     public AssessmentDatePolicy DatePolicy { get; set; } = AssessmentDatePolicy.AllowAll;
+
+    /// <summary>Cómo se cargan impacto y probabilidad: dato obligatorio y ajuste automático (Preferencias).</summary>
+    public RiskEntryPolicy EntryPolicy { get; set; } = RiskEntryPolicy.Default;
 
     /// <param name="assessedOn">Fecha de la primera evaluación (hoy si se omite).</param>
     /// <param name="note">Comentario de la evaluación.</param>
@@ -328,12 +329,19 @@ public sealed class RiskMatrixDocument
 
         var history = previous.Assessments;
         next.Assessments = history;
-        if (next.ImpactLevelId != previous.ImpactLevelId || next.ProbabilityLevelId != previous.ProbabilityLevelId)
+        if (next.ImpactLevelId != previous.ImpactLevelId || next.ProbabilityLevelId != previous.ProbabilityLevelId ||
+            next.ImpactAmount != previous.ImpactAmount || next.ProbabilityPercent != previous.ProbabilityPercent)
         {
             next.Assessments = history.Count == 0
                 ? [NewAssessment(Today, next, null)]
                 : [.. history.Take(history.Count - 1),
-                    history[^1] with { ImpactLevelId = next.ImpactLevelId, ProbabilityLevelId = next.ProbabilityLevelId }];
+                    history[^1] with
+                    {
+                        ImpactLevelId = next.ImpactLevelId,
+                        ProbabilityLevelId = next.ProbabilityLevelId,
+                        ImpactAmount = next.ImpactAmount,
+                        ProbabilityPercent = next.ProbabilityPercent,
+                    }];
         }
 
         Apply(Validation.Format(Messages.Undo_EditRisk, next.Title), DocumentChangeKind.Risks,
@@ -349,7 +357,8 @@ public sealed class RiskMatrixDocument
     /// </summary>
     public void AddAssessment(
         Guid riskId, Guid impactLevelId, Guid probabilityLevelId, DateOnly? date = null, string? note = null,
-        string? impactJustification = null, string? probabilityJustification = null)
+        string? impactJustification = null, string? probabilityJustification = null,
+        decimal? impactAmount = null, decimal? probabilityPercent = null)
     {
         var index = _risks.FindIndex(r => r.Id == riskId);
         if (index < 0)
@@ -361,6 +370,8 @@ public sealed class RiskMatrixDocument
         var next = previous.Clone();
         next.ImpactLevelId = impactLevelId;
         next.ProbabilityLevelId = probabilityLevelId;
+        next.ImpactAmount = Round(impactAmount);
+        next.ProbabilityPercent = Round(probabilityPercent);
         next.ImpactJustification = (impactJustification ?? previous.ImpactJustification).Trim();
         next.ProbabilityJustification = (probabilityJustification ?? previous.ProbabilityJustification).Trim();
         Validation.ValidateRisk(next, this);
@@ -494,11 +505,28 @@ public sealed class RiskMatrixDocument
         risk.LongDescription = risk.LongDescription.Trim();
         risk.ImpactJustification = risk.ImpactJustification.Trim();
         risk.ProbabilityJustification = risk.ProbabilityJustification.Trim();
+        risk.ImpactAmount = Round(risk.ImpactAmount);
+        risk.ProbabilityPercent = Round(risk.ProbabilityPercent);
         return risk;
     }
 
     private static RiskAssessment NewAssessment(DateOnly date, Risk risk, string? note) =>
-        new(Guid.NewGuid(), date, risk.ImpactLevelId, risk.ProbabilityLevelId, (note ?? "").Trim(), DateTime.UtcNow);
+        new(Guid.NewGuid(), date, risk.ImpactLevelId, risk.ProbabilityLevelId, (note ?? "").Trim(), DateTime.UtcNow)
+        {
+            ImpactAmount = risk.ImpactAmount,
+            ProbabilityPercent = risk.ProbabilityPercent,
+        };
+
+    /// <summary>Montos y porcentajes con 2 decimales.</summary>
+    private static decimal? Round(decimal? value) => value is { } v ? Math.Round(v, 2, MidpointRounding.AwayFromZero) : null;
+
+    private static void NormalizeLevel(Level level)
+    {
+        level.Name = level.Name.Trim();
+        level.Color = Palette.Normalize(level.Color);
+        level.RangeFrom = Round(level.RangeFrom);
+        level.RangeTo = Round(level.RangeTo);
+    }
 
     /// <summary>
     /// Una evaluación nunca puede ser futura. Una fecha anterior a hoy, o anterior a otra evaluación ya registrada
@@ -534,6 +562,8 @@ public sealed class RiskMatrixDocument
         {
             risk.ImpactLevelId = risk.Assessments[^1].ImpactLevelId;
             risk.ProbabilityLevelId = risk.Assessments[^1].ProbabilityLevelId;
+            risk.ImpactAmount = risk.Assessments[^1].ImpactAmount;
+            risk.ProbabilityPercent = risk.Assessments[^1].ProbabilityPercent;
         }
     }
 

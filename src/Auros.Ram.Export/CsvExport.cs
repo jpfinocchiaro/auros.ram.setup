@@ -19,13 +19,15 @@ public static class CsvExport
         var sb = new StringBuilder();
         Line(sb, ExportText.Col_Number, ExportText.Col_Title, ExportText.Col_Short, ExportText.Col_Long,
             ExportText.Col_Risk, ExportText.Col_Impact, ExportText.Col_Probability,
-            ExportText.Col_ImpactJustification, ExportText.Col_ProbabilityJustification);
+            ExportText.Col_ImpactJustification, ExportText.Col_ProbabilityJustification,
+            ExportText.Col_ImpactAmount, ExportText.Col_ProbabilityPercent);
         foreach (var row in Reports.Summary(doc))
         {
             var r = row.Risk;
             Line(sb, row.Number.ToString(Fmt.Culture), r.Title, RichText.ToPlain(r.ShortDescription), RichText.ToPlain(r.LongDescription),
                 row.RiskLevel.Name, row.ImpactLevel.Name, row.ProbabilityLevel.Name,
-                r.ImpactJustification, r.ProbabilityJustification);
+                r.ImpactJustification, r.ProbabilityJustification,
+                Fmt.Amount(r.ImpactAmount), Fmt.Amount(r.ProbabilityPercent));
         }
 
         File.WriteAllText(path, sb.ToString(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));

@@ -335,6 +335,132 @@ public class UiSmokeTests
     }
 
     [AvaloniaFact]
+    public void Amount_and_percent_suggest_the_level_when_automatic()
+    {
+        var doc = SampleDocument();
+        var impact = doc.ProjectScale(ScaleType.Impact)!.Clone();
+        decimal[][] ranges = [[0m, 999.99m], [1000m, 4999.99m], [5000m, 19999.99m], [20000m, 99999.99m], [100000m, 1000000m]];
+        for (var i = 0; i < ranges.Length; i++)
+        {
+            (impact.OrderedLevels[i].RangeFrom, impact.OrderedLevels[i].RangeTo) = (ranges[i][0], ranges[i][1]);
+        }
+
+        doc.UpdateScale(impact);
+
+        // Automático: el monto elige el nivel; se puede cambiar a mano y se advierte que no coincide.
+        var editor = new RiskEditorViewModel(doc, null);
+        var amount = editor.Dimensions[0];
+        amount.Value = 7500m;
+        Assert.Equal(impact.OrderedLevels[2].Id, amount.SelectedId);
+        Assert.Null(amount.ValueWarning);
+        amount.Options[4].SelectCommand.Execute(null);
+        Assert.NotNull(amount.ValueWarning);
+        amount.Value = 2_000_000m;   // fuera de todos los rangos
+        Assert.NotNull(amount.ValueWarning);
+
+        // Porcentaje: la escala de probabilidad trae rangos parejos (0–20, 20,01–40, …).
+        var percent = editor.Dimensions[1];
+        percent.Value = 55m;
+        Assert.Equal(doc.ProjectScale(ScaleType.Probability)!.OrderedLevels[2].Id, percent.SelectedId);
+
+        // Sin ajuste automático (Preferencias), el nivel no cambia solo.
+        doc.EntryPolicy = RiskEntryPolicy.Default with { ImpactAuto = false, Impact = EntryMode.Value };
+        var manual = new RiskEditorViewModel(doc, null);
+        manual.Dimensions[0].Value = 7500m;
+        Assert.Equal(Guid.Empty, manual.Dimensions[0].SelectedId);
+        Assert.Contains(Auros.Ram.App.Resources.Strings.Risk_Required, manual.Dimensions[0].ValueLabel, StringComparison.Ordinal);
+
+        // Se guarda con el monto y el porcentaje.
+        manual.Title = "Con monto";
+        manual.ShortDescription = "Resumen";
+        manual.LongDescription = "Detalle";
+        manual.Dimensions[0].Options[2].SelectCommand.Execute(null);
+        manual.Dimensions[1].Value = 30m;
+        manual.SaveCommand.Execute(null);
+        Assert.Null(manual.Error);
+        var saved = doc.Risks.Single(r => r.Title == "Con monto");
+        Assert.Equal((7500m, 30m), (saved.ImpactAmount!.Value, saved.ProbabilityPercent!.Value));
+        Assert.Equal(doc.ProjectScale(ScaleType.Probability)!.OrderedLevels[1].Id, saved.ProbabilityLevelId);
+
+        var shots = new ScaleEditorViewModel(doc, doc.ProjectScale(ScaleType.Impact), ScaleType.Impact);
+        ShowDialog(new ScaleEditorWindow(shots), "28-escala-montos");
+        ShowDialog(new ScaleEditorWindow(new ScaleEditorViewModel(doc, doc.ProjectScale(ScaleType.Probability), ScaleType.Probability)), "29-escala-porcentajes");
+        var withValues = new RiskEditorViewModel(doc, saved);
+        ShowDialog(new RiskEditorWindow(withValues), "30-riesgo-con-monto", scrollToEnd: true);
+        ShowDialog(new PreferencesWindow(new PreferencesViewModel { AutosaveMinutes = 5, LockMinutes = 15 }), "31-preferencias-carga");
+    }
+
+    [AvaloniaFact]
+    public void Matrix_image_renders_as_png_and_bitmap()
+    {
+        AppPaths.UseRoot(Path.Combine(Path.GetTempPath(), "auros-ram-uitests", Guid.NewGuid().ToString("N")));
+        var window = new MainWindow { Width = 1366, Height = 900 };
+        var ui = new UiService(window);
+        var vm = new MainWindowViewModel(ui, new AppSettings());
+        window.DataContext = vm;
+        window.Show();
+        var docVm = new DocumentViewModel(Path.Combine(Path.GetTempPath(), "Relevamiento ACME.rmx"), SampleDocument(), FileKey.CreateNew("contraseña-de-prueba"), ui);
+        vm.Documents.Add(docVm);
+        vm.Active = docVm;
+        docVm.SelectedSection = (int)Section.Reports;
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        var tabs = window.GetVisualDescendants<TabControl>().Last();
+        tabs.SelectedIndex = 3;   // Imagen de la matriz
+        Shot(window, "32-imagen-matriz");
+
+        var view = window.GetVisualDescendants<ReportsView>().Single();
+        var image = view.RenderImage(2);
+        Assert.NotNull(image);
+        Assert.Equal(2560, image.Width);
+        Assert.Equal([0x89, (byte)'P', (byte)'N', (byte)'G'], image.Png[..4]);
+
+        // Mapa de bits para el portapapeles: encabezado de 40 bytes, 32 bits, filas de abajo hacia arriba.
+        Assert.Equal(40, BitConverter.ToInt32(image.Dib, 0));
+        Assert.Equal(image.Width, BitConverter.ToInt32(image.Dib, 4));
+        Assert.Equal(image.Height, BitConverter.ToInt32(image.Dib, 8));
+        Assert.Equal(32, BitConverter.ToInt16(image.Dib, 14));
+        Assert.Equal(40 + (image.Width * image.Height * 4), image.Dib.Length);
+
+        // La esquina de arriba a la izquierda es el fondo blanco (en el DIB es la última fila).
+        var topLeft = 40 + ((image.Height - 1) * image.Width * 4);
+        Assert.Equal([255, 255, 255], image.Dib[topLeft..(topLeft + 3)]);
+
+        if (ShotDir is not null)
+        {
+            File.WriteAllBytes(Path.Combine(ShotDir, "33-imagen-exportada.png"), image.Png);
+        }
+
+        // Sin título ni leyenda la imagen es más baja.
+        docVm.Reports.Image.ShowTitle = false;
+        docVm.Reports.Image.ShowLegend = false;
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        var noHeader = view.RenderImage(1)!;
+        Assert.True(noHeader.Height < image.Height / 2);
+
+        // Solo el mapa de calor: sin encabezado, rótulos, ejes, riesgos ni leyenda; sin lugares vacíos.
+        var options = docVm.Reports.Image;
+        (options.ShowSubtitle, options.ShowLogo, options.ShowLevelLabels, options.ShowAxisNames, options.ShowRisks, options.ShowAbbreviations) =
+            (false, false, false, false, false, false);
+        Assert.False(options.HasHeader);
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        var cellsOnly = view.RenderImage(1)!;
+        Assert.Equal(1280, cellsOnly.Width);
+        Assert.True(cellsOnly.Height < noHeader.Height);
+        Assert.All(docVm.Reports.Image.Rows.SelectMany(r => r.Cells), c => Assert.Empty(c.Items));
+        if (ShotDir is not null)
+        {
+            File.WriteAllBytes(Path.Combine(ShotDir, "34-imagen-solo-celdas.png"), cellsOnly.Png);
+            options.ShowLevelLabels = true;
+            options.ShowAxisNames = true;
+            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+            File.WriteAllBytes(Path.Combine(ShotDir, "35-imagen-con-ejes.png"), view.RenderImage(1)!.Png);
+            Shot(window, "36-imagen-opciones");
+        }
+
+        window.Close();
+    }
+
+    [AvaloniaFact]
     public void Formatted_editor_starts_empty_for_a_new_risk()
     {
         // Un riesgo nuevo abre el editor sin texto: debe cargar sin errores y pasar lo que se escribe.

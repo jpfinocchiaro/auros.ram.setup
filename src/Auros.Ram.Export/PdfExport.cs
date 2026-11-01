@@ -258,6 +258,15 @@ public static class PdfExport
                 {
                     j.Format.Font.Italic = true;
                 }
+
+                // Monto del impacto o probabilidad en %, si se cargaron.
+                if (x.Risk.ValueFor(type) is { } value)
+                {
+                    var label = type == ScaleType.Impact ? ExportText.Col_ImpactAmount : ExportText.Col_ProbabilityPercent;
+                    var v = row.Cells[2].AddParagraph();
+                    v.AddFormattedText($"{label}: ", new Font { Bold = true });
+                    v.AddText(Fmt.Amount(value, type == ScaleType.Probability ? " %" : ""));
+                }
             }
 
             Block(section, ExportText.Col_Short, x.Risk.ShortDescription);
@@ -277,7 +286,7 @@ public static class PdfExport
         var table = section.AddTable();
         table.Borders.Color = Border;
         table.Borders.Width = 0.5;
-        double[] widths = [2.4, 2.9, 2.9, 2.9, 6.9];
+        double[] widths = [2.2, 3.2, 3.2, 2.6, 6.8];
         foreach (var w in widths)
         {
             table.AddColumn(Unit.FromCentimeter(w));
@@ -299,6 +308,8 @@ public static class PdfExport
             row.Cells[0].AddParagraph(step.Assessment.Date.ToString("d", Fmt.Culture));
             LevelCell(row.Cells[1], step.Impact, center: true);
             LevelCell(row.Cells[2], step.Probability, center: true);
+            ValueLine(row.Cells[1], step.Assessment.ImpactAmount, "", step.Impact);
+            ValueLine(row.Cells[2], step.Assessment.ProbabilityPercent, " %", step.Probability);
             if (step.RiskLevel is { } level)
             {
                 LevelCell(row.Cells[3], level, center: true);
@@ -400,6 +411,19 @@ public static class PdfExport
             }
 
             row.KeepWith = 0;
+        }
+    }
+
+    /// <summary>Monto o porcentaje debajo del nivel, si se cargó.</summary>
+    private static void ValueLine(Cell cell, decimal? value, string unit, Level level)
+    {
+        if (value is not null)
+        {
+            var p = cell.AddParagraph(Fmt.Amount(value, unit));
+            p.Format.Alignment = ParagraphAlignment.Center;
+            p.Format.Font.Size = 7.5;
+            p.Format.Font.Bold = true;
+            p.Format.Font.Color = ToColor(level.TextColor);
         }
     }
 

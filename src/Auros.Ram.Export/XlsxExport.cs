@@ -53,7 +53,7 @@ public static class XlsxExport
         [
             ExportText.Col_Number, ExportText.Col_Title, ExportText.Col_Short, ExportText.Col_Risk, ExportText.Col_Impact,
             ExportText.Col_Probability, ExportText.Col_Long, ExportText.Col_ImpactJustification,
-            ExportText.Col_ProbabilityJustification,
+            ExportText.Col_ProbabilityJustification, ExportText.Col_ImpactAmount, ExportText.Col_ProbabilityPercent,
         ];
         for (var c = 0; c < headers.Length; c++)
         {
@@ -72,6 +72,8 @@ public static class XlsxExport
             Rich(ws.Cell(row, 7), x.Risk.LongDescription);
             ws.Cell(row, 8).Value = x.Risk.ImpactJustification;
             ws.Cell(row, 9).Value = x.Risk.ProbabilityJustification;
+            Number(ws.Cell(row, 10), x.Risk.ImpactAmount, "#,##0.00");
+            Number(ws.Cell(row, 11), x.Risk.ProbabilityPercent, "0.00\" %\"");
             row++;
         }
 
@@ -80,6 +82,7 @@ public static class XlsxExport
         ws.Column(3).Width = 60;
         ws.Columns(4, 6).Width = 16;
         ws.Columns(7, 9).Width = 60;
+        ws.Columns(10, 11).Width = 18;
         ws.Range(1, 1, Math.Max(row - 1, 1), headers.Length).Style.Alignment.WrapText = true;
         ws.Range(1, 1, Math.Max(row - 1, 1), headers.Length).Style.Alignment.Vertical = XLAlignmentVerticalValues.Top;
         ws.SheetView.FreezeRows(1);
@@ -183,7 +186,11 @@ public static class XlsxExport
     /// <summary>Todas las evaluaciones de todos los riesgos, una por fila, para medir la evolución (filtros y tablas dinámicas).</summary>
     private static void WriteHistory(IXLWorksheet ws, RiskMatrixDocument doc)
     {
-        string[] headers = [ExportText.Col_Title, ExportText.Col_Date, ExportText.Col_Impact, ExportText.Col_Probability, ExportText.Col_Risk, ExportText.Col_Note];
+        string[] headers =
+        [
+            ExportText.Col_Title, ExportText.Col_Date, ExportText.Col_Impact, ExportText.Col_Probability, ExportText.Col_Risk, ExportText.Col_Note,
+            ExportText.Col_ImpactAmount, ExportText.Col_ProbabilityPercent,
+        ];
         for (var c = 0; c < headers.Length; c++)
         {
             Header(ws.Cell(1, c + 1), headers[c]);
@@ -205,6 +212,8 @@ public static class XlsxExport
                 }
 
                 ws.Cell(row, 6).Value = step.Assessment.Note;
+                Number(ws.Cell(row, 7), step.Assessment.ImpactAmount, "#,##0.00");
+                Number(ws.Cell(row, 8), step.Assessment.ProbabilityPercent, "0.00\" %\"");
                 row++;
             }
         }
@@ -213,10 +222,21 @@ public static class XlsxExport
         ws.Column(2).Width = 12;
         ws.Columns(3, 5).Width = 18;
         ws.Column(6).Width = 60;
+        ws.Columns(7, 8).Width = 18;
         ws.SheetView.FreezeRows(1);
         if (row > 2)
         {
             ws.Range(1, 1, row - 1, headers.Length).SetAutoFilter();
+        }
+    }
+
+    /// <summary>Número con formato (monto o porcentaje); la celda queda vacía si no se cargó.</summary>
+    private static void Number(IXLCell cell, decimal? value, string format)
+    {
+        if (value is { } v)
+        {
+            cell.Value = v;
+            cell.Style.NumberFormat.Format = format;
         }
     }
 

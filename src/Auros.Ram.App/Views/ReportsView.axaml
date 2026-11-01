@@ -233,6 +233,155 @@
       </DockPanel>
     </TabItem>
 
+    <!-- Imagen de la matriz: para guardar como PNG o copiar y pegar en PowerPoint o Word. Siempre en tema claro. -->
+    <TabItem Header="{x:Static r:Strings.Image_Tab}">
+      <DockPanel DataContext="{Binding Image}" x:DataType="vm:MatrixImageViewModel">
+        <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+          <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,4">
+            <TextBlock VerticalAlignment="Center" Classes="muted" Text="{x:Static r:Strings.Matrix_AsOf}" />
+            <CalendarDatePicker SelectedDate="{Binding AsOfDate}" Width="150" Watermark="{x:Static r:Strings.Matrix_Today}"
+                                DisplayDateEnd="{x:Static sys:DateTime.Today}" />
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,4">
+            <TextBlock VerticalAlignment="Center" Classes="muted" Text="{x:Static r:Strings.Image_Resolution}" />
+            <ComboBox ItemsSource="{Binding Scales}" SelectedItem="{Binding Scale}" Width="190" />
+          </StackPanel>
+          <Button Content="{x:Static r:Strings.Image_Copy}" Classes="accent" Command="{Binding CopyImageCommand}" Margin="0,0,8,4"
+                  ToolTip.Tip="{x:Static r:Strings.Image_CopyTip}" />
+          <Button Content="{x:Static r:Strings.Image_Save}" Command="{Binding SaveImageCommand}" Margin="0,0,8,4" />
+        </WrapPanel>
+        <!-- Qué partes lleva la imagen: se puede quitar cualquiera para copiar o guardar solo lo que haga falta. -->
+        <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+          <TextBlock VerticalAlignment="Center" Classes="muted" Margin="0,0,10,4" Text="{x:Static r:Strings.Image_Show}" />
+          <CheckBox IsChecked="{Binding ShowTitle}" Content="{x:Static r:Strings.Image_ShowTitle}" Margin="0,0,12,4" />
+          <CheckBox IsChecked="{Binding ShowSubtitle}" Content="{x:Static r:Strings.Image_ShowSubtitle}" Margin="0,0,12,4" />
+          <CheckBox IsChecked="{Binding ShowLogo}" Content="{x:Static r:Strings.Image_ShowLogo}" Margin="0,0,12,4" />
+          <CheckBox IsChecked="{Binding ShowLevelLabels}" Content="{x:Static r:Strings.Image_ShowLevelLabels}" Margin="0,0,12,4" />
+          <CheckBox IsChecked="{Binding ShowAxisNames}" Content="{x:Static r:Strings.Image_ShowAxisNames}" Margin="0,0,12,4" />
+          <CheckBox IsChecked="{Binding ShowRisks}" Content="{x:Static r:Strings.Image_ShowRisks}" Margin="0,0,12,4" />
+          <CheckBox IsChecked="{Binding ShowAbbreviations}" Content="{x:Static r:Strings.Image_ShowAbbreviations}" Margin="0,0,12,4" />
+          <CheckBox IsChecked="{Binding ShowLegend}" Content="{x:Static r:Strings.Image_ShowLegend}" Margin="0,0,12,4" />
+        </WrapPanel>
+        <TextBlock DockPanel.Dock="Top" Classes="muted" Margin="0,0,0,8" Text="{Binding Status}"
+                   IsVisible="{Binding Status, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+        <!-- Vista previa: la imagen se dibuja a 1280 de ancho y se achica para entrar en pantalla. -->
+        <Border Classes="card" Padding="12">
+          <Viewbox Stretch="Uniform" StretchDirection="DownOnly" VerticalAlignment="Top">
+            <ThemeVariantScope RequestedThemeVariant="Light">
+              <Border x:Name="ImageRoot" Width="1280" Background="White" Padding="36,28" TextElement.Foreground="#1C2733">
+                <DockPanel>
+                  <!-- Título, proyecto y logo -->
+                  <DockPanel DockPanel.Dock="Top" Margin="0,0,0,22" IsVisible="{Binding HasHeader}">
+                    <Image DockPanel.Dock="Right" Source="{Binding CompanyLogo}" Height="54" MaxWidth="220" Stretch="Uniform" VerticalAlignment="Center"
+                           IsVisible="{Binding ShowLogo}" />
+                    <StackPanel Spacing="4" VerticalAlignment="Center">
+                      <TextBlock Text="{Binding Title}" FontSize="30" FontWeight="SemiBold" IsVisible="{Binding ShowTitle}" />
+                      <TextBlock Text="{Binding Subtitle}" FontSize="16" Foreground="#5E6A75" IsVisible="{Binding ShowSubtitle}" />
+                    </StackPanel>
+                  </DockPanel>
+
+                  <!-- Leyenda -->
+                  <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="10" Margin="0,22,0,0" IsVisible="{Binding ShowLegend}">
+                    <TextBlock VerticalAlignment="Center" FontSize="15" Foreground="#5E6A75" Text="{x:Static r:Strings.Matrix_Legend}" />
+                    <ItemsControl ItemsSource="{Binding Legend}">
+                      <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="8" /></ItemsPanelTemplate>
+                      </ItemsControl.ItemsPanel>
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:LevelChip">
+                          <Border Background="{Binding Background}" CornerRadius="3" Padding="10,4">
+                            <TextBlock FontSize="15" FontWeight="SemiBold" Foreground="{Binding Foreground}" Text="{Binding Name}" />
+                          </Border>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+
+                  <!-- Matriz: impacto en filas (el mayor arriba) y probabilidad en columnas -->
+                  <Grid ColumnDefinitions="Auto,*" RowDefinitions="*,Auto">
+                    <LayoutTransformControl VerticalAlignment="Center" Margin="0,0,10,0" IsVisible="{Binding ShowAxisNames}">
+                      <LayoutTransformControl.LayoutTransform>
+                        <RotateTransform Angle="-90" />
+                      </LayoutTransformControl.LayoutTransform>
+                      <TextBlock FontSize="15" Foreground="#5E6A75" Text="{x:Static r:Strings.Matrix_AxisImpact}" />
+                    </LayoutTransformControl>
+                    <StackPanel Grid.Column="1">
+                      <ItemsControl ItemsSource="{Binding Rows}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate x:DataType="vm:PlaybackRow">
+                            <DockPanel>
+                              <Border DockPanel.Dock="Left" Width="150" MinHeight="{Binding MinHeight}" Padding="0,0,12,0"
+                                      BorderBrush="#5E6A75" BorderThickness="0,0,1,0"
+                                      IsVisible="{Binding $parent[UserControl].((vm:ReportsViewModel)DataContext).Image.ShowLevelLabels, FallbackValue=True}">
+                                <Border Background="{Binding Level.Background}" CornerRadius="3" Padding="9,4"
+                                        HorizontalAlignment="Right" VerticalAlignment="Center">
+                                  <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="{Binding Level.Foreground}" Text="{Binding Level.Name}"
+                                             TextTrimming="CharacterEllipsis" MaxWidth="120" />
+                                </Border>
+                              </Border>
+                              <ItemsControl ItemsSource="{Binding Cells}" Margin="3,0,0,0">
+                                <ItemsControl.ItemsPanel>
+                                  <ItemsPanelTemplate><UniformGrid Rows="1" /></ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                  <DataTemplate x:DataType="vm:PlaybackCell">
+                                    <Border CornerRadius="3" Margin="2.5" Padding="7,5" MinHeight="{Binding MinHeight}"
+                                            Background="{Binding Level.Background, FallbackValue=Transparent}"
+                                            TextElement.Foreground="{Binding Level.Foreground, FallbackValue=Black}">
+                                      <DockPanel>
+                                        <TextBlock DockPanel.Dock="Top" FontSize="12" FontWeight="SemiBold" Opacity="0.85" Margin="0,0,0,3"
+                                                   IsVisible="{Binding $parent[UserControl].((vm:ReportsViewModel)DataContext).Image.ShowAbbreviations, FallbackValue=False}"
+                                                   Text="{Binding Level.Abbrev, StringFormat='[{0}]', FallbackValue=''}" />
+                                        <ItemsControl ItemsSource="{Binding Items}" VerticalAlignment="Top">
+                                          <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:PlaybackItem">
+                                              <TextBlock Text="{Binding Title, StringFormat='• {0}'}" TextTrimming="CharacterEllipsis" Height="24"
+                                                         FontFamily="{StaticResource CondensedFontFamily}" FontSize="15" />
+                                            </DataTemplate>
+                                          </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                      </DockPanel>
+                                    </Border>
+                                  </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                              </ItemsControl>
+                            </DockPanel>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                      <DockPanel Margin="0,4,0,0" IsVisible="{Binding ShowLevelLabels}">
+                        <Border DockPanel.Dock="Left" Width="150" />
+                        <Border BorderBrush="#5E6A75" BorderThickness="0,1,0,0" Margin="3,0,0,0" Padding="0,8,0,0">
+                          <ItemsControl ItemsSource="{Binding Columns}">
+                            <ItemsControl.ItemsPanel>
+                              <ItemsPanelTemplate><UniformGrid Rows="1" /></ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                              <DataTemplate x:DataType="vm:LevelChip">
+                                <Border Background="{Binding Background}" CornerRadius="3" Padding="9,4" Margin="2.5,0" HorizontalAlignment="Left">
+                                  <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="{Binding Foreground}" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                                </Border>
+                              </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                          </ItemsControl>
+                        </Border>
+                      </DockPanel>
+                    </StackPanel>
+                    <!-- Eje X: centrado bajo las celdas (corrido por el ancho de los rótulos de fila, si se muestran) -->
+                    <DockPanel Grid.Row="1" Grid.Column="1" Margin="0,10,0,0" IsVisible="{Binding ShowAxisNames}">
+                      <Border DockPanel.Dock="Left" Width="153" IsVisible="{Binding ShowLevelLabels}" />
+                      <TextBlock FontSize="15" Foreground="#5E6A75" HorizontalAlignment="Center" Text="{x:Static r:Strings.Matrix_AxisProbability}" />
+                    </DockPanel>
+                  </Grid>
+                </DockPanel>
+              </Border>
+            </ThemeVariantScope>
+          </Viewbox>
+        </Border>
+      </DockPanel>
+    </TabItem>
+
     <!-- RF-17: Ficha detallada por riesgo -->
     <TabItem Header="{x:Static r:Strings.Reports_Detail}">
       <DockPanel>

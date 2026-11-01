@@ -104,4 +104,15 @@
   <data name="Error_AssessmentDateTaken" xml:space="preserve"><value>Ya hay una evaluación del {0} en el historial del riesgo.</value></data>
   <data name="Undo_EditAssessmentDate" xml:space="preserve"><value>Corregir fecha de evaluación de «{0}»</value></data>
   <data name="Undo_AddAssessment" xml:space="preserve"><value>Nueva evaluación de «{0}»</value></data>
+  <data name="Error_RangeNotForRisk" xml:space="preserve"><value>Los rangos (desde–hasta) son solo para las escalas de Impacto y de Probabilidad.</value></data>
+  <data name="Error_RangeIncomplete" xml:space="preserve"><value>El nivel «{0}» necesita el valor desde y el valor hasta (o ninguno de los dos).</value></data>
+  <data name="Error_RangeOrder" xml:space="preserve"><value>En el nivel «{0}», el valor desde no puede ser negativo ni mayor que el valor hasta.</value></data>
+  <data name="Error_RangePercent" xml:space="preserve"><value>En el nivel «{0}», la probabilidad no puede superar el 100 %.</value></data>
+  <data name="Error_RangeOverlap" xml:space="preserve"><value>Los rangos de los niveles «{0}» y «{1}» se superponen.</value></data>
+  <data name="Error_AmountNegative" xml:space="preserve"><value>El monto del impacto no puede ser negativo.</value></data>
+  <data name="Error_PercentRange" xml:space="preserve"><value>La probabilidad debe estar entre 0 y 100 %.</value></data>
+  <data name="Error_AmountRequired" xml:space="preserve"><value>Falta el monto del impacto (la configuración lo pide como dato obligatorio).</value></data>
+  <data name="Error_PercentRequired" xml:space="preserve"><value>Falta la probabilidad en porcentaje (la configuración la pide como dato obligatorio).</value></data>
+  <data name="Graded_ModerateLow" xml:space="preserve"><value>Moderado bajo</value></data>
+  <data name="Graded_ModerateHigh" xml:space="preserve"><value>Moderado alto</value></data>
 </root>

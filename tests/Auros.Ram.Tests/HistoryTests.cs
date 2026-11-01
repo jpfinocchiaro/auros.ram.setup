@@ -258,7 +258,7 @@ public class HistoryTests
     {
         var doc = Sample.Document(2);
         var json = JsonExchange.Export(doc)
-            .Replace("\"formatVersion\": 4", "\"formatVersion\": 3", StringComparison.Ordinal);
+            .Replace("\"formatVersion\": 5", "\"formatVersion\": 3", StringComparison.Ordinal);
         var v3 = System.Text.Json.Nodes.JsonNode.Parse(json)!;
         foreach (var r in v3["risks"]!.AsArray())
         {

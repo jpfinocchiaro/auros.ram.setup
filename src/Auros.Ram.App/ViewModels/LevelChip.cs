@@ -7,8 +7,10 @@ namespace Auros.Ram.App.ViewModels;
 /// <summary>Un nivel pintado de su color, con texto legible sin distinguir colores (RNF-46).</summary>
 public sealed class LevelChip
 {
-    public LevelChip(Level level)
+    /// <param name="unit">Unidad del rango del nivel (p. ej., "%"), si se muestra.</param>
+    public LevelChip(Level level, string? unit = null)
     {
+        RangeText = level.HasRange ? RangeFormat.Range(level.RangeFrom, level.RangeTo, unit) : null;
         Id = level.Id;
         Name = level.Name;
         Order = level.Order;
@@ -28,6 +30,9 @@ public sealed class LevelChip
     public string Abbrev { get; }
     public IBrush Background { get; }
     public IBrush Foreground { get; }
+
+    /// <summary>Rango del nivel ("1.000,00 – 4.999,99" o "0,00 – 20,00 %"), si tiene.</summary>
+    public string? RangeText { get; }
 
     public static LevelChip? From(Level? level) => level is null ? null : new LevelChip(level);
 
@@ -62,6 +67,19 @@ internal static class Brushes
 public sealed record FilterOption(string Label, Guid? LevelId)
 {
     public override string ToString() => Label;
+}
+
+/// <summary>Formato de montos y porcentajes: 2 decimales con separador de miles.</summary>
+public static class RangeFormat
+{
+    public static string Value(decimal? value, string? unit = null) =>
+        value is { } v ? v.ToString("N2", System.Globalization.CultureInfo.CurrentCulture) + (unit is null ? "" : " " + unit) : "";
+
+    public static string Range(decimal? from, decimal? to, string? unit = null) =>
+        $"{Value(from)} – {Value(to)}" + (unit is null ? "" : " " + unit);
+
+    /// <summary>Unidad de los valores de una escala: "%" en Probabilidad; los montos no llevan unidad.</summary>
+    public static string? UnitFor(ScaleType type) => type == ScaleType.Probability ? "%" : null;
 }
 
 public sealed record Choice<T>(string Label, T Value)

@@ -20,6 +20,8 @@ public sealed partial class LevelEditViewModel : ObservableObject
         _hex = level.Color;
         _textHex = level.TextColor;
         _order = level.Order;
+        _rangeFrom = level.RangeFrom;
+        _rangeTo = level.RangeTo;
         _namedColor = Find(Palette.Named, level.Color);
         _namedTextColor = Find(Palette.TextNamed, level.TextColor);
     }
@@ -42,6 +44,13 @@ public sealed partial class LevelEditViewModel : ObservableObject
 
     [ObservableProperty]
     private decimal? _order;
+
+    /// <summary>Rango del nivel: monto (Impacto) o porcentaje (Probabilidad), con 2 decimales.</summary>
+    [ObservableProperty]
+    private decimal? _rangeFrom;
+
+    [ObservableProperty]
+    private decimal? _rangeTo;
 
     [ObservableProperty]
     private NamedColor? _namedColor;
@@ -90,6 +99,8 @@ public sealed partial class LevelEditViewModel : ObservableObject
         Color = Palette.Normalize(Hex),
         TextColor = Palette.Normalize(TextHex),
         Order = (int)(Order ?? -1),
+        RangeFrom = Owner.HasRanges ? RangeFrom : null,
+        RangeTo = Owner.HasRanges ? RangeTo : null,
     };
 
     private static NamedColor? Find(IReadOnlyList<NamedColor> list, string hex) =>
@@ -126,7 +137,29 @@ public sealed partial class ScaleEditorViewModel : ObservableObject
     private string _name;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasRanges), nameof(IsProbability), nameof(RangeHint), nameof(RangeMax))]
     private Choice<ScaleType> _selectedType;
+
+    /// <summary>Impacto y Probabilidad tienen rango por nivel (monto o porcentaje); el nivel de riesgo no.</summary>
+    public bool HasRanges => SelectedType.Value != ScaleType.Risk;
+
+    public bool IsProbability => SelectedType.Value == ScaleType.Probability;
+
+    public decimal RangeMax => IsProbability ? 100m : 999_999_999_999.99m;
+
+    public string RangeHint => IsProbability ? Strings.Scale_RangeHintPercent : Strings.Scale_RangeHintAmount;
+
+    /// <summary>Probabilidad: reparte 0–100 % en partes iguales según el orden de los niveles.</summary>
+    [RelayCommand]
+    private void SplitPercent()
+    {
+        var levels = Levels.OrderBy(l => l.Order ?? 0).ToList();
+        for (var i = 0; i < levels.Count; i++)
+        {
+            levels[i].RangeFrom = i == 0 ? 0m : Math.Round(100m * i / levels.Count, 2) + 0.01m;
+            levels[i].RangeTo = i == levels.Count - 1 ? 100m : Math.Round(100m * (i + 1) / levels.Count, 2);
+        }
+    }
 
     [ObservableProperty]
     private string? _error;

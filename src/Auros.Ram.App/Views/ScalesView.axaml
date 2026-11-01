@@ -143,7 +143,12 @@
                               </ItemsControl.ItemsPanel>
                               <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="vm:LevelChip">
-                                  <ContentControl Content="{Binding}" Margin="0,0,6,4" />
+                                  <!-- Con el rango del nivel debajo, si tiene (monto en Impacto, porcentaje en Probabilidad). -->
+                                  <StackPanel Margin="0,0,8,4" Spacing="1">
+                                    <ContentControl Content="{Binding}" HorizontalAlignment="Left" />
+                                    <TextBlock Classes="muted" FontSize="11" Text="{Binding RangeText}"
+                                               IsVisible="{Binding RangeText, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                  </StackPanel>
                                 </DataTemplate>
                               </ItemsControl.ItemTemplate>
                             </ItemsControl>

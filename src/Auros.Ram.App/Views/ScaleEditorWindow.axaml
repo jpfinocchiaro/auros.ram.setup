@@ -6,7 +6,7 @@
         x:Class="Auros.Ram.App.Views.ScaleEditorWindow"
         x:DataType="vm:ScaleEditorViewModel"
         Title="{Binding WindowTitle}"
-        Width="1000" Height="600" MinWidth="900" MinHeight="460"
+        Width="1240" Height="620" MinWidth="1000" MinHeight="460"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource SurfaceAltBrush}">
   <Window.Resources>
@@ -30,6 +30,12 @@
         </StackPanel>
       </Grid>
       <TextBlock Classes="muted" TextWrapping="Wrap" Text="{x:Static r:Strings.Scale_LevelsHint}" />
+      <!-- Rangos: monto (Impacto) o porcentaje (Probabilidad) por nivel, para elegir el nivel desde el valor. -->
+      <DockPanel IsVisible="{Binding HasRanges}">
+        <Button DockPanel.Dock="Right" Content="{x:Static r:Strings.Scale_SplitPercent}" Command="{Binding SplitPercentCommand}"
+                IsVisible="{Binding IsProbability}" Margin="12,0,0,0" />
+        <TextBlock Classes="muted" TextWrapping="Wrap" VerticalAlignment="Center" Text="{Binding RangeHint}" />
+      </DockPanel>
     </StackPanel>
 
     <StackPanel DockPanel.Dock="Bottom" Spacing="8" Margin="0,12,0,0">
@@ -45,18 +51,20 @@
 
     <Border Classes="card" Padding="8">
       <DockPanel>
-        <Grid DockPanel.Dock="Top" ColumnDefinitions="120,*,236,236,130,Auto" Margin="4,0,4,6">
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="110,*,236,236,130,150,150,Auto" Margin="4,0,4,6">
           <TextBlock Classes="label" Text="{x:Static r:Strings.Scale_Order}" />
           <TextBlock Grid.Column="1" Classes="label" Text="{x:Static r:Strings.Scale_LevelName}" />
           <TextBlock Grid.Column="2" Classes="label" Text="{x:Static r:Strings.Scale_Color}" />
           <TextBlock Grid.Column="3" Classes="label" Text="{x:Static r:Strings.Scale_TextColor}" />
           <TextBlock Grid.Column="4" Classes="label" Text="{x:Static r:Strings.Scale_Preview}" />
+          <TextBlock Grid.Column="5" Classes="label" Text="{x:Static r:Strings.Scale_RangeFrom}" IsVisible="{Binding HasRanges}" />
+          <TextBlock Grid.Column="6" Classes="label" Text="{x:Static r:Strings.Scale_RangeTo}" IsVisible="{Binding HasRanges}" />
         </Grid>
         <ScrollViewer>
           <ItemsControl ItemsSource="{Binding Levels}">
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="vm:LevelEditViewModel">
-                <Grid ColumnDefinitions="120,*,236,236,130,Auto" Margin="4,3">
+                <Grid ColumnDefinitions="110,*,236,236,130,150,150,Auto" Margin="4,3">
                   <NumericUpDown Value="{Binding Order}" Minimum="0" Maximum="100" Increment="1" FormatString="0" Margin="0,0,6,0" />
                   <TextBox Grid.Column="1" Text="{Binding Name}" MaxLength="80" Margin="0,0,6,0" Watermark="{x:Static r:Strings.Scale_LevelNameHint}" />
                   <!-- Color de fondo: de la paleta o un código #RRGGBB -->
@@ -78,7 +86,13 @@
                     <TextBlock IsVisible="{Binding LowContrast}" FontSize="11" Foreground="{DynamicResource ErrorBrush}"
                                Text="{x:Static r:Strings.Scale_LowContrast}" ToolTip.Tip="{x:Static r:Strings.Scale_LowContrastTip}" />
                   </StackPanel>
-                  <Button Grid.Column="5" Content="✕" ToolTip.Tip="{x:Static r:Strings.Scale_RemoveLevel}"
+                  <NumericUpDown Grid.Column="5" Value="{Binding RangeFrom}" Minimum="0" Maximum="{Binding Owner.RangeMax}" Increment="1"
+                                 FormatString="N2" ShowButtonSpinner="False" Margin="0,0,6,0" IsVisible="{Binding Owner.HasRanges}"
+                                 Watermark="{x:Static r:Strings.Scale_RangeFrom}" />
+                  <NumericUpDown Grid.Column="6" Value="{Binding RangeTo}" Minimum="0" Maximum="{Binding Owner.RangeMax}" Increment="1"
+                                 FormatString="N2" ShowButtonSpinner="False" Margin="0,0,6,0" IsVisible="{Binding Owner.HasRanges}"
+                                 Watermark="{x:Static r:Strings.Scale_RangeTo}" />
+                  <Button Grid.Column="7" Content="✕" ToolTip.Tip="{x:Static r:Strings.Scale_RemoveLevel}"
                           Command="{Binding Owner.RemoveLevelCommand}" CommandParameter="{Binding}" />
                 </Grid>
               </DataTemplate>

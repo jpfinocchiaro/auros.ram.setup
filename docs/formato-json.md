@@ -1,4 +1,4 @@
-# Exportación JSON (RNF-63) — `formatVersion` 4
+# Exportación JSON (RNF-63) — `formatVersion` 5
 
 Contenido completo de una matriz, para integraciones y migraciones. Implementación:
 `src/Auros.Ram.Core/Serialization/JsonExchange.cs`. **El JSON no está cifrado.**
@@ -6,7 +6,7 @@ Contenido completo de una matriz, para integraciones y migraciones. Implementaci
 ```jsonc
 {
   "format": "auros.ram/matrix",      // identificador fijo
-  "formatVersion": 4,                // se rechaza si es mayor que la soportada o anterior a 3
+  "formatVersion": 5,                // se rechaza si es mayor que la soportada o anterior a 3
   "exportedUtc": "2026-10-30T12:00:00Z",
   "project": {
     "name": "Relevamiento 2026",     // obligatorio
@@ -27,8 +27,10 @@ Contenido completo de una matriz, para integraciones y migraciones. Implementaci
       "name": "Impacto estándar",    // 1–150 caracteres
       "type": "impact",              // impact | probability | risk
       "levels": [
-        { "id": "guid", "name": "Menor", "color": "#A9C4E4", "textColor": "#000000", "order": 2 }
-        // nombre 1–80; color de fondo y de fuente #RRGGBB; orden 0–100
+        { "id": "guid", "name": "Menor", "color": "#A9C4E4", "textColor": "#000000", "order": 2,
+          "rangeFrom": 1000.00, "rangeTo": 4999.99 }
+        // nombre 1–80; color de fondo y de fuente #RRGGBB; orden 0–100;
+        // rango opcional (2 decimales, extremos incluidos, sin superponerse): monto en Impacto, 0–100 en Probabilidad
       ]
     }
   ],
@@ -44,6 +46,8 @@ Contenido completo de una matriz, para integraciones y migraciones. Implementaci
       "probabilityJustification": "",
       "createdUtc": "…",
       "modifiedUtc": "…",
+      "impactAmount": 2500.00,       // opcional: monto del impacto (2 decimales), el de la evaluación vigente
+      "probabilityPercent": 45.50,   // opcional: probabilidad de 0 a 100 %
       "assessments": [               // historial de evaluaciones, de la más antigua a la más reciente
         {
           "id": "guid",
@@ -51,7 +55,9 @@ Contenido completo de una matriz, para integraciones y migraciones. Implementaci
           "impactLevelId": "guid",   // niveles de las escalas del proyecto
           "probabilityLevelId": "guid",
           "note": "Se aplicó un control",
-          "recordedUtc": "…"         // cuándo se registró (ordena dos evaluaciones del mismo día)
+          "recordedUtc": "…",        // cuándo se registró (ordena dos evaluaciones del mismo día)
+          "impactAmount": 2500.00,   // opcionales, como en el riesgo
+          "probabilityPercent": 45.50
         }
       ]
     }

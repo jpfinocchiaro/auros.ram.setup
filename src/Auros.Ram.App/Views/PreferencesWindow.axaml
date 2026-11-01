@@ -5,7 +5,7 @@
         x:Class="Auros.Ram.App.Views.PreferencesWindow"
         x:DataType="vm:PreferencesViewModel"
         Title="{x:Static r:Strings.Menu_Preferences}"
-        Width="460" SizeToContent="Height" CanResize="False"
+        Width="520" SizeToContent="Height" CanResize="False"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource SurfaceAltBrush}">
   <StackPanel Margin="20" Spacing="14">
@@ -41,6 +41,23 @@
         <TextBlock TextWrapping="Wrap" Text="{x:Static r:Strings.Prefs_DatePastOnEdit}" />
       </CheckBox>
       <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{x:Static r:Strings.Prefs_DatesHint}" />
+    </StackPanel>
+    <!-- Carga de impacto y probabilidad: qué dato es obligatorio y si el nivel se ajusta solo según los rangos. -->
+    <StackPanel Spacing="6">
+      <TextBlock Classes="label" TextWrapping="Wrap" Text="{x:Static r:Strings.Prefs_Entry}" />
+      <Grid ColumnDefinitions="110,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="4">
+        <TextBlock VerticalAlignment="Center" Text="{x:Static r:Strings.ScaleType_Impact}" />
+        <ComboBox Grid.Column="1" HorizontalAlignment="Stretch" ItemsSource="{Binding ImpactEntries}" SelectedItem="{Binding ImpactEntry}" />
+        <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding ImpactAuto}">
+          <TextBlock TextWrapping="Wrap" Text="{x:Static r:Strings.Prefs_ImpactAuto}" />
+        </CheckBox>
+        <TextBlock Grid.Row="2" VerticalAlignment="Center" Text="{x:Static r:Strings.Risks_ProbabilityShort}" />
+        <ComboBox Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch" ItemsSource="{Binding ProbabilityEntries}" SelectedItem="{Binding ProbabilityEntry}" />
+        <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding ProbabilityAuto}">
+          <TextBlock TextWrapping="Wrap" Text="{x:Static r:Strings.Prefs_ProbabilityAuto}" />
+        </CheckBox>
+      </Grid>
+      <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{x:Static r:Strings.Prefs_EntryHint}" />
     </StackPanel>
     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
       <Button Content="{x:Static r:Strings.Common_Cancel}" IsCancel="True" Click="OnCancel" />

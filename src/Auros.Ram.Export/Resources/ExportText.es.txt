@@ -49,3 +49,5 @@ Col_Changes=Cambios en el período
 Label_NoChanges=Sin cambios en el período
 Label_NotAssessed=Sin evaluar
 Label_Change=impacto {0} · probabilidad {1} → {2}
+Col_ImpactAmount=Monto del impacto
+Col_ProbabilityPercent=Probabilidad (%)

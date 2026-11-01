@@ -47,10 +47,15 @@ public class DocumentTests
     }
 
     [Theory]
+    [InlineData(ScalePreset.Matrix2x2)]
     [InlineData(ScalePreset.Matrix3x3)]
+    [InlineData(ScalePreset.Matrix4x4)]
     [InlineData(ScalePreset.Matrix5x5)]
+    [InlineData(ScalePreset.Matrix6x6)]
     [InlineData(ScalePreset.Matrix7x7)]
+    [InlineData(ScalePreset.Matrix8x8)]
     [InlineData(ScalePreset.Matrix9x9)]
+    [InlineData(ScalePreset.Matrix10x10)]
     public void Every_preset_builds_a_square_heat_map_with_three_risk_levels(ScalePreset preset)
     {
         var size = (int)preset;
@@ -62,7 +67,10 @@ public class DocumentTests
             Assert.Equal(size, levels.Select(l => l.Name).Distinct().Count());
             Assert.All(levels, l => Assert.True(Palette.IsValidHex(l.Color)));
             Assert.Equal(Palette.Green, levels[0].Color);     // de verde (el menor)…
-            Assert.Equal(Palette.Yellow, levels[size / 2].Color);  // …a amarillo (el del medio)…
+            if (size % 2 == 1)
+            {
+                Assert.Equal(Palette.Yellow, levels[size / 2].Color);  // …a amarillo (el del medio, si hay uno)…
+            }
             Assert.Equal(Palette.Red, levels[^1].Color);      // …y rojo (el mayor)
         }
 

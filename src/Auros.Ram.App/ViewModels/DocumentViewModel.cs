@@ -47,6 +47,7 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
         Document = document;
         // Las reglas de fechas de evaluación vienen de las Preferencias, no del archivo.
         Document.DatePolicy = DisplayOptions.Current.DatePolicy;
+        Document.EntryPolicy = DisplayOptions.Current.EntryPolicy;
         Key = key;
         Ui = ui;
         Project = new ProjectViewModel(this);

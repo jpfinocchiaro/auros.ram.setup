@@ -22,21 +22,96 @@ public sealed partial class LevelOption(LevelChip chip, DimensionEditor owner) :
     private void Select() => owner.Select(this);
 }
 
-/// <summary>Una dimensión (Impacto o Probabilidad): nivel elegido y justificación.</summary>
+/// <summary>
+/// Una dimensión (Impacto o Probabilidad): nivel elegido, valor (monto del impacto o probabilidad en %) y
+/// justificación. Con ajuste automático, al ingresar el valor se elige el nivel cuyo rango lo contiene; el
+/// nivel se puede cambiar después.
+/// </summary>
 public sealed partial class DimensionEditor : ObservableObject
 {
-    public DimensionEditor(ScaleType type, Scale? scale, Guid selected, string justification)
+    private readonly Scale? _scale;
+    private bool _settingValue;
+
+    public DimensionEditor(ScaleType type, Scale? scale, Guid selected, string justification, decimal? value = null,
+        EntryMode mode = EntryMode.Level, bool auto = true)
     {
         Type = type;
+        _scale = scale;
+        Mode = mode;
+        Auto = auto;
         Label = type.DisplayName();
         ScaleName = scale?.Name ?? "";
-        Options = [.. (scale?.OrderedLevels ?? []).Select(l => new LevelOption(new LevelChip(l), this))];
+        Options = [.. (scale?.OrderedLevels ?? []).Select(l => new LevelOption(new LevelChip(l, RangeFormat.UnitFor(type)), this))];
         foreach (var o in Options)
         {
             o.IsSelected = o.Chip.Id == selected;
         }
 
         _justification = justification;
+        _value = value;
+    }
+
+    public EntryMode Mode { get; }
+    public bool Auto { get; }
+
+    /// <summary>Monto del impacto o probabilidad en porcentaje (2 decimales).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ValueWarning))]
+    private decimal? _value;
+
+    public bool IsProbability => Type == ScaleType.Probability;
+
+    public decimal ValueMax => IsProbability ? 100m : 999_999_999_999.99m;
+
+    public string ValueLabel => (IsProbability ? Strings.Risk_PercentLabel : Strings.Risk_AmountLabel) + " " + Mode switch
+    {
+        EntryMode.Value => Strings.Risk_Required,
+        EntryMode.Either => Strings.Risk_OrLevel,
+        _ => Strings.Risk_Optional,
+    };
+
+    public bool HasRanges => _scale?.Levels.Any(l => l.HasRange) == true;
+
+    /// <summary>Ayuda bajo el valor: si el nivel se ajusta solo, o si la escala no tiene rangos.</summary>
+    public string ValueHint => !HasRanges ? Strings.Risk_NoRanges : Auto ? Strings.Risk_AutoHint : Strings.Risk_ManualHint;
+
+    /// <summary>Aviso si el valor no cae en ningún rango o no corresponde al nivel elegido.</summary>
+    public string? ValueWarning
+    {
+        get
+        {
+            if (Value is not { } v || !HasRanges)
+            {
+                return null;
+            }
+
+            var unit = RangeFormat.UnitFor(Type);
+            var match = _scale!.OrderedLevels.FirstOrDefault(l => l.Contains(v));
+            if (match is null)
+            {
+                return string.Format(CultureInfo.CurrentCulture, Strings.Risk_ValueOutOfRanges, RangeFormat.Value(v, unit));
+            }
+
+            var selected = _scale.FindLevel(SelectedId);
+            return selected is not null && selected.Id != match.Id
+                ? string.Format(CultureInfo.CurrentCulture, Strings.Risk_ValueOtherLevel, RangeFormat.Value(v, unit), match.Name, selected.Name)
+                : null;
+        }
+    }
+
+    partial void OnValueChanged(decimal? value)
+    {
+        // Ajuste automático: el nivel cuyo rango contiene el valor (si hay uno); después se puede cambiar a mano.
+        if (!Auto || value is not { } v || _settingValue)
+        {
+            return;
+        }
+
+        var match = _scale?.OrderedLevels.FirstOrDefault(l => l.Contains(v));
+        if (match is not null && Options.FirstOrDefault(o => o.Chip.Id == match.Id) is { } option && !option.IsSelected)
+        {
+            Select(option);
+        }
     }
 
     public ScaleType Type { get; }
@@ -61,7 +136,22 @@ public sealed partial class DimensionEditor : ObservableObject
         }
 
         OnPropertyChanged(nameof(SelectedText));
+        OnPropertyChanged(nameof(ValueWarning));
         SelectionChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>Carga un valor sin ajustar el nivel (p. ej., al volver a leer el riesgo).</summary>
+    public void SetValueQuietly(decimal? value)
+    {
+        _settingValue = true;
+        try
+        {
+            Value = value;
+        }
+        finally
+        {
+            _settingValue = false;
+        }
     }
 }
 
@@ -78,6 +168,10 @@ public sealed partial class HistoryEntry(
     public string Note { get; } = note;
     public bool IsCurrent { get; } = isCurrent;
     public bool CanRemove { get; } = canRemove;
+
+    /// <summary>Monto y porcentaje de la evaluación (vacíos si no se cargaron).</summary>
+    public string ImpactValue { get; init; } = "";
+    public string ProbabilityValue { get; init; } = "";
 
     /// <summary>Fecha en el selector; al cambiarla se corrige la evaluación.</summary>
     [ObservableProperty]
@@ -126,7 +220,8 @@ public sealed partial class RiskEditorViewModel : ObservableObject
         _longDescription = risk?.LongDescription ?? "";
         var source = risk ?? preset;
         Dimensions = [.. ScaleTypeExtensions.Dimensions.Select(t =>
-            new DimensionEditor(t, doc.ProjectScale(t), source?.LevelIdFor(t) ?? Guid.Empty, risk?.JustificationFor(t) ?? ""))];
+            new DimensionEditor(t, doc.ProjectScale(t), source?.LevelIdFor(t) ?? Guid.Empty, risk?.JustificationFor(t) ?? "",
+                risk?.ValueFor(t), doc.EntryPolicy.ModeFor(t), doc.EntryPolicy.AutoFor(t)))];
         foreach (var d in Dimensions)
         {
             d.SelectionChanged += (_, _) =>
@@ -280,7 +375,11 @@ public sealed partial class RiskEditorViewModel : ObservableObject
         {
             var s = steps[i];
             History.Add(new HistoryEntry(s.Assessment.Id, s.Assessment.Date, new LevelChip(s.Impact), new LevelChip(s.Probability),
-                LevelChip.From(s.RiskLevel), s.Assessment.Note, i == steps.Count - 1, steps.Count > 1, ChangeAssessmentDate));
+                LevelChip.From(s.RiskLevel), s.Assessment.Note, i == steps.Count - 1, steps.Count > 1, ChangeAssessmentDate)
+            {
+                ImpactValue = RangeFormat.Value(s.Assessment.ImpactAmount),
+                ProbabilityValue = RangeFormat.Value(s.Assessment.ProbabilityPercent, "%"),
+            });
         }
 
         foreach (var s in steps)
@@ -363,6 +462,8 @@ public sealed partial class RiskEditorViewModel : ObservableObject
                     {
                         d.Select(option);
                     }
+
+                    d.SetValueQuietly(risk.ValueFor(d.Type));
                 }
             }
         }
@@ -425,6 +526,8 @@ public sealed partial class RiskEditorViewModel : ObservableObject
         risk.ProbabilityLevelId = Dimensions[1].SelectedId;
         risk.ImpactJustification = Dimensions[0].Justification;
         risk.ProbabilityJustification = Dimensions[1].Justification;
+        risk.ImpactAmount = Dimensions[0].Value;
+        risk.ProbabilityPercent = Dimensions[1].Value;
 
         var date = DateOnly.FromDateTime(AssessmentDate ?? DateTime.Today);
         try
@@ -445,7 +548,7 @@ public sealed partial class RiskEditorViewModel : ObservableObject
                     }
 
                     _doc.AddAssessment(risk.Id, risk.ImpactLevelId, risk.ProbabilityLevelId, date, AssessmentNote,
-                        risk.ImpactJustification, risk.ProbabilityJustification);
+                        risk.ImpactJustification, risk.ProbabilityJustification, risk.ImpactAmount, risk.ProbabilityPercent);
                     break;
                 default:
                     _doc.UpdateRisk(risk);
