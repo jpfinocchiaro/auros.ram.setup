@@ -78,6 +78,7 @@ public class LanguageTests
     [Theory]
     [InlineData("en", "11/1/2026", "1,234.50")]
     [InlineData("pt", "01/11/2026", "1.234,50")]
+    [InlineData("fr", "01/11/2026", "1 234,50")]
     public void Dates_and_numbers_follow_the_language(string code, string date, string number)
     {
         var system = System.Globalization.CultureInfo.CurrentCulture;
@@ -128,6 +129,7 @@ public class LanguageTests
     [Theory]
     [InlineData("en")]
     [InlineData("pt")]
+    [InlineData("fr")]
     public void Included_languages_translate_every_text(string code)
     {
         var file = Languages.Load(code);
