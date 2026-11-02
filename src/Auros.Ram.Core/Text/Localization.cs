@@ -96,6 +96,23 @@ public static partial class Localization
         CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.CurrentUICulture = uiCulture;
     }
 
+    /// <summary>
+    /// País del idioma (código ISO de región: AR, US, BR…), para mostrar su bandera: el de la Cultura del archivo o el
+    /// habitual del idioma; en español (null), el de Windows. Vacío si no se conoce.
+    /// </summary>
+    public static string RegionOf(LanguageFile? language)
+    {
+        var culture = language is null ? SystemCulture : CulturesFor(language).Culture;
+        try
+        {
+            return culture.IsNeutralCulture || culture.Name.Length == 0 ? "" : new RegionInfo(culture.Name).TwoLetterISORegionName;
+        }
+        catch (ArgumentException)
+        {
+            return "";
+        }
+    }
+
     /// <summary>La cultura del archivo (Cultura=) o la habitual del código del idioma; si .NET no la conoce, la de Windows.</summary>
     private static (CultureInfo Culture, CultureInfo UiCulture) CulturesFor(LanguageFile language)
     {

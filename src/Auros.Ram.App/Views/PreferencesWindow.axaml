@@ -3,10 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:Auros.Ram.App.ViewModels"
         xmlns:r="using:Auros.Ram.App.Resources"
+        xmlns:svc="using:Auros.Ram.App.Services"
         x:Class="Auros.Ram.App.Views.PreferencesWindow"
         x:DataType="vm:PreferencesViewModel"
         Title="{x:Static r:Strings.Menu_Preferences}"
-        Width="520" SizeToContent="Height" CanResize="False"
+        Width="660" SizeToContent="Height" CanResize="False"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource SurfaceAltBrush}">
   <DockPanel Margin="20">
@@ -15,12 +16,21 @@
       <Button ui:ButtonIcon.Icon="{StaticResource IconSave}" Classes="accent" Content="{x:Static r:Strings.Common_Save}" IsDefault="True" Click="OnAccept" />
     </StackPanel>
     <TextBlock DockPanel.Dock="Top" Classes="h2" Margin="0,0,0,14" Text="{x:Static r:Strings.Menu_Preferences}" />
-    <ScrollViewer MaxHeight="600" Padding="0,0,12,0">
-  <StackPanel Spacing="14">
+    <ScrollViewer MaxHeight="600" HorizontalScrollBarVisibility="Disabled">
+  <StackPanel Spacing="14" Margin="0,0,18,0">
     <!-- Idioma de la aplicación: el español de origen, los incluidos y los agregados desde un archivo traducido. -->
     <StackPanel Spacing="6">
       <TextBlock Classes="label" Text="{x:Static r:Strings.Prefs_Language}" />
-      <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Languages}" SelectedItem="{Binding Language}" />
+      <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Languages}" SelectedItem="{Binding Language}">
+        <ComboBox.ItemTemplate>
+          <DataTemplate x:DataType="svc:LanguageOption">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+              <ui:Flag Region="{Binding Region}" VerticalAlignment="Center" />
+              <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+            </StackPanel>
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
       <StackPanel Orientation="Horizontal" Spacing="8">
         <Button ui:ButtonIcon.Icon="{StaticResource IconExport}" Content="{x:Static r:Strings.Prefs_LanguageGenerate}"
                 ToolTip.Tip="{x:Static r:Strings.Prefs_LanguageGenerateTip}" Command="{Binding GenerateLanguageCommand}" />
@@ -64,18 +74,25 @@
     <!-- Carga de impacto y probabilidad: qué dato es obligatorio y si el nivel se ajusta solo según los rangos. -->
     <StackPanel Spacing="6">
       <TextBlock Classes="label" TextWrapping="Wrap" Text="{x:Static r:Strings.Prefs_Entry}" />
-      <Grid ColumnDefinitions="110,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="4">
-        <TextBlock VerticalAlignment="Center" Text="{x:Static r:Strings.ScaleType_Impact}" />
-        <ComboBox Grid.Column="1" HorizontalAlignment="Stretch" ItemsSource="{Binding ImpactEntries}" SelectedItem="{Binding ImpactEntry}" />
-        <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding ImpactAuto}">
-          <TextBlock TextWrapping="Wrap" Text="{x:Static r:Strings.Prefs_ImpactAuto}" />
-        </CheckBox>
-        <TextBlock Grid.Row="2" VerticalAlignment="Center" Text="{x:Static r:Strings.Risks_ProbabilityShort}" />
-        <ComboBox Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch" ItemsSource="{Binding ProbabilityEntries}" SelectedItem="{Binding ProbabilityEntry}" />
-        <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding ProbabilityAuto}">
-          <TextBlock TextWrapping="Wrap" Text="{x:Static r:Strings.Prefs_ProbabilityAuto}" />
-        </CheckBox>
-      </Grid>
+      <!-- Una fila por dato: el nombre a la izquierda y, a la derecha, el combo con la casilla debajo (sin pasarse del ancho). -->
+      <DockPanel>
+        <TextBlock DockPanel.Dock="Left" Width="110" Margin="0,8,0,0" VerticalAlignment="Top" Text="{x:Static r:Strings.ScaleType_Impact}" />
+        <StackPanel Spacing="4">
+          <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding ImpactEntries}" SelectedItem="{Binding ImpactEntry}" />
+          <CheckBox IsChecked="{Binding ImpactAuto}">
+            <TextBlock TextWrapping="Wrap" Text="{x:Static r:Strings.Prefs_ImpactAuto}" />
+          </CheckBox>
+        </StackPanel>
+      </DockPanel>
+      <DockPanel>
+        <TextBlock DockPanel.Dock="Left" Width="110" Margin="0,8,0,0" VerticalAlignment="Top" Text="{x:Static r:Strings.Risks_ProbabilityShort}" />
+        <StackPanel Spacing="4">
+          <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding ProbabilityEntries}" SelectedItem="{Binding ProbabilityEntry}" />
+          <CheckBox IsChecked="{Binding ProbabilityAuto}">
+            <TextBlock TextWrapping="Wrap" Text="{x:Static r:Strings.Prefs_ProbabilityAuto}" />
+          </CheckBox>
+        </StackPanel>
+      </DockPanel>
       <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{x:Static r:Strings.Prefs_EntryHint}" />
     </StackPanel>
   </StackPanel>

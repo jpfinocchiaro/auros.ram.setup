@@ -145,6 +145,29 @@ public class UiSmokeTests
         ShowDialog(new AboutWindow(), "13-acerca-de");
         ShowDialog(new SplashWindow(), "15-inicio");
         ShowDialog(new PreferencesWindow(new PreferencesViewModel { AutosaveMinutes = 5, LockMinutes = 15, ShowAbbreviations = true }), "17-preferencias");
+        ShowDialog(new PreferencesWindow(new PreferencesViewModel { AutosaveMinutes = 5, LockMinutes = 15, ShowAbbreviations = true }), "17b-preferencias-final", scrollToEnd: true);
+        var flags = new StackPanel { Margin = new Thickness(16), Spacing = 8 };
+        foreach (var option in Languages.List())
+        {
+            flags.Children.Add(new StackPanel
+            {
+                Orientation = Avalonia.Layout.Orientation.Horizontal,
+                Spacing = 10,
+                Children = { new Flag { Region = option.Region }, new TextBlock { Text = $"{option.Name} ({option.Region})" } },
+            });
+        }
+
+        foreach (var region in new[] { "ES", "MX", "GB", "PT", "CA", "DE", "IT", "XX" })
+        {
+            flags.Children.Add(new StackPanel
+            {
+                Orientation = Avalonia.Layout.Orientation.Horizontal,
+                Spacing = 10,
+                Children = { new Flag { Region = region, Width = 48, Height = 32 }, new TextBlock { Text = region } },
+            });
+        }
+
+        ShowDialog(new Window { Width = 320, Height = 480, Content = flags }, "45-banderas");
         ShowDialog(new CatalogsWindow(new CatalogsViewModel(doc)), "39-catalogos");
 
         // Varias empresas: maestro, y las vistas filtradas por la empresa y la unidad elegidas en la barra.

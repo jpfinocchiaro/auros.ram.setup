@@ -5,7 +5,8 @@ using Auros.Ram.Persistence;
 namespace Auros.Ram.App.Services;
 
 /// <summary>Un idioma que se puede elegir en Preferencias.</summary>
-public sealed record LanguageOption(string Code, string Name, string? Path)
+/// <param name="Region">País de la bandera (AR, US, BR…).</param>
+public sealed record LanguageOption(string Code, string Name, string? Path, string Region = "")
 {
     public override string ToString() => Name;
 }
@@ -43,11 +44,12 @@ public static class Languages
     {
         var options = new Dictionary<string, LanguageOption>(StringComparer.OrdinalIgnoreCase)
         {
-            [Localization.BaseCode] = new(Localization.BaseCode, "Español", null),
+            [Localization.BaseCode] = new(Localization.BaseCode, "Español", null, "ES"),   // bandera de España (las fechas siguen el formato de Windows)
         };
         foreach (var (code, content) in Embedded())
         {
-            options[code] = new(code, Localization.Parse(content).Name, null);
+            var file = Localization.Parse(content);
+            options[code] = new(code, file.Name, null, Localization.RegionOf(file));
         }
 
         foreach (var path in Directory.EnumerateFiles(Folder, "*.txt"))
@@ -57,7 +59,7 @@ public static class Languages
                 var file = Localization.Parse(File.ReadAllText(path, Encoding.UTF8));
                 if (file.Code.Length > 0 && file.Code != Localization.BaseCode)
                 {
-                    options[file.Code] = new(file.Code, file.Name, path);
+                    options[file.Code] = new(file.Code, file.Name, path, Localization.RegionOf(file));
                 }
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
