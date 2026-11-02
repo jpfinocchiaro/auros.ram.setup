@@ -457,4 +457,31 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Org_EditButton" xml:space="preserve"><value>Empresas y unidades…</value></data>
   <data name="Org_EditTip" xml:space="preserve"><value>Cargar o modificar empresas y unidades de negocio</value></data>
   <data name="Menu_SaveTemplate" xml:space="preserve"><value>Guardar parámetros como plantilla…</value></data>
+  <data name="FileType_Language" xml:space="preserve"><value>Archivo de idioma</value></data>
+  <data name="Prefs_Language" xml:space="preserve"><value>Idioma</value></data>
+  <data name="Prefs_LanguageHint" xml:space="preserve"><value>El idioma se aplica al reiniciar auros.ram. Para otro idioma: genere el archivo, tradúzcalo (a mano o con una IA, siguiendo las instrucciones del encabezado) y agréguelo. Los datos cargados (escalas, empresas, catálogos, riesgos) no se traducen.</value></data>
+  <data name="Prefs_LanguageGenerate" xml:space="preserve"><value>Generar archivo para traducir…</value></data>
+  <data name="Prefs_LanguageGenerateTip" xml:space="preserve"><value>Guarda todos los textos de pantallas, mensajes e informes con su id, listos para traducir. Si el idioma elegido ya está traducido, conserva sus traducciones y marca las que faltan.</value></data>
+  <data name="Prefs_LanguageAdd" xml:space="preserve"><value>Agregar archivo de idioma…</value></data>
+  <data name="Prefs_LanguageAddTip" xml:space="preserve"><value>Agrega un archivo de idioma traducido para poder elegirlo</value></data>
+  <data name="Language_SaveTitle" xml:space="preserve"><value>Generar archivo de idioma</value></data>
+  <data name="Language_DefaultName" xml:space="preserve"><value>idioma</value></data>
+  <data name="Language_SavedTitle" xml:space="preserve"><value>Archivo de idioma</value></data>
+  <data name="Language_Saved" xml:space="preserve"><value>Se guardó «{0}». Tradúzcalo siguiendo las instrucciones del encabezado y agréguelo con «Agregar archivo de idioma…».</value></data>
+  <data name="Language_OpenTitle" xml:space="preserve"><value>Elegir archivo de idioma</value></data>
+  <data name="Language_AddedTitle" xml:space="preserve"><value>Idioma agregado</value></data>
+  <data name="Language_Added" xml:space="preserve"><value>Se agregó «{0}» ({1}): {2} de {3} textos traducidos. Elíjalo en la lista y guarde las preferencias.</value></data>
+  <data name="Language_Missing" xml:space="preserve"><value>
+Faltan {0} textos: se muestran en español.</value></data>
+  <data name="Language_BadPlaceholders" xml:space="preserve"><value>
+{0} textos no conservan los marcadores numerados y se muestran en español: {1}</value></data>
+  <data name="Language_Unknown" xml:space="preserve"><value>
+{0} ids no existen en esta versión y se ignoran.</value></data>
+  <data name="Language_ErrorTitle" xml:space="preserve"><value>No se pudo agregar el idioma</value></data>
+  <data name="Language_ErrorMessage" xml:space="preserve"><value>El archivo no es un archivo de idioma válido. Revise que la sección [Idioma] tenga el Codigo del idioma (por ejemplo, en o pt) y que no sea es.</value></data>
+  <data name="Language_Restart" xml:space="preserve"><value>El idioma elegido se aplica al reiniciar auros.ram.</value></data>
+  <data name="Scales_TranslateNames" xml:space="preserve"><value>Traducir nombres estándar</value></data>
+  <data name="Scales_TranslateNamesTip" xml:space="preserve"><value>Pasa al idioma actual los nombres estándar de las escalas y de sus niveles (los de los tamaños 2 × 2 a 10 × 10). Los nombres modificados quedan igual. Se puede deshacer.</value></data>
+  <data name="Scales_TranslateNamesDone" xml:space="preserve"><value>Se tradujeron {0} nombres de escalas y niveles al idioma actual. Se puede deshacer (Edición → Deshacer).</value></data>
+  <data name="Scales_TranslateNamesNone" xml:space="preserve"><value>No hay nombres estándar para traducir: las escalas ya están en el idioma actual o sus nombres fueron modificados.</value></data>
 </root>

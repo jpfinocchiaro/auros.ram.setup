@@ -17,6 +17,9 @@ public static class AppPaths
     public static string WorkDirectory => Ensure("work");
     public static string RecoveryDirectory => Ensure("recovery");
     public static string LogDirectory => Ensure("logs");
+    /// <summary>Archivos de idioma agregados por el usuario.</summary>
+    public static string LanguageDirectory => Ensure("idiomas");
+
     public static string SettingsFile => Path.Combine(Ensure(""), "settings.json");
 
     /// <summary>Borra archivos de trabajo que quedaron de una sesión anterior (todos están cifrados).</summary>

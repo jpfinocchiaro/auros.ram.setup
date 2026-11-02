@@ -118,6 +118,17 @@ public sealed partial class ScalesViewModel : ObservableObject
     [RelayCommand]
     private Task SaveTemplate() => _owner.SaveTemplateAsync();
 
+    /// <summary>Pasa al idioma actual los nombres estándar de escalas y niveles (los modificados quedan igual).</summary>
+    [RelayCommand]
+    private async Task TranslateNames()
+    {
+        var count = 0;
+        _owner.Run(() => count = _owner.Document.RenameStandardNames(Services.Languages.StandardNames()));
+        await _owner.Ui.AlertAsync(Strings.Scales_TranslateNames, count == 0
+            ? Strings.Scales_TranslateNamesNone
+            : string.Format(CultureInfo.CurrentCulture, Strings.Scales_TranslateNamesDone, count));
+    }
+
     [RelayCommand]
     private void ResetHeatMap() => _owner.Run(() => _owner.Document.ResetHeatMap());
 

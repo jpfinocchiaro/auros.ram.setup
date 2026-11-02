@@ -16,6 +16,9 @@ public sealed class AppSettings
     public int AutosaveMinutes { get; set; } = 5;
     public int LockMinutes { get; set; } = 15;
 
+    /// <summary>Código del idioma de la aplicación (es = español, el de origen). Se aplica al iniciar.</summary>
+    public string Language { get; set; } = "es";
+
     /// <summary>Abreviaturas de los niveles ([ALT], [MED], [BAJ]) en la matriz de riesgo.</summary>
     public bool ShowLevelAbbreviations { get; set; } = true;
 

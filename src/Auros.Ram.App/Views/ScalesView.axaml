@@ -28,8 +28,12 @@
   <ScrollViewer>
     <StackPanel Margin="24,20" Spacing="16">
       <DockPanel>
-        <Button ui:ButtonIcon.Icon="{StaticResource IconSave}" DockPanel.Dock="Right" Content="{x:Static r:Strings.Scales_SaveTemplate}" Command="{Binding SaveTemplateCommand}"
-                ToolTip.Tip="{x:Static r:Strings.Scales_SaveTemplateTip}" />
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
+          <Button ui:ButtonIcon.Icon="{StaticResource IconReassess}" Content="{x:Static r:Strings.Scales_TranslateNames}" Command="{Binding TranslateNamesCommand}"
+                  ToolTip.Tip="{x:Static r:Strings.Scales_TranslateNamesTip}" />
+          <Button ui:ButtonIcon.Icon="{StaticResource IconSave}" Content="{x:Static r:Strings.Scales_SaveTemplate}" Command="{Binding SaveTemplateCommand}"
+                  ToolTip.Tip="{x:Static r:Strings.Scales_SaveTemplateTip}" />
+        </StackPanel>
         <StackPanel Spacing="4">
           <TextBlock Classes="h1" Text="{x:Static r:Strings.Section_Scales}" />
           <TextBlock Classes="muted" TextWrapping="Wrap" Text="{x:Static r:Strings.Scales_Intro}" />

@@ -142,4 +142,5 @@
   <data name="Undo_AddUnit" xml:space="preserve"><value>Agregar la unidad «{0}» a «{1}»</value></data>
   <data name="Undo_EditUnit" xml:space="preserve"><value>Renombrar la unidad «{0}»</value></data>
   <data name="Undo_RemoveUnit" xml:space="preserve"><value>Quitar la unidad «{0}»</value></data>
+  <data name="Undo_TranslateNames" xml:space="preserve"><value>Traducir los nombres estándar de las escalas</value></data>
 </root>

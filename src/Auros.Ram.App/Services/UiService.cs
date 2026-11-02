@@ -20,6 +20,7 @@ public sealed class UiService(Window owner) : IUiService
         [FileKind.Xlsx] = (Strings.FileType_Xlsx, ["*.xlsx"], "xlsx"),
         [FileKind.Pdf] = (Strings.FileType_Pdf, ["*.pdf"], "pdf"),
         [FileKind.Csv] = (Strings.FileType_Csv, ["*.csv"], "csv"),
+        [FileKind.Language] = (Strings.FileType_Language, ["*.txt"], "txt"),
     };
 
     public async Task<string?> PickOpenFileAsync(string title, FileKind kind)

@@ -354,6 +354,49 @@ public sealed partial class RiskMatrixDocument
             () => _scales[index] = previous);
     }
 
+    /// <summary>
+    /// Cambia los nombres de escalas y niveles que figuran en <paramref name="names"/> (los estándar escritos en
+    /// otro idioma) por su traducción, en un solo paso que se puede deshacer. Los nombres modificados por el usuario
+    /// no están en la lista y quedan igual. Devuelve cuántos nombres cambiaron.
+    /// </summary>
+    public int RenameStandardNames(IReadOnlyDictionary<string, string> names)
+    {
+        ArgumentNullException.ThrowIfNull(names);
+        var count = 0;
+        string Rename(string name)
+        {
+            if (names.TryGetValue(name.Trim(), out var translated) && translated != name)
+            {
+                count++;
+                return translated;
+            }
+
+            return name;
+        }
+
+        var previous = _scales.ToList();
+        var next = previous.Select(s =>
+        {
+            var copy = s.Clone();
+            copy.Name = Rename(copy.Name);
+            foreach (var level in copy.Levels)
+            {
+                level.Name = Rename(level.Name);
+            }
+
+            return copy;
+        }).ToList();
+        if (count == 0)
+        {
+            return 0;
+        }
+
+        Apply(Messages.Undo_TranslateNames, DocumentChangeKind.Scales,
+            () => { _scales.Clear(); _scales.AddRange(next); },
+            () => { _scales.Clear(); _scales.AddRange(previous); });
+        return count;
+    }
+
     public void RemoveScale(Guid scaleId)
     {
         var index = _scales.FindIndex(s => s.Id == scaleId);
@@ -728,7 +771,7 @@ public sealed partial class RiskMatrixDocument
         }
     }
 
-    private static string Display(DateOnly date) => date.ToString("dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture);
+    private static string Display(DateOnly date) => date.ToString("d", System.Globalization.CultureInfo.CurrentCulture);
 
     /// <summary>Ordena el historial y deja como estado actual el de la última evaluación.</summary>
     public static void WithCurrentFromHistory(Risk risk)

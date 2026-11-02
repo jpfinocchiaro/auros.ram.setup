@@ -562,6 +562,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     {
         var vm = new PreferencesViewModel
         {
+            Ui = _ui,
             AutosaveMinutes = _settings.AutosaveMinutes,
             LockMinutes = _settings.LockMinutes,
             ShowAbbreviations = _settings.ShowLevelAbbreviations,
@@ -573,8 +574,13 @@ public sealed partial class MainWindowViewModel : ObservableObject
         };
         vm.ImpactEntry = vm.ImpactEntries.First(c => c.Value == _settings.ImpactEntry);
         vm.ProbabilityEntry = vm.ProbabilityEntries.First(c => c.Value == _settings.ProbabilityEntry);
+        vm.SelectLanguage(_settings.Language);
         if (await _ui.EditPreferencesAsync(vm))
         {
+            // El idioma se aplica al reiniciar: las ventanas ya armadas conservan sus textos.
+            var language = vm.Language?.Code ?? Core.Text.Localization.BaseCode;
+            var languageChanged = !string.Equals(language, _settings.Language, StringComparison.OrdinalIgnoreCase);
+            _settings.Language = language;
             _settings.AutosaveMinutes = (int)Math.Clamp(vm.AutosaveMinutes ?? 5, 1, 60);
             _settings.LockMinutes = (int)Math.Clamp(vm.LockMinutes ?? 15, 1, 240);
             _settings.ShowLevelAbbreviations = vm.ShowAbbreviations;
@@ -595,6 +601,10 @@ public sealed partial class MainWindowViewModel : ObservableObject
             }
             _settings.Save();
             _autosaveTimer.Interval = TimeSpan.FromMinutes(_settings.AutosaveMinutes);
+            if (languageChanged)
+            {
+                await _ui.AlertAsync(Strings.Prefs_Language, Strings.Language_Restart);
+            }
         }
     }
 

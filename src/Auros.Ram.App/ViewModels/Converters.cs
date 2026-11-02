@@ -5,6 +5,10 @@ namespace Auros.Ram.App.ViewModels;
 
 public static class Converters
 {
+    /// <summary>Fecha corta con el año de dos cifras, en el formato del idioma (01/11/26, 11/1/26…).</summary>
+    public static string ShortDatePattern =>
+        System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.Replace("yyyy", "yy", StringComparison.Ordinal);
+
     /// <summary>Cursiva cuando el valor es falso (p. ej., "sin justificación").</summary>
     public static readonly IValueConverter ItalicUnless =
         new FuncValueConverter<bool, FontStyle>(b => b ? FontStyle.Normal : FontStyle.Italic);

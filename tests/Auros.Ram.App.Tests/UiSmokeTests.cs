@@ -51,6 +51,11 @@ public class UiSmokeTests
     {
         AppPaths.UseRoot(Path.Combine(Path.GetTempPath(), "auros-ram-uitests", Guid.NewGuid().ToString("N")));
         BindingErrors.All.Clear();
+        // AUROS_LANGUAGE=en para revisar las capturas en otro idioma.
+        if (Environment.GetEnvironmentVariable("AUROS_LANGUAGE") is { Length: > 0 } language)
+        {
+            Languages.Startup(language);
+        }
         // AUROS_THEME=Dark para revisar el tema oscuro en las capturas.
         if (Environment.GetEnvironmentVariable("AUROS_THEME") == "Dark")
         {

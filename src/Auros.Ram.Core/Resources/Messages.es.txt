@@ -137,3 +137,5 @@ Undo_RemoveCompany=Quitar la empresa «{0}»
 Undo_AddUnit=Agregar la unidad «{0}» a «{1}»
 Undo_EditUnit=Renombrar la unidad «{0}»
 Undo_RemoveUnit=Quitar la unidad «{0}»
+
+Undo_TranslateNames=Traducir los nombres estándar de las escalas

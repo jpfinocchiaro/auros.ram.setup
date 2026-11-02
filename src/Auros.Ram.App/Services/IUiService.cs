@@ -12,6 +12,7 @@ public enum FileKind
     Xlsx,
     Pdf,
     Csv,
+    Language,
 }
 
 public enum SaveChoice

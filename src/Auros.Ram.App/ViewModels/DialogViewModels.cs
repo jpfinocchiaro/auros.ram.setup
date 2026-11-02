@@ -1,8 +1,13 @@
+using System.Collections.ObjectModel;
+using System.Globalization;
 using Auros.Ram.App.Resources;
+using Auros.Ram.App.Services;
 using Auros.Ram.Core;
 using Auros.Ram.Core.Model;
 using Auros.Ram.Core.Services;
+using Auros.Ram.Core.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Auros.Ram.App.ViewModels;
 
@@ -249,5 +254,97 @@ public sealed partial class PreferencesViewModel : ObservableObject
     {
         _impactEntry = ImpactEntries[0];
         _probabilityEntry = ProbabilityEntries[0];
+        RefreshLanguages(null);
+    }
+
+    // ---- Idioma ----------------------------------------------------------------
+
+    /// <summary>Selectores de archivo y avisos (null en las pruebas sin ventana).</summary>
+    public IUiService? Ui { get; init; }
+
+    public ObservableCollection<LanguageOption> Languages { get; } = [];
+
+    [ObservableProperty]
+    private LanguageOption? _language;
+
+    /// <summary>Elige el idioma por código (el español si no está).</summary>
+    public void SelectLanguage(string? code) =>
+        Language = Languages.FirstOrDefault(l => string.Equals(l.Code, code, StringComparison.OrdinalIgnoreCase)) ?? Languages[0];
+
+    private void RefreshLanguages(string? select)
+    {
+        Languages.Clear();
+        foreach (var option in Services.Languages.List())
+        {
+            Languages.Add(option);
+        }
+
+        SelectLanguage(select);
+    }
+
+    /// <summary>
+    /// Guarda todos los textos con su id para traducirlos. Con un idioma ya traducido elegido, conserva sus
+    /// traducciones y marca las que faltan (para completar un idioma después de actualizar la aplicación).
+    /// </summary>
+    [RelayCommand]
+    private async Task GenerateLanguage()
+    {
+        if (Ui is null)
+        {
+            return;
+        }
+
+        var chosen = Language is { Code: not Localization.BaseCode } l ? l : null;
+        var path = await Ui.PickSaveFileAsync(Strings.Language_SaveTitle, (chosen?.Code ?? Strings.Language_DefaultName) + ".txt", FileKind.Language);
+        if (path is null)
+        {
+            return;
+        }
+
+        var existing = chosen is null ? null : Services.Languages.Load(chosen.Code);
+        var content = chosen is null
+            ? Localization.Template("", "")
+            : Localization.Template(chosen.Code, chosen.Name, existing, existing?.Culture ?? "");
+        await File.WriteAllTextAsync(path, content, new System.Text.UTF8Encoding(true));
+        await Ui.AlertAsync(Strings.Language_SavedTitle, string.Format(CultureInfo.CurrentCulture, Strings.Language_Saved, Path.GetFileName(path)));
+    }
+
+    /// <summary>Agrega un archivo traducido a la lista de idiomas, con un resumen de lo que trae.</summary>
+    [RelayCommand]
+    private async Task AddLanguage()
+    {
+        if (Ui is null || await Ui.PickOpenFileAsync(Strings.Language_OpenTitle, FileKind.Language) is not { } path)
+        {
+            return;
+        }
+
+        try
+        {
+            var (file, check) = Services.Languages.Install(path);
+            RefreshLanguages(file.Code);
+            var message = new System.Text.StringBuilder(string.Format(CultureInfo.CurrentCulture, Strings.Language_Added,
+                file.Name, file.Code, check.Translated, check.Total));
+            if (check.Missing.Count > 0)
+            {
+                message.Append(string.Format(CultureInfo.CurrentCulture, Strings.Language_Missing, check.Missing.Count));
+            }
+
+            if (check.BadPlaceholders.Count > 0)
+            {
+                message.Append(string.Format(CultureInfo.CurrentCulture, Strings.Language_BadPlaceholders, check.BadPlaceholders.Count,
+                    string.Join(", ", check.BadPlaceholders.Take(10))));
+            }
+
+            if (check.Unknown.Count > 0)
+            {
+                message.Append(string.Format(CultureInfo.CurrentCulture, Strings.Language_Unknown, check.Unknown.Count));
+            }
+
+            await Ui.AlertAsync(Strings.Language_AddedTitle, message.ToString());
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException)
+        {
+            await Ui.AlertAsync(Strings.Language_ErrorTitle, Strings.Language_ErrorMessage);
+        }
     }
 }

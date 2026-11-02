@@ -94,7 +94,7 @@ public sealed class EvolutionChart : Control
             var p = points[i];
             var center = new Point(X(i), Y(p.LevelIndex));
             context.DrawEllipse(p.Color, new Pen(ink, 1.5), center, 6, 6);
-            var date = Text(p.Date.ToString("dd/MM/yy", CultureInfo.CurrentCulture), typeface, 10, muted);
+            var date = Text(p.Date.ToString(ViewModels.Converters.ShortDatePattern, CultureInfo.CurrentCulture), typeface, 10, muted);
             var left = Math.Clamp(center.X - (date.Width / 2), plot.Left - 20, Bounds.Width - date.Width);
             if (left > lastLabelRight + 6)
             {

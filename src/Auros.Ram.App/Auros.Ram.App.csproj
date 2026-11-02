@@ -37,6 +37,8 @@
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
     <EmbeddedResource Include="..\..\THIRD-PARTY-NOTICES.txt" LogicalName="THIRD-PARTY-NOTICES.txt" />
+    <!-- Idiomas incluidos (además del español de origen). -->
+    <EmbeddedResource Include="Resources\Languages\*.txt" LogicalName="Languages.%(Filename)%(Extension)" />
     <EmbeddedResource Update="Resources\Strings.resx">
       <StronglyTypedFileName>$(IntermediateOutputPath)Strings.Designer.cs</StronglyTypedFileName>
       <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>

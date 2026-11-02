@@ -151,7 +151,7 @@ public sealed partial class MatrixViewModel : ObservableObject
             .Select(s => new PathMarker(
                 rows.FindIndex(l => l.Id == s.Impact.Id),
                 columns.FindIndex(l => l.Id == s.Probability.Id),
-                s.Assessment.Date.ToString("dd/MM/yy", CultureInfo.CurrentCulture)))
+                s.Assessment.Date.ToString(Converters.ShortDatePattern, CultureInfo.CurrentCulture)))
             .Where(p => p.Row >= 0 && p.Column >= 0)];
     }
 

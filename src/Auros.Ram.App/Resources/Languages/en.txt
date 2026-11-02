@@ -1,0 +1,766 @@
+﻿# auros.ram — archivo de idioma
+#
+# INSTRUCCIONES PARA TRADUCIR (a mano o con una IA):
+# - Cada línea tiene el formato ID=texto. Traducir solo el texto que está después del primer "=".
+# - No modificar los ID ni los títulos de sección entre corchetes, no agregar ni quitar líneas y mantener el orden.
+# - Las líneas que empiezan con "#" son comentarios: dejarlas igual.
+# - Conservar exactamente los marcadores {0}, {1}, etc. y los \n (saltos de línea); se pueden mover dentro de la frase.
+# - Conservar los símbolos y la puntuación especial: …, →, ·, %, ✕.
+# - Usar terminología de gestión de riesgos y auditoría (riesgo, impacto, probabilidad de ocurrencia,
+#   criterio de materialidad, unidad de negocio). Preferir textos cortos: son botones, títulos y etiquetas.
+# - En [Idioma], Codigo es el código ISO del idioma (en, pt, fr, it, de…) y Nombre, el nombre del idioma
+#   escrito en ese idioma (English, Português, Français…). Cultura es el formato de fechas y números del país
+#   (en-US: 11/1/2026; en-GB: 01/11/2026; pt-BR: 01/11/2026); si queda vacía se usa el habitual del idioma.
+# - Un texto que falte o pierda un marcador se muestra en español.
+
+[Idioma]
+Codigo=en
+Nombre=English
+Cultura=en-US
+
+[Strings]
+# --- About ---
+About_Description=Risk matrices: configurable scales, classification by impact and likelihood of occurrence, heat map and reports.
+About_ThirdParty=Third-party licenses
+About_Version=Version {0}
+# --- Catalog ---
+Catalog_Hint=These are the options in each risk's combo boxes in this matrix. You can also add one by typing a new value in the risk's combo box. An option used by any risk cannot be removed. Changes can be undone (Edit → Undo).
+Catalog_Menu=Consequences and materiality criteria…
+Catalog_NewHint=New option (short description)
+Catalog_Remove=Remove this option from the catalog
+Catalog_Title=Consequences and materiality criteria
+Catalog_Unused=unused
+Catalog_Usage=in {0} risk(s)
+# --- Clone ---
+Clone_Assessment=New assessment based on this one
+Clone_Button=Clone
+Clone_Note=Copy of «{0}»
+Clone_Risk=Clone risk
+Clone_Tip=Clones the selection: a risk opens «New risk» with everything copied; an assessment opens «New assessment» for the same risk with its values
+Clone_Title={0} (copy)
+# --- Close ---
+Close_DontSave=Don't save
+Close_LockedMessage=The file is locked and has unsaved changes. Unlock it before closing it.
+Close_LockedTitle=File locked
+Close_SaveMessage=Save changes to «{0}» before closing? If you don't save them, they will be lost.
+Close_SaveTitle=Unsaved changes
+# --- Common ---
+Common_Accept=OK
+Common_All=All
+Common_Apply=Apply changes
+Common_Cancel=Cancel
+Common_CannotDo=The action cannot be performed
+Common_Close=Close
+Common_Continue=Continue
+Common_Delete=Delete
+Common_Discard=Discard
+Common_Edit=Edit
+Common_No=No
+Common_Remove=Remove
+Common_Save=Save
+Common_Yes=Yes
+# --- Error ---
+Error_ReadFile=The file could not be read. Check that it exists and is not open in another program.
+Error_SaveTitle=Could not save
+Error_UnexpectedMessage=An unexpected error occurred. Your files were not modified. Save your work and, if the problem persists, restart the application.
+Error_UnexpectedTitle=Unexpected error
+# --- Evolution ---
+Evolution_Change=impact {0} · likelihood {1} → {2}
+Evolution_Changes=Changes in the period
+Evolution_End=At the end (level · impact · likelihood)
+Evolution_From=From
+Evolution_FromHint=First assessment
+Evolution_NoChanges=No changes in the period
+Evolution_NotAssessed=Not assessed
+Evolution_Start=At the start (level · impact · likelihood)
+Evolution_Summary=Worsened: {0} · Improved: {1} · New: {2} · Unchanged: {3}
+Evolution_Tab=Risk evolution
+Evolution_To=to
+Evolution_Trend=Trend
+# --- Export ---
+Export_Continue=Export
+Export_ErrorMessage=Could not export. Check that the folder exists, that you have permissions, and that the destination file is not open in another program.
+Export_ErrorTitle=Could not export
+Export_PdfPassword=PDF password
+Export_PdfPasswordShort=The PDF password must be at least 6 characters long.
+Export_ProtectPdf=Protect the PDF with a password
+Export_SaveTitle=Export
+Export_SuffixDetail=Detailed sheet
+Export_SuffixEvolution=Evolution
+Export_SuffixMatrix=Risk matrix
+Export_SuffixReport=Report
+Export_SuffixRisks=Risks
+Export_SuffixSummary=Summary sheet
+Export_WarningText=The exported file is NOT encrypted: anyone who receives it can read its contents. Share it only through secure channels and delete it when you no longer need it.
+Export_WarningTitle=Export to an open format
+# --- FileType ---
+FileType_Csv=CSV (semicolon-separated)
+FileType_Image=PNG or JPG image
+FileType_Json=auros.ram JSON
+FileType_Language=Language file
+FileType_Matrix=auros.ram risk matrix
+FileType_Pdf=PDF document
+FileType_Template=auros.ram parameter template
+FileType_Xlsx=Excel workbook
+# --- Format ---
+Format_BoldTip=Bold (Ctrl+B)
+Format_BulletsTip=Bulleted list (selected lines)
+Format_ItalicTip=Italic (Ctrl+I)
+Format_NumbersTip=Numbered list (selected lines)
+Format_Size=Size
+Format_SizeLarge=Large
+Format_SizeNormal=Normal
+Format_SizeSmall=Small
+Format_SizeTip=Font size of the selected text
+Format_UnderlineTip=Underline (Ctrl+U)
+# --- HeatMap ---
+HeatMap_CellTip=Impact «{0}» × likelihood «{1}». Click to choose the risk level.
+HeatMap_Intro=The risk level for each combination of impact and likelihood. Click a cell to change it: the risks in that cell change level with it.
+HeatMap_Reset=Reset
+HeatMap_Title=Heat map
+# --- History ---
+History_ColDate=Date
+History_Date=Assessment date
+History_DateEditHint=To correct the date of an assessment, choose another one in its row. The change is applied immediately and can be undone (Edit → Undo).
+History_DateEditTip=Correct the date of this assessment
+History_FirstAssessment=First assessment
+History_FirstHint=Date from which the risk has this impact and this likelihood. Later changes are kept in the history.
+History_NewAssessment=New assessment
+History_NewHint=Date on which the risk was assessed with this impact and this likelihood; it is kept in the history (if there is already an assessment on that day, it replaces it).
+History_Note=Comment
+History_NoteHint=Optional: why it changed (e.g., a control was applied)
+History_RemoveTip=Remove this assessment (entered by mistake)
+History_Title=Assessment history
+History_WarnBeforeRecorded=It is earlier than the last recorded assessment ({0}): it is inserted into the history and the current status remains that of the most recent assessment.
+History_WarnBeforeRecordedNotAllowed=It is earlier than the last recorded assessment ({0}) and the settings do not allow it: it cannot be saved (it can be enabled in Preferences).
+History_WarnFuture=The date cannot be later than today.
+History_WarnPast=The date is earlier than today.
+History_WarnPastNotAllowed=The settings do not allow a date earlier than today: it cannot be saved (it can be enabled in Preferences).
+# --- Image ---
+Image_Copied=Image copied to the clipboard ({0} × {1} px). Paste it with Ctrl+V into PowerPoint, Word or another program.
+Image_Copy=Copy image
+Image_CopyError=The image could not be copied to the clipboard (another program may be using it). Try again or save it as a file.
+Image_CopyTip=Copies the image to the clipboard to paste it into PowerPoint, Word or another program (Ctrl+V)
+Image_Resolution=Resolution
+Image_Save=Save image (PNG)…
+Image_SaveError=The image could not be saved. Check that the folder exists and that you have permission to write to it.
+Image_SaveTitle=Save the matrix image
+Image_Saved=Image saved: {0} ({1} × {2} px).
+Image_Scale1=Normal (1280 px wide)
+Image_Scale2=High (2560 px)
+Image_Scale3=Very high (3840 px)
+Image_Show=Show:
+Image_ShowAbbreviations=Level abbreviations
+Image_ShowAxisNames=Axis names
+Image_ShowLegend=Legend (risk level)
+Image_ShowLevelLabels=Impact and likelihood levels
+Image_ShowLogo=Logo
+Image_ShowRisks=Risks in the cells
+Image_ShowSubtitle=Project, company and date
+Image_ShowTitle=Title
+Image_Tab=Matrix image
+# --- Import ---
+Import_ErrorTitle=Could not import
+Import_Title=Import from JSON
+# --- Language ---
+Language_Added=«{0}» ({1}) was added: {2} of {3} texts translated. Choose it from the list and save the preferences.
+Language_AddedTitle=Language added
+Language_BadPlaceholders=\n{0} texts do not keep the numbered placeholders and are shown in Spanish: {1}
+Language_DefaultName=language
+Language_ErrorMessage=The file is not a valid language file. Check that the [Idioma] section has the language Codigo (for example, en or pt) and that it is not es.
+Language_ErrorTitle=Could not add the language
+Language_Missing=\n{0} texts are missing: they are shown in Spanish.
+Language_OpenTitle=Choose language file
+Language_Restart=The chosen language is applied when auros.ram is restarted.
+Language_SaveTitle=Generate language file
+Language_Saved=«{0}» was saved. Translate it following the instructions in the header and add it with «Add language file…».
+Language_SavedTitle=Language file
+Language_Unknown=\n{0} ids do not exist in this version and are ignored.
+# --- Lock ---
+Lock_Message=«{0}» was locked due to inactivity. Enter the file password to continue.
+Lock_Title=File locked
+Lock_Unlock=Unlock
+# --- Matrix ---
+Matrix_AsOf=View as of
+Matrix_AsOfSubtitle=as of {0}
+Matrix_AxisImpact=Impact →
+Matrix_AxisProbability=Likelihood of occurrence →
+Matrix_CellTip=Impact «{0}» × likelihood «{1}». Double-click to add a risk here.
+Matrix_ExportPdf=Export PDF
+Matrix_ExportXlsx=Export Excel
+Matrix_Legend=Risk level
+Matrix_Path=Path of
+Matrix_PathNone=(no risk)
+Matrix_ShowAmount=Impact amount
+Matrix_ShowAmountTip=Shows the impact amount next to each risk. Within each cell, risks are sorted from highest to lowest amount (those without an amount go last).
+Matrix_Today=Today
+Matrix_Tooltip={0}\nRisk level: {1}\nClick: edit · Right-click: new assessment
+# --- Menu ---
+Menu_About=About auros.ram
+Menu_ChangePassword=Change password…
+Menu_Close=Close
+Menu_Edit=_Edit
+Menu_Exit=Exit
+Menu_Export=Export
+Menu_ExportCsvMatrix=CSV — Risk matrix…
+Menu_ExportCsvRisks=CSV — Risk list…
+Menu_ExportJson=JSON — Full content…
+Menu_ExportPdfAll=PDF — Full report…
+Menu_ExportPdfDetail=PDF — Detailed sheet…
+Menu_ExportPdfEvolution=PDF — Risk evolution…
+Menu_ExportPdfMatrix=PDF — Risk matrix…
+Menu_ExportPdfSummary=PDF — Summary sheet…
+Menu_ExportXlsx=Excel (.xlsx)…
+Menu_File=_File
+Menu_Help=_Help
+Menu_ImportJson=Import from JSON…
+Menu_Lock=Lock now
+Menu_New=New…
+Menu_NewRisk=New risk…
+Menu_Open=Open…
+Menu_Preferences=Preferences…
+Menu_Print=Print…
+Menu_Recent=Recent
+Menu_Redo=Redo
+Menu_Save=Save
+Menu_SaveAs=Save as…
+Menu_SaveTemplate=Save parameters as template…
+Menu_Settings=_Settings
+Menu_Undo=Undo
+Menu_View=_View
+# --- Mode ---
+Mode_CorrectionHint=You changed the impact or likelihood: saving corrects the current assessment (of {0}) without adding another one to the history. If the risk changed over time, record it as a new assessment.
+Mode_EditHint=Corrects the risk data. It does not add assessments to the history: to record that the risk changed over time, use «New assessment».
+Mode_EditTitle=Edit risk
+Mode_NewHint=Risk data and its first assessment (impact and likelihood on a date).
+Mode_NewTitle=New risk
+Mode_ReassessHint=Records the risk's impact and likelihood on a date. It is kept in the history; previous assessments do not change.
+Mode_ReassessTitle=New assessment
+Mode_RiskLabel=Risk
+Mode_SwitchToReassess=Record as new assessment
+# --- New ---
+New_DefaultFileName=Risk matrix
+New_ErrorTitle=That file cannot be used
+New_FileIsOpen=That file is already open in another tab. Choose another name or close the tab.
+New_Intro=Each matrix is its own file. You can protect it with a password, which encrypts it; for now this is optional. Next, you will choose where to save it.
+New_NameRequired=Enter the project name.
+New_PasswordTitle=New file password
+New_SaveTitle=Save the new matrix
+New_Scales=Matrix size (impact × likelihood)
+New_SizeHint=Risk level: Low, Medium and High. Everything can be edited later in Scales.
+New_TemplateScales=Use the parameters from a template (.rmt)
+New_Title=New risk matrix
+# --- Open ---
+Open_ErrorTitle=Could not open
+Open_MigratedMessage=The file was from an earlier version and has been updated to the current format. A copy of the original was saved as «{0}» in the same folder.
+Open_MigratedTitle=File updated
+Open_NotFound=The file was not found:\n{0}\nIt was removed from the recent files list.
+Open_PasswordTitle=Open matrix
+Open_Title=Open risk matrix
+# --- Org ---
+Org_ClearLogo=Remove the company logo
+Org_Companies=Companies
+Org_EditButton=Companies and units…
+Org_EditTip=Add or modify companies and business units
+Org_Hint=Each risk belongs to a company and to a business unit of that company. Choose a company to see its units. The company logo appears in the matrix and in reports when viewing that company. A company or unit with risks cannot be removed. Changes can be undone (Edit → Undo).
+Org_Menu=Companies and business units…
+Org_NewCompany=New company
+Org_NewUnit=New business unit
+Org_PickLogo=Choose the company logo
+Org_RemoveCompany=Remove this company
+Org_RemoveUnit=Remove this business unit
+Org_Title=Companies and business units
+Org_Units=Business units
+Org_UnitsOf=Business units of {0}
+# --- Password ---
+Password_AckRequired=Confirm that you understand the password cannot be recovered.
+Password_Acknowledge=I understand that if I forget the password I will not be able to open the file.
+Password_ChangeTitle=Change password
+Password_Confirm=Repeat the password
+Password_Current=Current password
+Password_CurrentRequired=Enter the current password.
+Password_CurrentWrong=The current password is incorrect.
+Password_Label=Password
+Password_MinLength=At least 12 characters. Use a long phrase that is easy to remember.
+Password_Mismatch=The passwords do not match.
+Password_New=New password
+Password_NoRecoveryText=The password encrypts the file. Neither auros.ram nor its developer can recover it: if it is forgotten, the file can never be opened again.
+Password_NoRecoveryTitle=There is no way to recover the password
+Password_NoneWarning=Without a password the file is not encrypted: anyone who has auros.ram and the file can open it.
+Password_OptionalHint=Optional: leave both fields blank so that the file has no password.
+Password_Required=Enter the password.
+Password_SetTitle=Add password
+Password_TooShort=The password must be at least 12 characters long.
+Password_Wrong=The password is incorrect.
+# --- Playback ---
+Playback_Appeared={0}: new, {1} (impact {2} · likelihood {3})
+Playback_Axes=Rows: impact (highest at the top) · Columns: likelihood of occurrence (lowest to highest)
+Playback_Changes=Changes in this frame
+Playback_Counter=Frame {0} of {1}
+Playback_First=First frame
+Playback_FrameTitle=Matrix as of {0}
+Playback_Last=Last frame
+Playback_Loop=Loop
+Playback_Moved={0}: {1} → {2} (impact {3} · likelihood {4})
+Playback_Next=Next frame
+Playback_NoChanges=No changes: this is the status at the start of the period, or risks were reassessed on this date without changing cells.
+Playback_Pause=⏸  Pause
+Playback_Play=▶  Play
+Playback_Previous=Previous frame
+Playback_Seconds=Seconds per frame
+Playback_Tab=Matrix playback
+# --- Prefs ---
+Prefs_Abbreviations=Show the level abbreviations ([HIG], [MED], [LOW]) in the risk matrix?
+Prefs_AbbreviationsHint=They help distinguish levels without relying on color (for example, when printing in black and white).
+Prefs_Autosave=Recovery autosave (minutes)
+Prefs_AutosaveHint=How often an encrypted copy of unsaved changes is saved, so they can be recovered after an unexpected shutdown.
+Prefs_DateBeforeRecorded=when editing, a date earlier than an already recorded assessment (it is inserted into the history)
+Prefs_DatePastOnCreate=when creating, a date earlier than today
+Prefs_DatePastOnEdit=when editing or correcting an assessment, a date earlier than today
+Prefs_Dates=Risk assessment dates: allow using
+Prefs_DatesHint=If allowed, the editor only warns that the date is in the past. A date later than today is never accepted.
+Prefs_Entry=Entry of risk impact and likelihood
+Prefs_EntryAmount=The amount is entered (required)
+Prefs_EntryEither=Either one (the level or the value)
+Prefs_EntryHint=The adjustment uses each level's ranges (Settings → Scales). The level is always needed to place the risk in the matrix.
+Prefs_EntryLevel=The level is entered (the value is optional)
+Prefs_EntryPercent=The percentage is entered (required)
+Prefs_ImpactAuto=Adjust the level automatically based on the amount (can be changed)
+Prefs_Language=Language
+Prefs_LanguageAdd=Add language file…
+Prefs_LanguageAddTip=Adds a translated language file so it can be chosen
+Prefs_LanguageGenerate=Generate file to translate…
+Prefs_LanguageGenerateTip=Saves all the texts of screens, messages and reports with their id, ready to translate. If the chosen language is already translated, it keeps its translations and marks the missing ones.
+Prefs_LanguageHint=The language is applied when auros.ram is restarted. For another language: generate the file, translate it (by hand or with an AI, following the instructions in the header) and add it. Entered data (scales, companies, catalogs, risks) is not translated.
+Prefs_Lock=Inactivity lock (minutes)
+Prefs_LockHint=After this time without using the application, open files that have a password are locked and ask for it again.
+Prefs_ProbabilityAuto=Adjust the level automatically based on the percentage (can be changed)
+# --- Print ---
+Print_OpenFailed=The system PDF viewer could not be opened. The file was saved in:\n{0}\nOpen it and print it from there.
+Print_SaveTitle=Save the PDF to print
+Print_Title=Print
+# --- Project ---
+Project_AssignedScales=Project scales
+Project_Company=Organization (consolidated)
+Project_Date=Date
+Project_Distribution=Distribution by risk level
+Project_Logo=Consolidated logo
+Project_LogoHint=Appears in the matrix and in reports when viewing all companies, and for companies that have no logo of their own.
+Project_LogoInvalid=The image could not be read. Use a PNG or JPG file.
+Project_LogoTooLarge=The image exceeds 2 MB. Use a lighter version.
+Project_Name=Project name
+Project_NoLogo=No logo
+Project_PickLogo=Choose logo
+Project_PickLogoButton=Choose image…
+Project_RiskTotal={0} risks entered
+Project_Scales=Assigned scales
+Project_ScalesHint=Choose one scale of each type. Once risks have been entered, they can no longer be changed.
+Project_ScalesLocked=The project already has risks: the assigned scales cannot be changed. You can edit their levels from Settings → Scales.
+Project_Status=Status
+Project_Title=Project data
+# --- Recovery ---
+Recovery_Discard=Discard
+Recovery_Message=Unsaved changes were found from a previous session that closed unexpectedly. Do you want to recover them? If you discard them, the last saved version will be opened.
+Recovery_Recover=Recover changes
+Recovery_Title=Recover changes
+# --- Reports ---
+Reports_Detail=Detailed sheet per risk
+Reports_ExportCsv=Export CSV
+Reports_ExportDetailPdf=Export sheets to PDF
+Reports_ExportPdf=Export PDF
+Reports_FromHeatMap=Results from the impact and likelihood according to the heat map.
+Reports_NoJustification=(no justification)
+Reports_Summary=Summary sheet of improvement opportunities
+# --- Risk ---
+Risk_AddConsequence=Add
+Risk_AmountLabel=Impact amount
+Risk_AutoHint=When entered, the level is chosen according to the scale ranges; it can be changed afterwards.
+Risk_Company=Company
+Risk_CompanyHint=Choose or type a company
+Risk_ConsequenceHint=Choose a consequence or type a new one…
+Risk_Consequences=Potential consequences
+Risk_Edit=Edit risk
+Risk_EditTitle=Edit risk «{0}»
+Risk_JustificationHint=Justification (optional, recommended): why it received this level
+Risk_LevelFromHeatMap=Not chosen: it results from the impact and likelihood according to the heat map (Settings → Scales).
+Risk_Long=Long description
+Risk_LongHint=Long description — detail, analysis and recommendation (required)
+Risk_ManualHint=The level is chosen manually (automatic adjustment is turned off in Preferences).
+Risk_Materiality=Materiality criterion
+Risk_MaterialityHint=Choose a criterion or type a new one… (optional)
+Risk_New=New risk
+Risk_NoLevel=not chosen
+Risk_NoRanges=The scale has no ranges per level: the level is chosen manually (ranges are entered in Settings → Scales).
+Risk_Optional=(optional)
+Risk_OrLevel=(this value or the level)
+Risk_PercentLabel=Likelihood of occurrence (%)
+Risk_ReassessTitle=New assessment of «{0}»
+Risk_RemoveConsequence=Remove this consequence
+Risk_Required=(required)
+Risk_Short=Short description
+Risk_ShortHint=Short description — executive summary (required)
+Risk_Title=Title (required)
+Risk_Unit=Business unit
+Risk_UnitHint=Choose or type a unit
+Risk_ValueOtherLevel={0} corresponds to level «{1}», but «{2}» is selected.
+Risk_ValueOutOfRanges={0} is not within the range of any level of the scale.
+# --- Risks ---
+Risks_Add=New risk
+Risks_CheckAll=Check all
+Risks_CheckTip=Check to delete
+Risks_CheckedText=Checked: {0} risk(s) and {1} assessment(s)
+Risks_ClearFilters=Clear
+Risks_ColAmount=Amount
+Risks_ColEntries=Assess.
+Risks_ColLast=Last assess.
+Risks_ColOrganization=Company · Unit
+Risks_ColRisk=Risk / improvement opportunity
+Risks_CollapseAll=Collapse all
+Risks_Count=Showing {0} of {1} risks
+Risks_Current=current
+Risks_DeleteChecked=Delete checked
+Risks_DeleteCheckedEntries={0} assessment(s) will be removed from other risks; each one returns to the status of its most recent remaining assessment.
+Risks_DeleteCheckedRisks={0} risk(s) will be deleted with all their assessments ({1} in total).
+Risks_DeleteCheckedTitle=Delete risks and assessments
+Risks_DeleteCheckedUndo=It can be undone with Edit → Undo.
+Risks_DeleteMessage=«{0}» will be deleted with all its assessments ({1}). It can be undone with Edit → Undo.
+Risks_DeleteTip=Deletes the selection: risks with all their assessments and individual assessments (also with the Delete key)
+Risks_DeleteTitle=Delete risk
+Risks_DescendingTip=Descending order (highest to lowest)
+Risks_Edit=Edit
+Risks_EditTip=Corrects the risk data (does not add assessments to the history)
+Risks_EmptyHint=Enter the first risk: title, descriptions, impact and likelihood of occurrence. The risk level is calculated automatically.
+Risks_EmptyTitle=No risks yet
+Risks_ExpandAll=Expand all
+Risks_ExpandTip=View this risk's assessments
+Risks_ProbabilityShort=Likelihood
+Risks_Reassess=New assessment
+Risks_ReassessTip=Records the risk's impact and likelihood on a date (kept in the history)
+Risks_Search=Search
+Risks_SearchHint=Text in title or descriptions
+Risks_SelectionText=Selected: {0} risk(s) and {1} assessment(s)
+Risks_SortBy=Sort by
+Risks_SortCreated=Creation date
+Risks_SortTitle=Title
+Risks_UncheckAll=Uncheck all
+# --- SaveAs ---
+SaveAs_Title=Save as
+# --- ScaleType ---
+ScaleType_Impact=Impact
+ScaleType_Probability=Likelihood of occurrence
+ScaleType_Risk=Risk level
+# --- Scale ---
+Scale_AddLevel=+ Add level
+Scale_Color=Background color
+Scale_CustomColor=Custom
+Scale_Edit=Edit scale
+Scale_Hex=Code
+Scale_LevelInUse=Level «{0}» cannot be removed because there are risks using it.
+Scale_LevelName=Level name
+Scale_LevelNameHint=E.g.: High
+Scale_LevelsHint=The order places each level on the scale (the lowest number is the lowest level) and defines its position in the matrix. Name or color changes are reflected in all risks and reports.
+Scale_LowContrast=Low contrast
+Scale_LowContrastTip=The font may be hard to read on this background. A contrast of at least 3:1 is recommended for these bold labels.
+Scale_Name=Scale name
+Scale_New=New scale
+Scale_Order=Order
+Scale_Preview=Preview
+Scale_RangeFrom=From
+Scale_RangeHintAmount=Amount range for each level (optional, 2 decimals, from and to inclusive, non-overlapping). Used to choose the level from the impact amount.
+Scale_RangeHintPercent=Likelihood range for each level, from 0 to 100 % (optional, 2 decimals, from and to inclusive, non-overlapping). Used to choose the level from the percentage.
+Scale_RangeTo=To
+Scale_RemoveLevel=Remove level
+Scale_RemoveLevelMessage=Remove level «{0}» from the scale? The change is applied when the scale is saved.
+Scale_RemoveLevelTitle=Remove level
+Scale_SplitPercent=Split 0–100 % into equal parts
+Scale_TextColor=Font color
+Scale_Type=Type
+# --- Scales ---
+Scales_Add=+ New scale
+Scales_Assigned=Assigned to the project
+Scales_DeleteAssigned=Scale «{0}» is assigned to the project and cannot be deleted. Assign another scale in the project data first.
+Scales_DeleteMessage=Delete scale «{0}»? You can undo it with Edit → Undo.
+Scales_DeleteTitle=Delete scale
+Scales_Intro=Scales live inside this file. To reuse them in other matrices, save them as a template (along with the rest of the parameters).
+Scales_LevelCount={0} levels
+Scales_PurposeImpact=Consequences if the risk occurs — vertical axis of the matrix.
+Scales_PurposeProbability=How likely it is to occur — horizontal axis of the matrix.
+Scales_PurposeRisk=Result of combining impact and likelihood according to the heat map: it gives each risk its color.
+Scales_SaveTemplate=Save parameters as template…
+Scales_SaveTemplateTip=Saves all the parameters of this matrix to a template (.rmt): scales and heat map, companies and business units, consequences and materiality criteria
+# --- Scope ---
+Scope_AllCompanies=All companies
+Scope_AllUnits=All units
+Scope_Company=Company
+Scope_Unit=Business unit
+# --- Section ---
+Section_Matrix=Risk matrix
+Section_Project=Project
+Section_Reports=Reports
+Section_Risks=Risks
+Section_Scales=Scales
+# --- Status ---
+Status_Autosaved=Recovery copy saved at {0}
+Status_Exported=Exported: {0}
+Status_Exporting=Exporting…
+Status_PasswordChanged=Password saved and file re-encrypted
+Status_PasswordRemoved=Password removed: the file is no longer encrypted
+Status_Saved=Saved at {0}
+Status_Saving=Saving…
+Status_TemplateSaved=Template saved
+# --- Template ---
+Template_DefaultName=Parameters
+Template_ErrorTitle=Could not open the template
+Template_OpenTitle=Choose parameter template
+Template_PasswordOpenTitle=Open template
+Template_PasswordTitle=Template password
+Template_SaveTitle=Save parameters as template
+# --- Welcome ---
+Welcome_DiagramCaption=Each risk is placed according to its impact and its likelihood of occurrence. The cell color is its risk level: the most severe is at the top right.
+Welcome_Import=Import JSON
+Welcome_ImportHint=From an auros.ram export
+Welcome_New=New matrix
+Welcome_NewHint=With standard scales or a template
+Welcome_Open=Open matrix…
+Welcome_OpenHint=An existing .rmx file
+Welcome_Recent=Recent files
+Welcome_SecurityNote=Each matrix is saved in its own file. If you set a password, the file is encrypted (AES-256); the password is never stored and cannot be recovered: write it down in a safe place.
+Welcome_Subtitle=Classify each risk by its impact and its likelihood of occurrence, and see on a heat map which ones to address first.
+Scales_TranslateNames=Translate standard names
+Scales_TranslateNamesTip=Changes the standard names of the scales and their levels (those of the 2 × 2 to 10 × 10 sizes) to the current language. Modified names stay as they are. Can be undone.
+Scales_TranslateNamesDone={0} scale and level names were translated to the current language. This can be undone (Edit → Undo).
+Scales_TranslateNamesNone=There are no standard names to translate: the scales are already in the current language or their names were modified.
+
+[Messages]
+# --- Color ---
+Color_Black=Black
+Color_Blue=Blue
+Color_Gray=Gray
+Color_Green=Green
+Color_Orange=Orange
+Color_Red=Red
+Color_Violet=Violet
+Color_White=White
+Color_Yellow=Yellow
+# --- DefaultScale ---
+DefaultScale_Impact=Impact ({0} levels)
+DefaultScale_Probability=Likelihood ({0} levels)
+DefaultScale_Risk=Standard risk level
+# --- Default ---
+Default_Company=Company
+Default_Unit=General
+# --- Error ---
+Error_AllAssessments=Not all assessments of «{0}» can be removed: to do that, delete the risk.
+Error_AmountNegative=The impact amount cannot be negative.
+Error_AmountRequired=The impact amount is missing (the settings require it).
+Error_AssessmentBeforeLast=The settings do not allow a date earlier than an already recorded assessment of the risk (the most recent is from {0}). It can be enabled in Preferences.
+Error_AssessmentDateTaken=There is already an assessment from {0} in the risk history.
+Error_AssessmentInFuture=The assessment date cannot be later than today.
+Error_AssessmentLevelInvalid=An assessment in the history uses a level that is not in the project scales.
+Error_AssessmentNotFound=The assessment no longer exists in the risk history.
+Error_AssessmentPastOnCreate=The settings do not allow creating a risk with an assessment date earlier than today. It can be enabled in Preferences.
+Error_AssessmentPastOnEdit=The settings do not allow recording or correcting an assessment with a date earlier than today. It can be enabled in Preferences.
+Error_CatalogDuplicate=There is already an option «{0}».
+Error_CatalogItemInUse=«{0}» cannot be removed: it is used by {1} risk(s). Remove it from those risks first.
+Error_CatalogItemNotFound=The option no longer exists in the matrix catalog.
+Error_CatalogNameRequired=Enter a description.
+Error_CatalogNameTooLong=The description cannot be longer than {0} characters.
+Error_CompanyNotFound=The company no longer exists in the matrix.
+Error_DuplicateLevelId=The scale has duplicate levels. Remove the duplicate and try again.
+Error_FieldTooLong=The field «{0}» can have up to {1} characters.
+Error_HeatCellInvalid=The heat map cell does not match the project scales.
+Error_JsonInvalid=The file is not an auros.ram JSON export or it is damaged.
+Error_JsonNewerVersion=The JSON file was generated by a newer version of auros.ram. Update the application to import it.
+Error_JsonObsoleteVersion=The JSON is from an earlier trial version of auros.ram (with added value and difficulty) and can no longer be imported.
+Error_JsonRisk=The risk «{0}» could not be imported: {1}
+Error_LastAssessment=The only assessment of the risk cannot be removed.
+Error_LastCompany=The matrix needs at least one company.
+Error_LastUnit=«{0}» needs at least one business unit.
+Error_LevelColorInvalid=The background color of level «{0}» is not valid. Use a code such as #2E9E44 or choose one from the list.
+Error_LevelInUse=Level «{0}» cannot be removed because there are risks using it. Change the level of those risks first.
+Error_LevelNameRequired=All levels need a name.
+Error_LevelNameTooLong=The name of level «{0}» exceeds {1} characters.
+Error_LevelOrderRange=The order of level «{0}» must be a whole number between {1} and {2}.
+Error_LevelTextColorInvalid=The font color of level «{0}» is not valid. Use a code such as #FFFFFF or choose one from the list.
+Error_PercentRange=The likelihood must be between 0 and 100 %.
+Error_PercentRequired=The likelihood percentage is missing (the settings require it).
+Error_ProjectNameRequired=The project needs a name.
+Error_ProjectScaleMissing=The {0} scale assigned to the project does not exist. Choose another one.
+Error_ProjectScaleRequired=Assign a {0} scale to the project.
+Error_ProjectScaleWrongType=Scale «{0}» is not of type {1}. Choose a scale of that type.
+Error_RangeIncomplete=Level «{0}» needs both the from value and the to value (or neither).
+Error_RangeNotForRisk=Ranges (from–to) are only for the Impact and Likelihood scales.
+Error_RangeOrder=In level «{0}», the from value cannot be negative or greater than the to value.
+Error_RangeOverlap=The ranges of levels «{0}» and «{1}» overlap.
+Error_RangePercent=In level «{0}», the likelihood cannot exceed 100 %.
+Error_RiskCompanyRequired=Choose the risk's company.
+Error_RiskLevelNotInScale=The chosen {0} level does not belong to the project's «{1}» scale. Choose one of the available levels.
+Error_RiskLevelRequired=Choose the {0} level.
+Error_RiskLongRequired=Enter the long description (detail, analysis and recommendation).
+Error_RiskNotFound=The risk no longer exists in the file.
+Error_RiskShortRequired=Enter the short description (executive summary).
+Error_RiskShortTooLong=The short description can have up to {0} characters.
+Error_RiskTitleRequired=The risk needs a title.
+Error_RiskTitleTooLong=The title can have up to {0} characters.
+Error_RiskUnitRequired=Choose a business unit of «{0}».
+Error_ScaleAssigned=Scale «{0}» cannot be deleted because it is assigned to the project.
+Error_ScaleNameRequired=The scale needs a name.
+Error_ScaleNameTooLong=The scale name can have up to {0} characters.
+Error_ScaleNeedsLevel=The scale must have at least one level. Add one before saving.
+Error_ScaleNotFound=The scale no longer exists in the file.
+Error_ScaleTypeInvalid=Choose the scale type: Risk level, Impact or Likelihood of occurrence.
+Error_ScalesLockedByRisks=The project scales cannot be changed because it already has risks entered.
+Error_UnitNotFound=The business unit no longer exists in the matrix.
+# --- Field ---
+Field_Company=Company
+Field_ProjectName=Project name
+# --- Graded ---
+Graded_Extreme=Extreme
+Graded_FairlyHigh=Fairly high
+Graded_FairlyLow=Fairly low
+Graded_Minimal=Minimal
+Graded_Moderate=Moderate
+Graded_ModerateHigh=Moderate high
+Graded_ModerateLow=Moderate low
+Graded_VeryHigh=Very high
+Graded_VeryLow=Very low
+# --- Impact ---
+Impact_Catastrophic=Catastrophic
+Impact_Insignificant=Insignificant
+Impact_Major=Major
+Impact_Minor=Minor
+Impact_Moderate=Moderate
+# --- Level ---
+Level_High=High
+Level_Low=Low
+Level_Medium=Medium
+# --- Probability ---
+Probability_AlmostCertain=Almost certain
+Probability_Likely=Likely
+Probability_Possible=Possible
+Probability_Rare=Rare
+Probability_Unlikely=Unlikely
+# --- ScaleType ---
+ScaleType_Impact=Impact
+ScaleType_Probability=Likelihood of occurrence
+ScaleType_Risk=Risk level
+# --- Status ---
+Status_Finished=Finished
+Status_InProgress=In progress
+# --- Strength ---
+Strength_Fair=Fair
+Strength_Strong=Strong
+Strength_VeryStrong=Very strong
+Strength_VeryWeak=Very weak
+Strength_Weak=Weak
+# --- Suggested ---
+Suggested_Consequences=Workplace accident|Loss of profitability|Reputational damage|Regulatory sanction|Business interruption|Information loss or leakage|Fraud|Environmental damage
+Suggested_Materiality=Significant financial impact|Legal or regulatory non-compliance|Affects reputation|Affects people's safety|Affects business continuity
+# --- Trend ---
+Trend_Better=Improved
+Trend_New=New
+Trend_Same=Unchanged
+Trend_Worse=Worsened
+# --- Undo ---
+Undo_AddAssessment=New assessment of «{0}»
+Undo_AddCatalogItem=Add «{0}» to the catalog
+Undo_AddCompany=Add company «{0}»
+Undo_AddRisk=Add risk «{0}»
+Undo_AddScale=Add scale «{0}»
+Undo_AddUnit=Add unit «{0}» to «{1}»
+Undo_EditAssessmentDate=Correct assessment date of «{0}»
+Undo_EditCatalogItem=Rename option «{0}»
+Undo_EditCompany=Modify company «{0}»
+Undo_EditHeatMap=Change heat map (impact «{0}», likelihood «{1}»)
+Undo_EditProject=Edit project data
+Undo_EditRisk=Edit risk «{0}»
+Undo_EditScale=Edit scale «{0}»
+Undo_EditUnit=Rename unit «{0}»
+Undo_RemoveAssessment=Remove assessment of «{0}»
+Undo_RemoveAssessments=Remove {0} assessment(s)
+Undo_RemoveCatalogItem=Remove «{0}» from the catalog
+Undo_RemoveCompany=Remove company «{0}»
+Undo_RemoveRisk=Delete risk «{0}»
+Undo_RemoveRisks=Delete {0} risks
+Undo_RemoveScale=Delete scale «{0}»
+Undo_RemoveUnit=Remove unit «{0}»
+Undo_ResetHeatMap=Reset heat map
+Undo_TranslateNames=Translate the standard scale names
+
+[ExportText]
+# --- Axis ---
+Axis_Impact=Impact ↑
+Axis_Probability=Likelihood of occurrence →
+# --- Col ---
+Col_Changes=Changes in the period
+Col_Color=Background color
+Col_Company=Company
+Col_Consequences=Potential consequences
+Col_Date=Date
+Col_End=At the end
+Col_Field=Field
+Col_FieldValue=Value
+Col_Impact=Impact
+Col_ImpactAmount=Impact amount
+Col_ImpactJustification=Impact justification
+Col_Level=Level
+Col_Long=Long description
+Col_Materiality=Materiality criterion
+Col_Note=Comment
+Col_Number=No.
+Col_Order=Order
+Col_Organization=Company and business unit
+Col_Probability=Likelihood of occurrence
+Col_ProbabilityJustification=Likelihood justification
+Col_ProbabilityPercent=Likelihood (%)
+Col_Risk=Risk level
+Col_Scale=Scale
+Col_Short=Short description
+Col_Start=At the start
+Col_TextColor=Font color
+Col_Title=Title
+Col_Trend=Trend
+Col_Type=Type
+Col_Unit=Business unit
+# --- Generated ---
+Generated_On=Generated on {0} with auros.ram {1}
+# --- Label ---
+Label_Change=impact {0} · likelihood {1} → {2}
+Label_FromHeatMap=Results from the impact and likelihood according to the heat map.
+Label_History=Assessment history
+Label_Justification=Justification:
+Label_NoChanges=No changes in the period
+Label_NoJustification=(no justification)
+Label_NotAssessed=Not assessed
+Label_Period=Period: {0} to {1}
+# --- Matrix ---
+Matrix_Legend=Risk level of each cell:
+# --- Page ---
+Page_Footer=Page {0} of {1}
+# --- Project ---
+Project_Company=Company
+Project_Date=Date
+Project_Name=Project
+Project_Status=Status
+# --- Sheet ---
+Sheet_History=History
+Sheet_Matrix=Risk matrix
+Sheet_Project=Project
+Sheet_Risks=Risks
+Sheet_Scales=Scales
+Sheet_Summary=Summary sheet
+# --- Title ---
+Title_Detail=Detailed sheet per risk
+Title_Evolution=Risk evolution
+Title_Matrix=Risk matrix
+Title_Summary=Risk summary sheet
+
+[FileMessages]
+# --- Error ---
+Error_Corrupted=The file is damaged and cannot be opened. It was not modified. Try a backup copy.
+Error_Io=The file could not be read or written. Check that the folder exists, that you have permissions, and that the file is not open in another program.
+Error_NewerVersion=The file was created with a newer version of auros.ram. Update the application to open it.
+Error_NotRmx=The file is not an auros.ram matrix. Check that you chose the correct file.
+Error_ObsoleteVersion=The file is from an earlier trial version of auros.ram (with added value and difficulty) and can no longer be opened. Create a new matrix.
+Error_WrongKind=The file is not of the expected type: a matrix was expected and it is a template, or vice versa.
+Error_WrongPassword=The password is incorrect, or the file was tampered with. The file was not modified.
