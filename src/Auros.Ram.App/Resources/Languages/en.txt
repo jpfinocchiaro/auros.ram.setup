@@ -530,6 +530,7 @@ Scales_TranslateNames=Translate standard names
 Scales_TranslateNamesTip=Changes the standard names of the scales and their levels (those of the 2 × 2 to 10 × 10 sizes) to the current language. Modified names stay as they are. Can be undone.
 Scales_TranslateNamesDone={0} scale and level names were translated to the current language. This can be undone (Edit → Undo).
 Scales_TranslateNamesNone=There are no standard names to translate: the scales are already in the current language or their names were modified.
+Language_CurrentTip=The application is in {0}. To change the language: Settings → Preferences.
 
 [Messages]
 # --- Color ---

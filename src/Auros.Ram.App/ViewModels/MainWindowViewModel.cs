@@ -84,6 +84,11 @@ public sealed partial class MainWindowViewModel : ObservableObject
     public bool HasRecent => Recent.Count > 0;
     public string Version => AppInfo.Version;
 
+    /// <summary>Idioma con el que está funcionando la aplicación (arriba a la derecha).</summary>
+    public LanguageOption Language => Languages.Current;
+
+    public string LanguageTip => string.Format(CultureInfo.CurrentCulture, Strings.Language_CurrentTip, Language.Name);
+
     /// <summary>Mapa de calor de las escalas estándar, para la pantalla de bienvenida (el impacto mayor arriba).</summary>
     public IReadOnlyList<SketchRow> SampleHeatMap { get; } = BuildSample();
 

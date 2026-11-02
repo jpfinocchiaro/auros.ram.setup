@@ -22,6 +22,9 @@ public static class Languages
 
     public static string Folder => AppPaths.LanguageDirectory;
 
+    /// <summary>El idioma con el que está funcionando la aplicación (el elegido se aplica al reiniciar).</summary>
+    public static LanguageOption Current { get; private set; } = new(Localization.BaseCode, "Español", null, "ES");
+
     /// <summary>Registra los textos traducibles y aplica el idioma guardado en las preferencias.</summary>
     public static void Startup(string? code)
     {
@@ -33,6 +36,7 @@ public static class Languages
         try
         {
             Localization.Apply(Load(code));
+            Current = List().FirstOrDefault(l => string.Equals(l.Code, code, StringComparison.OrdinalIgnoreCase)) ?? List()[0];
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {

@@ -530,6 +530,7 @@ Welcome_OpenHint=Un fichier .rmx existant
 Welcome_Recent=Fichiers récents
 Welcome_SecurityNote=Chaque matrice est enregistrée dans son propre fichier. Si vous lui attribuez un mot de passe, le fichier est chiffré (AES-256) ; le mot de passe n'est jamais enregistré et ne peut pas être récupéré : notez-le en lieu sûr.
 Welcome_Subtitle=Classez chaque risque selon son impact et sa probabilité d'occurrence, et visualisez sur une carte de chaleur ceux à traiter en priorité.
+Language_CurrentTip=L'application est en {0}. Pour changer de langue : Paramètres → Préférences.
 
 [Messages]
 # --- Color ---
