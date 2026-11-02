@@ -59,6 +59,8 @@
           <SolidColorBrush x:Key="MutedTextBrush" Color="#5E6A75" />
           <SolidColorBrush x:Key="BorderSubtleBrush" Color="#D9DDD8" />
           <SolidColorBrush x:Key="AccentBrush" Color="#1D5866" />
+          <!-- Opción elegida del menú de la izquierda y pestaña del archivo activo: el petróleo de los botones principales. -->
+          <SolidColorBrush x:Key="SelectedBrush" Color="#1D5866" />
           <SolidColorBrush x:Key="AccentSoftBrush" Color="#E2EDEF" />
           <SolidColorBrush x:Key="RailBrush" Color="#ECEEEA" />
           <SolidColorBrush x:Key="ErrorBrush" Color="#B3261E" />
@@ -88,6 +90,7 @@
           <SolidColorBrush x:Key="MutedTextBrush" Color="#9AA6B1" />
           <SolidColorBrush x:Key="BorderSubtleBrush" Color="#2F3943" />
           <SolidColorBrush x:Key="AccentBrush" Color="#7CC0CE" />
+          <SolidColorBrush x:Key="SelectedBrush" Color="#2A6E7D" />
           <SolidColorBrush x:Key="AccentSoftBrush" Color="#1F3A41" />
           <SolidColorBrush x:Key="RailBrush" Color="#12171B" />
           <SolidColorBrush x:Key="ErrorBrush" Color="#FF8A80" />
@@ -192,7 +195,7 @@
       <Setter Property="Margin" Value="0,0,4,0" />
       <Setter Property="Foreground" Value="{DynamicResource InkBrush}" />
     </Style>
-    <!-- Archivos abiertos: el activo en azul con fuente blanca y en negrita; los demás, transparentes con la fuente normal. -->
+    <!-- Archivos abiertos: el activo en petróleo con fuente blanca y en negrita; los demás, transparentes con la fuente normal. -->
     <Style Selector="TabControl.files > TabItem /template/ Border#PART_LayoutRoot">
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="CornerRadius" Value="6,6,0,0" />
@@ -205,7 +208,7 @@
       <Setter Property="Foreground" Value="White" />
     </Style>
     <Style Selector="TabControl.files > TabItem:selected /template/ Border#PART_LayoutRoot">
-      <Setter Property="Background" Value="{StaticResource BrandBlueBrush}" />
+      <Setter Property="Background" Value="{DynamicResource SelectedBrush}" />
     </Style>
     <Style Selector="TabControl.files > TabItem /template/ Border#PART_SelectedPipe">
       <Setter Property="IsVisible" Value="False" />
@@ -214,7 +217,7 @@
       <Setter Property="Foreground" Value="{DynamicResource InkBrush}" />
     </Style>
     <Style Selector="TabControl.files > TabItem:selected:pointerover /template/ Border#PART_LayoutRoot">
-      <Setter Property="Background" Value="{StaticResource BrandBlueBrush}" />
+      <Setter Property="Background" Value="{DynamicResource SelectedBrush}" />
     </Style>
     <Style Selector="TabControl.files > TabItem:selected:pointerover /template/ Border#PART_LayoutRoot > ContentPresenter">
       <Setter Property="Foreground" Value="White" />
@@ -273,7 +276,7 @@
       <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
     <Style Selector="TabControl.rail > TabItem:selected /template/ Border#PART_LayoutRoot">
-      <Setter Property="Background" Value="{StaticResource BrandBlueBrush}" />
+      <Setter Property="Background" Value="{DynamicResource SelectedBrush}" />
     </Style>
     <Style Selector="TabControl.rail > TabItem /template/ Border#PART_SelectedPipe">
       <Setter Property="IsVisible" Value="False" />
