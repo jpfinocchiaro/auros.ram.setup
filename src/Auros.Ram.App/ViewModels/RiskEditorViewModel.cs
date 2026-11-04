@@ -10,6 +10,46 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace Auros.Ram.App.ViewModels;
 
+/// <summary>Una acción mitigante en edición: descripción, responsable, fecha comprometida y estado.</summary>
+public sealed partial class ActionEditor : ObservableObject
+{
+    public ActionEditor(RiskEditorViewModel owner, MitigationAction? action = null)
+    {
+        Owner = owner;
+        Id = action?.Id ?? Guid.Empty;
+        _description = action?.Description ?? "";
+        _responsible = action?.Responsible ?? "";
+        _dueDate = action?.DueDate?.ToDateTime(TimeOnly.MinValue);
+        _status = Statuses.First(s => s.Value == (action?.Status ?? MitigationStatus.Pending));
+    }
+
+    public RiskEditorViewModel Owner { get; }
+    public Guid Id { get; }
+
+    public static IReadOnlyList<Choice<MitigationStatus>> Statuses { get; } =
+        [.. Enum.GetValues<MitigationStatus>().Select(s => new Choice<MitigationStatus>(s.DisplayName(), s))];
+
+    public int DescriptionMax => Limits.ActionDescriptionMax;
+    public int ResponsibleMax => Limits.ActionResponsibleMax;
+
+    [ObservableProperty]
+    private string _description;
+
+    [ObservableProperty]
+    private string _responsible;
+
+    [ObservableProperty]
+    private DateTime? _dueDate;
+
+    [ObservableProperty]
+    private Choice<MitigationStatus> _status;
+
+    /// <param name="keepId">false en una nueva evaluación: sus acciones son propias (ids nuevos).</param>
+    public MitigationAction ToAction(bool keepId) => new(
+        keepId ? Id : Guid.Empty, Description, Responsible,
+        DueDate is { } d ? DateOnly.FromDateTime(d.Date) : null, Status.Value);
+}
+
 /// <summary>Un botón de color por nivel de la escala del proyecto (RF-10).</summary>
 public sealed partial class LevelOption(LevelChip chip, DimensionEditor owner) : ObservableObject
 {
@@ -252,6 +292,13 @@ public sealed partial class RiskEditorViewModel : ObservableObject
         _company = company?.Name ?? "";
         _unit = (company?.Units.FirstOrDefault(u => u.Id == source?.UnitId) ?? company?.Units.FirstOrDefault())?.Name ?? "";
 
+        // Acciones mitigantes: en la edición, las de la evaluación vigente; en una nueva evaluación se proponen las
+        // vigentes para actualizarlas (quedan como propias de la nueva).
+        foreach (var action in risk?.CurrentActions ?? [])
+        {
+            Actions.Add(new ActionEditor(this, action));
+        }
+
         _currentImpact = risk?.ImpactLevelId ?? Guid.Empty;
         _currentProbability = risk?.ProbabilityLevelId ?? Guid.Empty;
         UpdateRiskLevel();
@@ -284,6 +331,7 @@ public sealed partial class RiskEditorViewModel : ObservableObject
         }
 
         vm.Materiality = doc.MaterialityName(source);
+        vm.LoadActions(source.CurrentActions);
         vm.AssessmentNote = string.Format(CultureInfo.CurrentCulture, Strings.Clone_Note, source.Title);
         return vm;
     }
@@ -307,8 +355,48 @@ public sealed partial class RiskEditorViewModel : ObservableObject
         }
 
         vm.AssessmentNote = source.Note;
+        vm.LoadActions(source.Actions);
         return vm;
     }
+
+    // ---- Acciones mitigantes ----------------------------------------------
+
+    /// <summary>Acciones mitigantes de la evaluación (la vigente en la edición; la nueva en el alta y en una nueva evaluación).</summary>
+    public ObservableCollection<ActionEditor> Actions { get; } = [];
+
+    public bool HasActions => Actions.Count > 0;
+
+    public string ActionsHint => IsEdit ? Strings.Actions_HintEdit : Strings.Actions_HintNew;
+
+    private void LoadActions(IEnumerable<MitigationAction> actions)
+    {
+        Actions.Clear();
+        foreach (var action in actions)
+        {
+            Actions.Add(new ActionEditor(this, action));
+        }
+
+        OnPropertyChanged(nameof(HasActions));
+    }
+
+    [RelayCommand]
+    private void AddAction()
+    {
+        Actions.Add(new ActionEditor(this));
+        OnPropertyChanged(nameof(HasActions));
+    }
+
+    [RelayCommand]
+    private void RemoveAction(ActionEditor action)
+    {
+        Actions.Remove(action);
+        OnPropertyChanged(nameof(HasActions));
+    }
+
+    /// <summary>Las acciones cargadas (sin las filas que quedaron vacías).</summary>
+    private List<MitigationAction> CollectActions() =>
+        [.. Actions.Where(a => !string.IsNullOrWhiteSpace(a.Description) || !string.IsNullOrWhiteSpace(a.Responsible) || a.DueDate is not null)
+            .Select(a => a.ToAction(keepId: IsEdit))];
 
     // ---- Empresa y unidad de negocio --------------------------------------
 
@@ -491,7 +579,7 @@ public sealed partial class RiskEditorViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsNew), nameof(IsEdit), nameof(IsReassess), nameof(CanEditTexts), nameof(ShowAssessment),
         nameof(IsCorrecting), nameof(WindowTitle), nameof(ModeTitle), nameof(ModeHint), nameof(AssessmentTitle),
-        nameof(AssessmentHint), nameof(DateWarning))]
+        nameof(AssessmentHint), nameof(DateWarning), nameof(ActionsHint))]
     private RiskEditorMode _mode;
 
     public bool IsNew => Mode == RiskEditorMode.New;
@@ -738,7 +826,7 @@ public sealed partial class RiskEditorViewModel : ObservableObject
             switch (Mode)
             {
                 case RiskEditorMode.New:
-                    _doc.AddRisk(risk, date, AssessmentNote);
+                    _doc.AddRisk(risk, date, AssessmentNote, CollectActions());
                     break;
                 case RiskEditorMode.Reassess:
                     // Los textos no se editan en una nueva evaluación, salvo que se haya pasado desde la edición con cambios.
@@ -751,10 +839,10 @@ public sealed partial class RiskEditorViewModel : ObservableObject
                     }
 
                     _doc.AddAssessment(risk.Id, risk.ImpactLevelId, risk.ProbabilityLevelId, date, AssessmentNote,
-                        risk.ImpactJustification, risk.ProbabilityJustification, risk.ImpactAmount, risk.ProbabilityPercent);
+                        risk.ImpactJustification, risk.ProbabilityJustification, risk.ImpactAmount, risk.ProbabilityPercent, CollectActions());
                     break;
                 default:
-                    _doc.UpdateRisk(risk);
+                    _doc.UpdateRisk(risk, CollectActions());
                     break;
             }
 

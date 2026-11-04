@@ -834,6 +834,16 @@ public class UiSmokeTests
         Reassess(3, 3, 1, 30, "Se automatizó la instalación de parches");
         Reassess(6, 3, 3, 20, "Se amplió el alcance del sistema");
 
+        // Acciones mitigantes de la evaluación vigente de dos riesgos.
+        doc.UpdateRisk(doc.Risks[0].Clone(),
+        [
+            new MitigationAction(Guid.Empty, "Cuentas nominales para cada administrador", "Infraestructura", today.AddDays(-12), MitigationStatus.Implemented),
+            new MitigationAction(Guid.Empty, "Revisión trimestral de accesos privilegiados", "Seguridad informática", today.AddDays(45), MitigationStatus.InProgress),
+            new MitigationAction(Guid.Empty, "Bóveda de contraseñas", "", null, MitigationStatus.Pending),
+        ]);
+        doc.UpdateRisk(doc.Risks[1].Clone(),
+            [new MitigationAction(Guid.Empty, "Copia diaria en un sitio externo", "Infraestructura", today.AddDays(30), MitigationStatus.Pending)]);
+
         doc.MarkSaved();
         return doc;
     }

@@ -139,3 +139,11 @@ Undo_EditUnit=Renombrar la unidad «{0}»
 Undo_RemoveUnit=Quitar la unidad «{0}»
 
 Undo_TranslateNames=Traducir los nombres estándar de las escalas
+Mitigation_Pending=Pendiente
+Mitigation_InProgress=En curso
+Mitigation_Implemented=Implementada
+Mitigation_Discarded=Descartada
+Error_ActionDescriptionRequired=Cada acción mitigante necesita una descripción.
+Error_ActionDescriptionTooLong=La descripción de una acción mitigante admite hasta {0} caracteres.
+Error_ActionResponsibleTooLong=El responsable de una acción mitigante admite hasta {0} caracteres.
+Error_ActionStatusInvalid=El estado de una acción mitigante no es válido.

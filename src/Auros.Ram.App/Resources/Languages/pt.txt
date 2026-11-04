@@ -531,6 +531,19 @@ Scales_TranslateNamesTip=Passa para o idioma atual os nomes padrão das escalas 
 Scales_TranslateNamesDone=Foram traduzidos {0} nomes de escalas e níveis para o idioma atual. Pode ser desfeito (Edição → Desfazer).
 Scales_TranslateNamesNone=Não há nomes padrão para traduzir: as escalas já estão no idioma atual ou seus nomes foram modificados.
 Language_CurrentTip=O aplicativo está em {0}. Para mudar o idioma: Configurações → Preferências.
+Actions_Title=Ações mitigadoras
+Actions_HintNew=O que é feito para reduzir o risco nesta avaliação (podem ser várias). Em uma nova avaliação, as vigentes são propostas para atualizar seu status.
+Actions_HintEdit=As ações mitigadoras da avaliação vigente.
+Actions_Add=Adicionar ação
+Actions_Description=Ação
+Actions_DescriptionHint=O que é feito para mitigar o risco
+Actions_Responsible=Responsável
+Actions_ResponsibleHint=Pessoa ou área
+Actions_DueDate=Data prevista
+Actions_Status=Status
+Actions_Remove=Remover esta ação
+Actions_GridOpen=Abertas: {1} de {0}
+Actions_GridDone=Todas fechadas ({0})
 
 [Messages]
 # --- Color ---
@@ -687,6 +700,14 @@ Undo_RemoveScale=Excluir escala «{0}»
 Undo_RemoveUnit=Remover a unidade «{0}»
 Undo_ResetHeatMap=Restaurar mapa de calor
 Undo_TranslateNames=Traduzir os nomes padrão das escalas
+Mitigation_Pending=Pendente
+Mitigation_InProgress=Em andamento
+Mitigation_Implemented=Implementada
+Mitigation_Discarded=Descartada
+Error_ActionDescriptionRequired=Cada ação mitigadora precisa de uma descrição.
+Error_ActionDescriptionTooLong=A descrição de uma ação mitigadora admite até {0} caracteres.
+Error_ActionResponsibleTooLong=O responsável de uma ação mitigadora admite até {0} caracteres.
+Error_ActionStatusInvalid=O status de uma ação mitigadora não é válido.
 
 [ExportText]
 # --- Axis ---
@@ -755,6 +776,14 @@ Title_Detail=Ficha detalhada por risco
 Title_Evolution=Evolução dos riscos
 Title_Matrix=Matriz de riscos
 Title_Summary=Ficha resumo de riscos
+Col_Actions=Ações mitigadoras
+Col_Action=Ação mitigadora
+Col_Responsible=Responsável
+Col_DueDate=Data prevista
+Col_Status=Status
+Col_AssessmentDate=Data da avaliação
+Sheet_Actions=Ações mitigadoras
+Label_Actions=Ações mitigadoras
 
 [FileMessages]
 # --- Error ---

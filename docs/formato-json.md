@@ -1,4 +1,4 @@
-# Exportación JSON (RNF-63) — `formatVersion` 7
+# Exportación JSON (RNF-63) — `formatVersion` 8
 
 Contenido completo de una matriz, para integraciones y migraciones. Implementación:
 `src/Auros.Ram.Core/Serialization/JsonExchange.cs`. **El JSON no está cifrado.**
@@ -6,7 +6,7 @@ Contenido completo de una matriz, para integraciones y migraciones. Implementaci
 ```jsonc
 {
   "format": "auros.ram/matrix",      // identificador fijo
-  "formatVersion": 7,                // se rechaza si es mayor que la soportada o anterior a 3
+  "formatVersion": 8,                // se rechaza si es mayor que la soportada o anterior a 3
   "exportedUtc": "2026-10-30T12:00:00Z",
   "project": {
     "name": "Relevamiento 2026",     // obligatorio
@@ -71,7 +71,13 @@ Contenido completo de una matriz, para integraciones y migraciones. Implementaci
           "note": "Se aplicó un control",
           "recordedUtc": "…",        // cuándo se registró (ordena dos evaluaciones del mismo día)
           "impactAmount": 2500.00,   // opcionales, como en el riesgo
-          "probabilityPercent": 45.50
+          "probabilityPercent": 45.50,
+          "actions": [               // acciones mitigantes de esa evaluación (opcional)
+            { "id": "guid", "description": "Revisar las bajas cada mes",   // 1–300
+              "responsible": "RR. HH.",                                   // opcional, hasta 150
+              "dueDate": "2026-12-15",                                    // opcional
+              "status": "inProgress" }                                    // pending | inProgress | implemented | discarded
+          ]
         }
       ]
     }
@@ -89,7 +95,7 @@ Al importar se aplican las mismas validaciones que en la edición (RF-02, RF-03,
 Un error indica el riesgo o campo que falla. La importación crea un archivo `.rmx` nuevo, con una
 contraseña nueva (opcional).
 
-Un JSON anterior a la versión 7 se importa con una empresa (la del proyecto, con su logo) y la unidad «General»,
+Un JSON anterior a la versión 8 se importa sin acciones mitigantes. Un JSON anterior a la versión 7 se importa con una empresa (la del proyecto, con su logo) y la unidad «General»,
 a la que pasan todos los riesgos. Un JSON anterior a la versión 6 se importa con los catálogos sugeridos y sin consecuencias ni criterio en los
 riesgos. Un JSON de la versión 3 (sin `assessments`) se importa con una sola evaluación por riesgo: su estado
 actual, fechado el día en que se creó.

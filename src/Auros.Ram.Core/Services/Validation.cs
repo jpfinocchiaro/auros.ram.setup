@@ -16,6 +16,8 @@ public static class Limits
     public const int RiskShortDescriptionMax = 500;
     public const int ProjectTextMax = 200;
     public const int CatalogNameMax = 80;
+    public const int ActionDescriptionMax = 300;
+    public const int ActionResponsibleMax = 150;
 }
 
 internal static class Validation
@@ -257,6 +259,30 @@ internal static class Validation
         if (risk.Assessments.Any(a => impact?.FindLevel(a.ImpactLevelId) is null || probability?.FindLevel(a.ProbabilityLevelId) is null))
         {
             throw new DomainException(Messages.Error_AssessmentLevelInvalid);
+        }
+    }
+
+    /// <summary>Acción mitigante: descripción obligatoria, largos máximos y un estado conocido.</summary>
+    public static void ValidateAction(MitigationAction action)
+    {
+        if (string.IsNullOrWhiteSpace(action.Description))
+        {
+            throw new DomainException(Messages.Error_ActionDescriptionRequired, nameof(MitigationAction.Description));
+        }
+
+        if (action.Description.Length > Limits.ActionDescriptionMax)
+        {
+            throw new DomainException(Format(Messages.Error_ActionDescriptionTooLong, Limits.ActionDescriptionMax), nameof(MitigationAction.Description));
+        }
+
+        if (action.Responsible.Length > Limits.ActionResponsibleMax)
+        {
+            throw new DomainException(Format(Messages.Error_ActionResponsibleTooLong, Limits.ActionResponsibleMax), nameof(MitigationAction.Responsible));
+        }
+
+        if (!Enum.IsDefined(action.Status))
+        {
+            throw new DomainException(Messages.Error_ActionStatusInvalid, nameof(MitigationAction.Status));
         }
     }
 

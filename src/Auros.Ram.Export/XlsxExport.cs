@@ -17,6 +17,7 @@ public static class XlsxExport
         WriteRisks(wb.AddWorksheet(ExportText.Sheet_Risks), doc);
         WriteMatrix(wb.AddWorksheet(ExportText.Sheet_Matrix), doc);
         WriteHistory(wb.AddWorksheet(ExportText.Sheet_History), doc);
+        WriteActions(wb.AddWorksheet(ExportText.Sheet_Actions), doc);
         WriteScales(wb.AddWorksheet(ExportText.Sheet_Scales), doc);
         wb.Worksheet(2).SetTabActive();
         wb.SaveAs(path);
@@ -55,6 +56,7 @@ public static class XlsxExport
             ExportText.Col_Probability, ExportText.Col_Long, ExportText.Col_ImpactJustification,
             ExportText.Col_ProbabilityJustification, ExportText.Col_ImpactAmount, ExportText.Col_ProbabilityPercent,
             ExportText.Col_Consequences, ExportText.Col_Materiality, ExportText.Col_Company, ExportText.Col_Unit,
+            ExportText.Col_Actions,
         ];
         for (var c = 0; c < headers.Length; c++)
         {
@@ -79,6 +81,7 @@ public static class XlsxExport
             ws.Cell(row, 13).Value = doc.MaterialityName(x.Risk);
             ws.Cell(row, 14).Value = doc.CompanyName(x.Risk);
             ws.Cell(row, 15).Value = doc.UnitName(x.Risk);
+            ws.Cell(row, 16).Value = CsvExport.ActionsText(x.Risk.CurrentActions, "\n");
             row++;
         }
 
@@ -90,6 +93,7 @@ public static class XlsxExport
         ws.Columns(10, 11).Width = 18;
         ws.Columns(12, 13).Width = 40;
         ws.Columns(14, 15).Width = 28;
+        ws.Column(16).Width = 60;
         ws.Range(1, 1, Math.Max(row - 1, 1), headers.Length).Style.Alignment.WrapText = true;
         ws.Range(1, 1, Math.Max(row - 1, 1), headers.Length).Style.Alignment.Vertical = XLAlignmentVerticalValues.Top;
         ws.SheetView.FreezeRows(1);
@@ -230,6 +234,59 @@ public static class XlsxExport
         ws.Columns(3, 5).Width = 18;
         ws.Column(6).Width = 60;
         ws.Columns(7, 8).Width = 18;
+        ws.SheetView.FreezeRows(1);
+        if (row > 2)
+        {
+            ws.Range(1, 1, row - 1, headers.Length).SetAutoFilter();
+        }
+    }
+
+    /// <summary>Acciones mitigantes de todas las evaluaciones: una fila por acción, con el riesgo y la fecha de la evaluación.</summary>
+    private static void WriteActions(IXLWorksheet ws, RiskMatrixDocument doc)
+    {
+        string[] headers =
+        [
+            ExportText.Col_Number, ExportText.Col_Title, ExportText.Col_AssessmentDate, ExportText.Col_Action,
+            ExportText.Col_Responsible, ExportText.Col_DueDate, ExportText.Col_Status,
+        ];
+        for (var c = 0; c < headers.Length; c++)
+        {
+            Header(ws.Cell(1, c + 1), headers[c]);
+        }
+
+        var row = 2;
+        foreach (var x in Reports.Summary(doc))
+        {
+            foreach (var assessment in x.Risk.Assessments.Reverse())
+            {
+                foreach (var action in assessment.Actions)
+                {
+                    ws.Cell(row, 1).Value = x.Number;
+                    ws.Cell(row, 2).Value = x.Risk.Title;
+                    ws.Cell(row, 3).Value = assessment.Date.ToDateTime(TimeOnly.MinValue);
+                    ws.Cell(row, 3).Style.DateFormat.Format = "dd/mm/yyyy";
+                    ws.Cell(row, 4).Value = action.Description;
+                    ws.Cell(row, 5).Value = action.Responsible;
+                    if (action.DueDate is { } due)
+                    {
+                        ws.Cell(row, 6).Value = due.ToDateTime(TimeOnly.MinValue);
+                        ws.Cell(row, 6).Style.DateFormat.Format = "dd/mm/yyyy";
+                    }
+
+                    ws.Cell(row, 7).Value = action.Status.DisplayName();
+                    row++;
+                }
+            }
+        }
+
+        ws.Column(1).Width = 6;
+        ws.Column(2).Width = 40;
+        ws.Column(3).Width = 14;
+        ws.Column(4).Width = 60;
+        ws.Column(5).Width = 28;
+        ws.Column(6).Width = 16;
+        ws.Column(7).Width = 16;
+        ws.Range(1, 1, Math.Max(row - 1, 1), headers.Length).Style.Alignment.WrapText = true;
         ws.SheetView.FreezeRows(1);
         if (row > 2)
         {

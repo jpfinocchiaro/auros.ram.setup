@@ -1,5 +1,6 @@
 using System.Text;
 using Auros.Ram.Core;
+using Auros.Ram.Core.Model;
 using Auros.Ram.Core.Services;
 using Auros.Ram.Core.Text;
 using Auros.Ram.Export.Resources;
@@ -21,7 +22,7 @@ public static class CsvExport
             ExportText.Col_Risk, ExportText.Col_Impact, ExportText.Col_Probability,
             ExportText.Col_ImpactJustification, ExportText.Col_ProbabilityJustification,
             ExportText.Col_ImpactAmount, ExportText.Col_ProbabilityPercent, ExportText.Col_Consequences, ExportText.Col_Materiality,
-            ExportText.Col_Company, ExportText.Col_Unit);
+            ExportText.Col_Company, ExportText.Col_Unit, ExportText.Col_Actions);
         foreach (var row in Reports.Summary(doc))
         {
             var r = row.Risk;
@@ -30,11 +31,18 @@ public static class CsvExport
                 r.ImpactJustification, r.ProbabilityJustification,
                 Fmt.Amount(r.ImpactAmount), Fmt.Amount(r.ProbabilityPercent),
                 string.Join(" | ", doc.ConsequenceNames(r)), doc.MaterialityName(r),
-                doc.CompanyName(r), doc.UnitName(r));
+                doc.CompanyName(r), doc.UnitName(r), ActionsText(r.CurrentActions, " | "));
         }
 
         File.WriteAllText(path, sb.ToString(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
     }
+
+    /// <summary>Acciones mitigantes en una celda: "acción [estado, responsable, fecha]" separadas.</summary>
+    internal static string ActionsText(IReadOnlyList<MitigationAction> actions, string separator) =>
+        string.Join(separator, actions.Select(a => $"{a.Description} [" + string.Join(", ", new[]
+        {
+            a.Status.DisplayName(), a.Responsible, a.DueDate?.ToString("d", Fmt.Culture) ?? "",
+        }.Where(s => s.Length > 0)) + "]"));
 
     /// <summary>Matriz de riesgo: una fila por nivel de impacto, una columna por nivel de probabilidad.</summary>
     public static void WriteMatrix(RiskMatrixDocument doc, string path)

@@ -201,6 +201,27 @@ public sealed record RiskAssessment(Guid Id, DateOnly Date, Guid ImpactLevelId, 
 
     /// <summary>Probabilidad de ocurrencia en esa evaluación, de 0 a 100 % (opcional, 2 decimales).</summary>
     public decimal? ProbabilityPercent { get; init; }
+
+    /// <summary>Acciones mitigantes registradas en esa evaluación (pueden ser varias).</summary>
+    public IReadOnlyList<MitigationAction> Actions { get; init; } = [];
+}
+
+/// <summary>Estado de una acción mitigante.</summary>
+public enum MitigationStatus
+{
+    Pending = 0,
+    InProgress = 1,
+    Implemented = 2,
+    Discarded = 3,
+}
+
+/// <summary>Una acción mitigante de una evaluación: qué se hace, quién, para cuándo y en qué estado está.</summary>
+/// <param name="Responsible">Persona o área a cargo (opcional).</param>
+/// <param name="DueDate">Fecha comprometida (opcional).</param>
+public sealed record MitigationAction(Guid Id, string Description, string Responsible, DateOnly? DueDate, MitigationStatus Status)
+{
+    /// <summary>Todavía hay que hacerla (pendiente o en curso).</summary>
+    public bool IsOpen => Status is MitigationStatus.Pending or MitigationStatus.InProgress;
 }
 
 /// <summary>Qué se pide al cargar el impacto o la probabilidad de un riesgo (Preferencias).</summary>
@@ -289,6 +310,9 @@ public sealed class Risk
     /// <see cref="ProbabilityLevelId"/> son siempre los de la última. Como el mapa de calor, se reemplaza, nunca se modifica.
     /// </summary>
     public IReadOnlyList<RiskAssessment> Assessments { get; set; } = [];
+
+    /// <summary>Acciones mitigantes de la evaluación vigente.</summary>
+    public IReadOnlyList<MitigationAction> CurrentActions => Assessments.Count > 0 ? Assessments[^1].Actions : [];
 
     /// <summary>La evaluación vigente en una fecha (la última hasta ese día), o null si el riesgo todavía no estaba evaluado.</summary>
     public RiskAssessment? AssessmentAt(DateOnly date) => Assessments.LastOrDefault(a => a.Date <= date);

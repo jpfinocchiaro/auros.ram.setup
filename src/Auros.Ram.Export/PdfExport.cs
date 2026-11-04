@@ -285,7 +285,50 @@ public static class PdfExport
             {
                 Block(section, ExportText.Col_Materiality, materiality);
             }
+            ActionsTable(section, x.Risk);
             HistoryTable(section, doc, x.Risk);
+        }
+    }
+
+    /// <summary>Acciones mitigantes de la evaluación vigente (si tiene).</summary>
+    private static void ActionsTable(Section section, Risk risk)
+    {
+        if (risk.CurrentActions.Count == 0)
+        {
+            return;
+        }
+
+        var heading = section.AddParagraph(ExportText.Label_Actions);
+        heading.Format.Font.Bold = true;
+        heading.Format.SpaceBefore = Unit.FromPoint(10);
+        heading.Format.SpaceAfter = Unit.FromPoint(3);
+
+        var table = section.AddTable();
+        table.Borders.Color = Border;
+        table.Borders.Width = 0.5;
+        double[] widths = [8.0, 3.6, 2.6, 3.8];
+        foreach (var w in widths)
+        {
+            table.AddColumn(Unit.FromCentimeter(w));
+        }
+
+        var head = table.AddRow();
+        head.HeadingFormat = true;
+        head.Shading.Color = HeaderFill;
+        head.Format.Font.Bold = true;
+        string[] titles = [ExportText.Col_Action, ExportText.Col_Responsible, ExportText.Col_DueDate, ExportText.Col_Status];
+        for (var i = 0; i < titles.Length; i++)
+        {
+            head.Cells[i].AddParagraph(titles[i]);
+        }
+
+        foreach (var action in risk.CurrentActions)
+        {
+            var row = table.AddRow();
+            row.Cells[0].AddParagraph(action.Description);
+            row.Cells[1].AddParagraph(action.Responsible);
+            row.Cells[2].AddParagraph(action.DueDate?.ToString("d", Fmt.Culture) ?? "");
+            row.Cells[3].AddParagraph(action.Status.DisplayName());
         }
     }
 

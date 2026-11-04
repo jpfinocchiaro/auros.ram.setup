@@ -61,4 +61,12 @@
   <data name="Col_Company" xml:space="preserve"><value>Empresa</value></data>
   <data name="Col_Unit" xml:space="preserve"><value>Unidad de negocio</value></data>
   <data name="Col_Organization" xml:space="preserve"><value>Empresa y unidad de negocio</value></data>
+  <data name="Col_Actions" xml:space="preserve"><value>Acciones mitigantes</value></data>
+  <data name="Col_Action" xml:space="preserve"><value>Acción mitigante</value></data>
+  <data name="Col_Responsible" xml:space="preserve"><value>Responsable</value></data>
+  <data name="Col_DueDate" xml:space="preserve"><value>Fecha comprometida</value></data>
+  <data name="Col_Status" xml:space="preserve"><value>Estado</value></data>
+  <data name="Col_AssessmentDate" xml:space="preserve"><value>Fecha de la evaluación</value></data>
+  <data name="Sheet_Actions" xml:space="preserve"><value>Acciones mitigantes</value></data>
+  <data name="Label_Actions" xml:space="preserve"><value>Acciones mitigantes</value></data>
 </root>

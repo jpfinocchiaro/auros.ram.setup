@@ -33,7 +33,7 @@ public class ExportTests
         var path = dir.File("matriz.xlsx");
         XlsxExport.Write(Sample.Document(10), path);
         using var wb = new ClosedXML.Excel.XLWorkbook(path);
-        Assert.Equal(5, wb.Worksheets.Count);   // proyecto, riesgos, matriz, historial y escalas
+        Assert.Equal(6, wb.Worksheets.Count);   // proyecto, riesgos, matriz, historial, acciones mitigantes y escalas
         Assert.Equal(11, wb.Worksheet(2).LastRowUsed()!.RowNumber());
     }
 

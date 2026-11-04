@@ -155,6 +155,20 @@ internal static class Schema
                             unit_id = (SELECT id FROM business_unit ORDER BY position LIMIT 1)
                 WHERE company_id IS NULL;
             """),
+
+        // v8: acciones mitigantes de cada evaluación (descripción, responsable, fecha comprometida y estado
+        // 0 pendiente / 1 en curso / 2 implementada / 3 descartada).
+        (8, """
+            CREATE TABLE IF NOT EXISTS mitigation_action (
+                id             TEXT PRIMARY KEY,
+                assessment_id  TEXT NOT NULL REFERENCES risk_assessment(id) ON DELETE CASCADE,
+                position       INTEGER NOT NULL,
+                description    TEXT NOT NULL,
+                responsible    TEXT NOT NULL DEFAULT '',
+                due_date       TEXT,
+                status         INTEGER NOT NULL DEFAULT 0
+            );
+            """),
     ];
 
     /// <summary>Archivos con un esquema anterior a este no se abren (versiones de prueba sin migración).</summary>

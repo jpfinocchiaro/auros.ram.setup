@@ -212,6 +212,40 @@
           </StackPanel>
         </Border>
 
+        <!-- Acciones mitigantes de la evaluación: varias, cada una con responsable, fecha comprometida y estado. -->
+        <Border Classes="card" Padding="12">
+          <StackPanel Spacing="8">
+            <DockPanel>
+              <Button DockPanel.Dock="Right" ui:ButtonIcon.Icon="{StaticResource IconAdd}" Content="{x:Static r:Strings.Actions_Add}"
+                      Command="{Binding AddActionCommand}" VerticalAlignment="Top" />
+              <StackPanel Spacing="2">
+                <TextBlock Text="{x:Static r:Strings.Actions_Title}" FontWeight="SemiBold" />
+                <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{Binding ActionsHint}" />
+              </StackPanel>
+            </DockPanel>
+            <Grid ColumnDefinitions="*,8,170,8,150,8,140,8,32" IsVisible="{Binding HasActions}">
+              <TextBlock Classes="label" Text="{x:Static r:Strings.Actions_Description}" />
+              <TextBlock Grid.Column="2" Classes="label" Text="{x:Static r:Strings.Actions_Responsible}" />
+              <TextBlock Grid.Column="4" Classes="label" Text="{x:Static r:Strings.Actions_DueDate}" />
+              <TextBlock Grid.Column="6" Classes="label" Text="{x:Static r:Strings.Actions_Status}" />
+            </Grid>
+            <ItemsControl ItemsSource="{Binding Actions}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:ActionEditor">
+                  <Grid ColumnDefinitions="*,8,170,8,150,8,140,8,32" Margin="0,0,0,6">
+                    <TextBox Text="{Binding Description}" MaxLength="{Binding DescriptionMax}" Watermark="{x:Static r:Strings.Actions_DescriptionHint}" />
+                    <TextBox Grid.Column="2" Text="{Binding Responsible}" MaxLength="{Binding ResponsibleMax}" Watermark="{x:Static r:Strings.Actions_ResponsibleHint}" />
+                    <CalendarDatePicker Grid.Column="4" SelectedDate="{Binding DueDate}" HorizontalAlignment="Stretch" />
+                    <ComboBox Grid.Column="6" HorizontalAlignment="Stretch" ItemsSource="{x:Static vm:ActionEditor.Statuses}" SelectedItem="{Binding Status}" />
+                    <Button Grid.Column="8" Content="✕" Padding="0" Width="32" Height="32" ToolTip.Tip="{x:Static r:Strings.Actions_Remove}"
+                            Command="{Binding Owner.RemoveActionCommand}" CommandParameter="{Binding}" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+
         <!-- Historial: evolución del nivel de riesgo en el tiempo y cada evaluación registrada. -->
         <Border Classes="card" Padding="12" IsVisible="{Binding HasHistory}">
           <StackPanel Spacing="8">

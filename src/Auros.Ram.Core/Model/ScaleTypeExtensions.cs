@@ -17,6 +17,14 @@ public static class ScaleTypeExtensions
         _ => type.ToString(),
     };
 
+    public static string DisplayName(this MitigationStatus status) => status switch
+    {
+        MitigationStatus.InProgress => Messages.Mitigation_InProgress,
+        MitigationStatus.Implemented => Messages.Mitigation_Implemented,
+        MitigationStatus.Discarded => Messages.Mitigation_Discarded,
+        _ => Messages.Mitigation_Pending,
+    };
+
     public static string DisplayName(this ProjectStatus status) => status switch
     {
         ProjectStatus.Finished => Messages.Status_Finished,

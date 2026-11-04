@@ -13,14 +13,14 @@ namespace Auros.Ram.Core.Serialization;
 /// evaluaciones de cada riesgo (un JSON de la versión 3 se importa con una sola evaluación por riesgo).
 /// Versión 5: rangos de los niveles (monto o porcentaje) y monto del impacto y probabilidad en porcentaje.
 /// Versión 6: catálogos de consecuencias y de criterios de materialidad, y su uso en cada riesgo (un JSON anterior
-/// se importa con los catálogos sugeridos). Versión 7: varias empresas con sus unidades de negocio, y la empresa y
+/// se importa con los catálogos sugeridos). Versión 8: acciones mitigantes de cada evaluación. Versión 7: varias empresas con sus unidades de negocio, y la empresa y
 /// unidad de cada riesgo (un JSON anterior se importa con la empresa del proyecto y la unidad "General").
 /// Las versiones 1 y 2 (valor agregado y dificultad) fueron de prueba y ya no se importan.
 /// </summary>
 public static class JsonExchange
 {
     public const string FormatId = "auros.ram/matrix";
-    public const int FormatVersion = 7;
+    public const int FormatVersion = 8;
     public const int OldestSupportedVersion = 3;
 
     private static readonly JsonSerializerOptions Options = new()
@@ -103,6 +103,14 @@ public static class JsonExchange
                     RecordedUtc = a.RecordedUtc,
                     ImpactAmount = a.ImpactAmount,
                     ProbabilityPercent = a.ProbabilityPercent,
+                    Actions = [.. a.Actions.Select(m => new ActionDto
+                    {
+                        Id = m.Id,
+                        Description = m.Description,
+                        Responsible = m.Responsible,
+                        DueDate = m.DueDate,
+                        Status = m.Status,
+                    })],
                 })],
             })],
         };
@@ -241,7 +249,17 @@ public static class JsonExchange
             ? [.. list.Select(a => new RiskAssessment(
                 a.Id == Guid.Empty ? Guid.NewGuid() : a.Id, a.Date, a.ImpactLevelId, a.ProbabilityLevelId,
                 a.Note ?? "", a.RecordedUtc ?? risk.ModifiedUtc)
-                { ImpactAmount = a.ImpactAmount, ProbabilityPercent = a.ProbabilityPercent })]
+                {
+                    ImpactAmount = a.ImpactAmount,
+                    ProbabilityPercent = a.ProbabilityPercent,
+                    Actions = [.. (a.Actions ?? []).Select(m =>
+                    {
+                        var action = new MitigationAction(m.Id == Guid.Empty ? Guid.NewGuid() : m.Id, (m.Description ?? "").Trim(),
+                            (m.Responsible ?? "").Trim(), m.DueDate, m.Status);
+                        Validation.ValidateAction(action);
+                        return action;
+                    })],
+                })]
             : [new RiskAssessment(Guid.NewGuid(), DateOnly.FromDateTime(risk.CreatedUtc.ToLocalTime()),
                 risk.ImpactLevelId, risk.ProbabilityLevelId, "", risk.CreatedUtc)
                 { ImpactAmount = risk.ImpactAmount, ProbabilityPercent = risk.ProbabilityPercent }];
@@ -358,5 +376,15 @@ public static class JsonExchange
         public DateTime? RecordedUtc { get; set; }
         public decimal? ImpactAmount { get; set; }
         public decimal? ProbabilityPercent { get; set; }
+        public List<ActionDto>? Actions { get; set; }
+    }
+
+    private sealed class ActionDto
+    {
+        public Guid Id { get; set; }
+        public string? Description { get; set; }
+        public string? Responsible { get; set; }
+        public DateOnly? DueDate { get; set; }
+        public MitigationStatus Status { get; set; }
     }
 }

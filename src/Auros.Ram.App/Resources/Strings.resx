@@ -485,4 +485,17 @@ Faltan {0} textos: se muestran en español.</value></data>
   <data name="Scales_TranslateNamesDone" xml:space="preserve"><value>Se tradujeron {0} nombres de escalas y niveles al idioma actual. Se puede deshacer (Edición → Deshacer).</value></data>
   <data name="Scales_TranslateNamesNone" xml:space="preserve"><value>No hay nombres estándar para traducir: las escalas ya están en el idioma actual o sus nombres fueron modificados.</value></data>
   <data name="Language_CurrentTip" xml:space="preserve"><value>La aplicación está en {0}. Para cambiar el idioma: Configuración → Preferencias.</value></data>
+  <data name="Actions_Title" xml:space="preserve"><value>Acciones mitigantes</value></data>
+  <data name="Actions_HintNew" xml:space="preserve"><value>Lo que se hace para reducir el riesgo en esta evaluación (pueden ser varias). En una nueva evaluación se proponen las vigentes para actualizar su estado.</value></data>
+  <data name="Actions_HintEdit" xml:space="preserve"><value>Las acciones mitigantes de la evaluación vigente.</value></data>
+  <data name="Actions_Add" xml:space="preserve"><value>Agregar acción</value></data>
+  <data name="Actions_Description" xml:space="preserve"><value>Acción</value></data>
+  <data name="Actions_DescriptionHint" xml:space="preserve"><value>Qué se hace para mitigar el riesgo</value></data>
+  <data name="Actions_Responsible" xml:space="preserve"><value>Responsable</value></data>
+  <data name="Actions_ResponsibleHint" xml:space="preserve"><value>Persona o área</value></data>
+  <data name="Actions_DueDate" xml:space="preserve"><value>Fecha comprometida</value></data>
+  <data name="Actions_Status" xml:space="preserve"><value>Estado</value></data>
+  <data name="Actions_Remove" xml:space="preserve"><value>Quitar esta acción</value></data>
+  <data name="Actions_GridOpen" xml:space="preserve"><value>Abiertas: {1} de {0}</value></data>
+  <data name="Actions_GridDone" xml:space="preserve"><value>Todas cerradas ({0})</value></data>
 </root>

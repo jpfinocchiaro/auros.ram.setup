@@ -531,6 +531,19 @@ Scales_TranslateNamesTip=Changes the standard names of the scales and their leve
 Scales_TranslateNamesDone={0} scale and level names were translated to the current language. This can be undone (Edit → Undo).
 Scales_TranslateNamesNone=There are no standard names to translate: the scales are already in the current language or their names were modified.
 Language_CurrentTip=The application is in {0}. To change the language: Settings → Preferences.
+Actions_Title=Mitigating actions
+Actions_HintNew=What is done to reduce the risk in this assessment (there can be several). In a new assessment the current ones are proposed so their status can be updated.
+Actions_HintEdit=The mitigating actions of the current assessment.
+Actions_Add=Add action
+Actions_Description=Action
+Actions_DescriptionHint=What is done to mitigate the risk
+Actions_Responsible=Owner
+Actions_ResponsibleHint=Person or area
+Actions_DueDate=Due date
+Actions_Status=Status
+Actions_Remove=Remove this action
+Actions_GridOpen=Open: {1} of {0}
+Actions_GridDone=All closed ({0})
 
 [Messages]
 # --- Color ---
@@ -687,6 +700,14 @@ Undo_RemoveScale=Delete scale «{0}»
 Undo_RemoveUnit=Remove unit «{0}»
 Undo_ResetHeatMap=Reset heat map
 Undo_TranslateNames=Translate the standard scale names
+Mitigation_Pending=Pending
+Mitigation_InProgress=In progress
+Mitigation_Implemented=Implemented
+Mitigation_Discarded=Discarded
+Error_ActionDescriptionRequired=Each mitigating action needs a description.
+Error_ActionDescriptionTooLong=The description of a mitigating action allows up to {0} characters.
+Error_ActionResponsibleTooLong=The owner of a mitigating action allows up to {0} characters.
+Error_ActionStatusInvalid=The status of a mitigating action is not valid.
 
 [ExportText]
 # --- Axis ---
@@ -755,6 +776,14 @@ Title_Detail=Detailed sheet per risk
 Title_Evolution=Risk evolution
 Title_Matrix=Risk matrix
 Title_Summary=Risk summary sheet
+Col_Actions=Mitigating actions
+Col_Action=Mitigating action
+Col_Responsible=Owner
+Col_DueDate=Due date
+Col_Status=Status
+Col_AssessmentDate=Assessment date
+Sheet_Actions=Mitigating actions
+Label_Actions=Mitigating actions
 
 [FileMessages]
 # --- Error ---

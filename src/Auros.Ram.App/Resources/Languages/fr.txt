@@ -531,6 +531,19 @@ Welcome_Recent=Fichiers récents
 Welcome_SecurityNote=Chaque matrice est enregistrée dans son propre fichier. Si vous lui attribuez un mot de passe, le fichier est chiffré (AES-256) ; le mot de passe n'est jamais enregistré et ne peut pas être récupéré : notez-le en lieu sûr.
 Welcome_Subtitle=Classez chaque risque selon son impact et sa probabilité d'occurrence, et visualisez sur une carte de chaleur ceux à traiter en priorité.
 Language_CurrentTip=L'application est en {0}. Pour changer de langue : Paramètres → Préférences.
+Actions_Title=Actions d'atténuation
+Actions_HintNew=Ce qui est fait pour réduire le risque dans cette évaluation (il peut y en avoir plusieurs). Dans une nouvelle évaluation, les actions en vigueur sont proposées pour mettre à jour leur état.
+Actions_HintEdit=Les actions d'atténuation de l'évaluation en vigueur.
+Actions_Add=Ajouter une action
+Actions_Description=Action
+Actions_DescriptionHint=Ce qui est fait pour atténuer le risque
+Actions_Responsible=Responsable
+Actions_ResponsibleHint=Personne ou service
+Actions_DueDate=Échéance
+Actions_Status=État
+Actions_Remove=Supprimer cette action
+Actions_GridOpen=Ouvertes : {1} sur {0}
+Actions_GridDone=Toutes closes ({0})
 
 [Messages]
 # --- Color ---
@@ -687,6 +700,14 @@ Undo_RemoveScale=Supprimer l'échelle «{0}»
 Undo_RemoveUnit=Retirer l'unité «{0}»
 Undo_ResetHeatMap=Réinitialiser la carte de chaleur
 Undo_TranslateNames=Traduire les noms standard des échelles
+Mitigation_Pending=En attente
+Mitigation_InProgress=En cours
+Mitigation_Implemented=Mise en œuvre
+Mitigation_Discarded=Abandonnée
+Error_ActionDescriptionRequired=Chaque action d'atténuation doit avoir une description.
+Error_ActionDescriptionTooLong=La description d'une action d'atténuation accepte jusqu'à {0} caractères.
+Error_ActionResponsibleTooLong=Le responsable d'une action d'atténuation accepte jusqu'à {0} caractères.
+Error_ActionStatusInvalid=L'état d'une action d'atténuation n'est pas valide.
 
 [ExportText]
 # --- Axis ---
@@ -755,6 +776,14 @@ Title_Detail=Fiche détaillée par risque
 Title_Evolution=Évolution des risques
 Title_Matrix=Matrice des risques
 Title_Summary=Fiche de synthèse des risques
+Col_Actions=Actions d'atténuation
+Col_Action=Action d'atténuation
+Col_Responsible=Responsable
+Col_DueDate=Échéance
+Col_Status=État
+Col_AssessmentDate=Date de l'évaluation
+Sheet_Actions=Actions d'atténuation
+Label_Actions=Actions d'atténuation
 
 [FileMessages]
 # --- Error ---

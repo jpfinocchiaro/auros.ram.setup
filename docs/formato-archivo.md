@@ -1,4 +1,4 @@
-# Formato de archivo `.rmx` / `.rmt` (contenedor v1, esquema v7)
+# Formato de archivo `.rmx` / `.rmt` (contenedor v1, esquema v8)
 
 Cada matriz (`.rmx`) y cada plantilla de parámetros (`.rmt`: el mismo esquema, sin riesgos; las escalas asignadas, el mapa de calor, las empresas y unidades y los catálogos van en `project` y sus tablas; en las plantillas anteriores, solo de escalas, `project` no tiene escalas asignadas) es un único archivo autocontenido,
 independiente del sistema operativo (RNF-11, RNF-53). Implementación: `src/Auros.Ram.Persistence`.
@@ -67,7 +67,7 @@ La base se arma en un archivo de trabajo cifrado, se le antepone la cabecera y s
 temporal junto al original (`.nombre.rmx.<guid>.tmp`, con *write-through*). Luego un renombrado
 reemplaza el original. En ningún momento el original queda a medio escribir.
 
-## Esquema v7
+## Esquema v8
 
 | Tabla | Contenido |
 |---|---|
@@ -82,6 +82,7 @@ reemplaza el original. En ningún momento el original queda a medio escribir.
 | `catalog_item` | catálogos de la matriz (id, tipo 1 consecuencia / 2 criterio de materialidad, posición, nombre) |
 | `risk_consequence` | consecuencias potenciales de cada riesgo (riesgo, opción del catálogo, posición); el criterio de materialidad está en `risk.materiality_id` |
 | `risk_assessment` | historial de evaluaciones de cada riesgo (id, riesgo, fecha `yyyy-MM-dd`, nivel de impacto y de probabilidad, comentario, momento del registro UTC); la última es el estado actual |
+| `mitigation_action` | acciones mitigantes de cada evaluación (id, evaluación, posición, descripción, responsable, fecha comprometida `yyyy-MM-dd` opcional, estado 0 pendiente / 1 en curso / 2 implementada / 3 descartada) |
 
 El nivel de riesgo de cada riesgo no se guarda: se calcula con el mapa de calor.
 `PRAGMA user_version` guarda la versión del esquema.
@@ -95,6 +96,7 @@ El nivel de riesgo de cada riesgo no se guarda: se calcula con el mapa de calor.
 | 4 | Historial de evaluaciones (`risk_assessment`). Al migrar, cada riesgo empieza su historial con su estado actual fechado el día en que se creó |
 | 6 | Catálogos de consecuencias potenciales y criterios de materialidad (`catalog_item`), consecuencias de cada riesgo (`risk_consequence`) y su criterio (`risk.materiality_id`). Al migrar, la matriz recibe la lista sugerida |
 | 7 | Varias empresas (`company`, con su logo) y sus unidades de negocio (`business_unit`); empresa y unidad de cada riesgo (`risk.company_id`, `risk.unit_id`). Al migrar, la matriz recibe una empresa con el nombre y el logo del proyecto y la unidad «General», y todos los riesgos pasan a ella |
+| 8 | Acciones mitigantes de cada evaluación (`mitigation_action`). Los archivos anteriores quedan sin acciones |
 | 5 | Rangos de los niveles (`range_from`, `range_to`) y monto del impacto y probabilidad en % en riesgos y evaluaciones (`impact_amount`, `probability_percent`). Decimales como texto invariante con 2 decimales |
 
 ## Cómo agregar una versión del esquema (RNF-69)

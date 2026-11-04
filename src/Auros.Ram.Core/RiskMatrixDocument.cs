@@ -429,8 +429,10 @@ public sealed partial class RiskMatrixDocument
 
     /// <param name="assessedOn">Fecha de la primera evaluación (hoy si se omite).</param>
     /// <param name="note">Comentario de la evaluación.</param>
-    public Risk AddRisk(Risk risk, DateOnly? assessedOn = null, string? note = null)
+    /// <param name="actions">Acciones mitigantes de la primera evaluación.</param>
+    public Risk AddRisk(Risk risk, DateOnly? assessedOn = null, string? note = null, IEnumerable<MitigationAction>? actions = null)
     {
+        var mitigation = NormalizeActions(actions);
         ArgumentNullException.ThrowIfNull(risk);
         var copy = Normalize(risk.Clone());
         if (_risks.Exists(r => r.Id == copy.Id))
@@ -447,7 +449,7 @@ public sealed partial class RiskMatrixDocument
         {
             var date = assessedOn ?? Today;
             CheckAssessmentDate(date, creating: true, []);
-            copy.Assessments = [NewAssessment(date, copy, note)];
+            copy.Assessments = [NewAssessment(date, copy, note) with { Actions = mitigation }];
         }
         else
         {
@@ -465,9 +467,11 @@ public sealed partial class RiskMatrixDocument
     /// se corrige la evaluación vigente, sin agregar otra al historial. Un cambio en el tiempo se registra con
     /// <see cref="AddAssessment"/>.
     /// </summary>
-    public void UpdateRisk(Risk updated)
+    /// <param name="currentActions">Acciones mitigantes corregidas de la evaluación vigente (null = sin cambios).</param>
+    public void UpdateRisk(Risk updated, IEnumerable<MitigationAction>? currentActions = null)
     {
         ArgumentNullException.ThrowIfNull(updated);
+        var mitigation = currentActions is null ? null : NormalizeActions(currentActions);
         var index = _risks.FindIndex(r => r.Id == updated.Id);
         if (index < 0)
         {
@@ -497,6 +501,11 @@ public sealed partial class RiskMatrixDocument
                     }];
         }
 
+        if (mitigation is not null && next.Assessments.Count > 0)
+        {
+            next.Assessments = [.. next.Assessments.Take(next.Assessments.Count - 1), next.Assessments[^1] with { Actions = mitigation }];
+        }
+
         Apply(Validation.Format(Messages.Undo_EditRisk, next.Title), DocumentChangeKind.Risks,
             () => _risks[index] = next,
             () => _risks[index] = previous);
@@ -511,8 +520,9 @@ public sealed partial class RiskMatrixDocument
     public void AddAssessment(
         Guid riskId, Guid impactLevelId, Guid probabilityLevelId, DateOnly? date = null, string? note = null,
         string? impactJustification = null, string? probabilityJustification = null,
-        decimal? impactAmount = null, decimal? probabilityPercent = null)
+        decimal? impactAmount = null, decimal? probabilityPercent = null, IEnumerable<MitigationAction>? actions = null)
     {
+        var mitigation = NormalizeActions(actions);
         var index = _risks.FindIndex(r => r.Id == riskId);
         if (index < 0)
         {
@@ -533,7 +543,7 @@ public sealed partial class RiskMatrixDocument
         var history = previous.Assessments;
         var sameDay = history.FirstOrDefault(a => a.Date == day);
         CheckAssessmentDate(day, creating: false, [.. history.Where(a => a != sameDay)]);
-        var entry = NewAssessment(day, next, note);
+        var entry = NewAssessment(day, next, note) with { Actions = mitigation };
         next.Assessments = sameDay is null
             ? [.. history, entry]
             : [.. history.Select(a => a == sameDay ? entry with { Id = sameDay.Id } : a)];
@@ -735,6 +745,25 @@ public sealed partial class RiskMatrixDocument
             ImpactAmount = risk.ImpactAmount,
             ProbabilityPercent = risk.ProbabilityPercent,
         };
+
+    /// <summary>Acciones mitigantes: textos sin espacios de más, un id para las nuevas, y validadas.</summary>
+    private static IReadOnlyList<MitigationAction> NormalizeActions(IEnumerable<MitigationAction>? actions)
+    {
+        var list = (actions ?? [])
+            .Select(a => a with
+            {
+                Id = a.Id == Guid.Empty ? Guid.NewGuid() : a.Id,
+                Description = (a.Description ?? "").Trim(),
+                Responsible = (a.Responsible ?? "").Trim(),
+            })
+            .ToList();
+        foreach (var action in list)
+        {
+            Validation.ValidateAction(action);
+        }
+
+        return list;
+    }
 
     /// <summary>Montos y porcentajes con 2 decimales.</summary>
     private static decimal? Round(decimal? value) => value is { } v ? Math.Round(v, 2, MidpointRounding.AwayFromZero) : null;

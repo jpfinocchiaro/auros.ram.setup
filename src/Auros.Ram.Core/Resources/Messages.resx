@@ -143,4 +143,12 @@
   <data name="Undo_EditUnit" xml:space="preserve"><value>Renombrar la unidad «{0}»</value></data>
   <data name="Undo_RemoveUnit" xml:space="preserve"><value>Quitar la unidad «{0}»</value></data>
   <data name="Undo_TranslateNames" xml:space="preserve"><value>Traducir los nombres estándar de las escalas</value></data>
+  <data name="Mitigation_Pending" xml:space="preserve"><value>Pendiente</value></data>
+  <data name="Mitigation_InProgress" xml:space="preserve"><value>En curso</value></data>
+  <data name="Mitigation_Implemented" xml:space="preserve"><value>Implementada</value></data>
+  <data name="Mitigation_Discarded" xml:space="preserve"><value>Descartada</value></data>
+  <data name="Error_ActionDescriptionRequired" xml:space="preserve"><value>Cada acción mitigante necesita una descripción.</value></data>
+  <data name="Error_ActionDescriptionTooLong" xml:space="preserve"><value>La descripción de una acción mitigante admite hasta {0} caracteres.</value></data>
+  <data name="Error_ActionResponsibleTooLong" xml:space="preserve"><value>El responsable de una acción mitigante admite hasta {0} caracteres.</value></data>
+  <data name="Error_ActionStatusInvalid" xml:space="preserve"><value>El estado de una acción mitigante no es válido.</value></data>
 </root>

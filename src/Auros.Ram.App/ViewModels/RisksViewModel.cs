@@ -16,6 +16,23 @@ public abstract class GridRow : ObservableObject
 }
 
 /// <summary>Una evaluación de un riesgo: fila hija en la grilla.</summary>
+/// <summary>Resumen de las acciones mitigantes para la grilla: cantidad y abiertas, y la lista como ayuda emergente.</summary>
+public static class ActionSummary
+{
+    public static string Text(IReadOnlyList<MitigationAction> actions)
+    {
+        var open = actions.Count(a => a.IsOpen);
+        return actions.Count == 0 ? ""
+            : open == 0 ? string.Format(CultureInfo.CurrentCulture, Strings.Actions_GridDone, actions.Count)
+            : string.Format(CultureInfo.CurrentCulture, Strings.Actions_GridOpen, actions.Count, open);
+    }
+
+    public static string? Tip(IReadOnlyList<MitigationAction> actions) => actions.Count == 0 ? null
+        : string.Join("\n", actions.Select(a => $"• {a.Description} — {a.Status.DisplayName()}" +
+            (a.Responsible.Length > 0 ? $" ({a.Responsible})" : "") +
+            (a.DueDate is { } d ? $", {d.ToString("d", CultureInfo.CurrentCulture)}" : "")));
+}
+
 public sealed class EntryRow(RiskRow parent, HistoryStep step, bool isCurrent) : GridRow
 {
     public override RiskRow Owner { get; } = parent;
@@ -28,6 +45,8 @@ public sealed class EntryRow(RiskRow parent, HistoryStep step, bool isCurrent) :
     public string ImpactValue { get; } = RangeFormat.Value(step.Assessment.ImpactAmount);
     public string ProbabilityValue { get; } = RangeFormat.Value(step.Assessment.ProbabilityPercent, "%");
     public string Note { get; } = step.Assessment.Note;
+    public string Actions { get; } = ActionSummary.Text(step.Assessment.Actions);
+    public string? ActionsTip { get; } = ActionSummary.Tip(step.Assessment.Actions);
 
     /// <summary>La vigente (la más reciente): el estado actual del riesgo.</summary>
     public bool IsCurrent { get; } = isCurrent;
@@ -41,6 +60,10 @@ public sealed partial class RiskRow(Risk risk, LevelChip? riskLevel, LevelChip? 
     public LevelChip? RiskLevel { get; } = riskLevel;
     public LevelChip? ImpactLevel { get; } = impactLevel;
     public LevelChip? ProbabilityLevel { get; } = probabilityLevel;
+
+    /// <summary>Acciones mitigantes de la evaluación vigente.</summary>
+    public string Actions => ActionSummary.Text(Risk.CurrentActions);
+    public string? ActionsTip => ActionSummary.Tip(Risk.CurrentActions);
 
     public string Title => Risk.Title;
 

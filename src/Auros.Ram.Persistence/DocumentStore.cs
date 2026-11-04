@@ -143,6 +143,30 @@ internal static class DocumentStore
             }
         }
 
+        using (var cmd = Command(c, tx, """
+            INSERT INTO mitigation_action (id, assessment_id, position, description, responsible, due_date, status)
+            VALUES ($id, $assessment, $pos, $description, $responsible, $due, $status);
+            """))
+        {
+            var names = new[] { "$id", "$assessment", "$pos", "$description", "$responsible", "$due", "$status" };
+            var prm = names.Select(n => cmd.Parameters.Add(n, SqliteType.Text)).ToArray();
+            foreach (var a in doc.Risks.SelectMany(r => r.Assessments))
+            {
+                for (var i = 0; i < a.Actions.Count; i++)
+                {
+                    var action = a.Actions[i];
+                    prm[0].Value = action.Id.ToString();
+                    prm[1].Value = a.Id.ToString();
+                    prm[2].Value = i;
+                    prm[3].Value = action.Description;
+                    prm[4].Value = action.Responsible;
+                    prm[5].Value = action.DueDate is { } due ? due.ToString(DateFormat, CultureInfo.InvariantCulture) : DBNull.Value;
+                    prm[6].Value = (int)action.Status;
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
         // Empresas y unidades de negocio (el paso v7 del esquema puede haber dejado una por omisión: se reemplazan).
         Sql.Execute(c, "DELETE FROM business_unit; DELETE FROM company;", tx);
         using (var companyCmd = Command(c, tx, "INSERT INTO company (id, position, name, logo) VALUES ($id, $pos, $name, $logo);"))
@@ -377,6 +401,28 @@ internal static class DocumentStore
             risk.ConsequenceIds = riskConsequences.GetValueOrDefault(risk.Id) ?? [];
         }
 
+        var actions = new Dictionary<Guid, List<MitigationAction>>();
+        using (var cmd = Command(c, null, "SELECT id, assessment_id, description, responsible, due_date, status FROM mitigation_action ORDER BY position;"))
+        using (var r = cmd.ExecuteReader())
+        {
+            while (r.Read())
+            {
+                var assessmentId = Guid.Parse(r.GetString(1));
+                if (!actions.TryGetValue(assessmentId, out var list))
+                {
+                    actions[assessmentId] = list = [];
+                }
+
+                var status = (MitigationStatus)r.GetInt32(5);
+                list.Add(new MitigationAction(
+                    Guid.Parse(r.GetString(0)),
+                    r.GetString(2),
+                    r.GetString(3),
+                    r.IsDBNull(4) ? null : DateOnly.ParseExact(r.GetString(4), DateFormat, CultureInfo.InvariantCulture),
+                    Enum.IsDefined(status) ? status : MitigationStatus.Pending));
+            }
+        }
+
         var history = new Dictionary<Guid, List<RiskAssessment>>();
         using (var cmd = Command(c, null, """
             SELECT id, risk_id, date, impact_level_id, probability_level_id, note, recorded_utc, impact_amount, probability_percent
@@ -402,6 +448,7 @@ internal static class DocumentStore
                 {
                     ImpactAmount = Dec(r, 7),
                     ProbabilityPercent = Dec(r, 8),
+                    Actions = actions.GetValueOrDefault(Guid.Parse(r.GetString(0))) ?? [],
                 });
             }
         }
