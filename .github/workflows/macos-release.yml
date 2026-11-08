@@ -1,0 +1,51 @@
+# Arma los .dmg de macOS en una Mac de GitHub y los sube a la release de la versión de Directory.Build.props.
+# Se lanza a mano: Actions → macos-release → Run workflow (la release vX.Y.Z tiene que existir).
+# La firma es ad hoc: al abrir la aplicación, macOS avisa que no puede verificar al desarrollador.
+name: macos-release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  dmg:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Instalar Pillow (para el ícono)
+        run: python -m pip install pillow
+      - name: Armar auros.ram.app
+        shell: pwsh
+        run: tools/build-macos.ps1
+      - name: Firmar y armar los DMG
+        working-directory: publish/macos
+        run: |
+          for zip in auros.ram-*-macos-*.zip; do
+            bash ../../tools/macos/finish-on-mac.sh "$zip"
+          done
+          ls -l *.dmg
+      - name: Comprobar que la aplicación abre (Apple Silicon)
+        run: |
+          hdiutil attach -nobrowse -mountpoint /tmp/auros publish/macos/*-macos-arm64.dmg
+          codesign --verify --deep --strict /tmp/auros/auros.ram.app
+          /tmp/auros/auros.ram.app/Contents/MacOS/auros.ram &
+          pid=$!
+          sleep 20
+          kill -0 "$pid"
+          kill "$pid"
+          wait "$pid" || true
+          hdiutil detach /tmp/auros
+      - name: Subir los DMG a la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="$(sed -n 's/.*<Version>\(.*\)<\/Version>.*/\1/p' Directory.Build.props | head -n 1)"
+          gh release upload "v$version" publish/macos/*.dmg --clobber
