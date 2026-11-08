@@ -43,10 +43,11 @@
 | RNF-39 | ✅ | La aplicación no hace ninguna conexión de red |
 | RNF-40, RNF-41 | 🟡 | Versiones fijadas (gestión central, dependencia transitiva vulnerable corregida). Firma de código ⏳ (requiere certificados) |
 | RNF-42 | 🟡 | Todos los textos en `.resx`; faltan las traducciones a inglés y portugués |
-| RNF-43 | 🟡 | Nuevo, Abrir, Guardar, Guardar como, Recientes, cambios sin guardar y confirmación al cerrar. El doble clic en el explorador requiere el instalador (RNF-50); la app ya abre el archivo que recibe como argumento |
+| RNF-43 | 🟡 | Nuevo, Abrir, Guardar, Guardar como, Recientes, cambios sin guardar y confirmación al cerrar. Con el instalador de Windows, doble clic en un `.rmx` o `.rmt` lo abre en la aplicación |
 | RNF-44, 45, 47, 48 | ✅ | Atajos Ctrl/Cmd; tema claro/oscuro del sistema; mensajes accionables; ventana mínima de 1024 × 700 |
 | RNF-46 | 🟡 | Texto `[ABR]` además del color en matriz e informes, y ✓ en el nivel elegido; falta auditar el contraste WCAG AA |
-| RNF-49 a RNF-52, RNF-54 | ⏳ | Instaladores (MSI, DMG, AppImage, .deb), asociación de extensión y actualización |
+| RNF-49, RNF-50 | 🟡 | Windows: MSI (WiX 5, `tools/build-installer.ps1`) por máquina, con accesos directos, asociación de `.rmx` y `.rmt` y reemplazo de la versión anterior; falta firmarlo. macOS: `auros.ram.app` para Apple Silicon e Intel armado desde Windows (`tools/build-macos.ps1`), con asociación de `.rmx` y `.rmt`; firma y DMG en una Mac (`tools/macos/finish-on-mac.sh`), notarización con cuenta de Apple Developer; sin probar todavía en una Mac. Linux (AppImage, .deb): pendiente |
+| RNF-51, RNF-52, RNF-54 | ⏳ | Actualización automática y demás requisitos de distribución |
 | RNF-53 | ✅ | El formato no depende del sistema operativo (little endian fijo, SQLite) |
 | RNF-55 a RNF-58 | ⏳ | Licenciamiento, activación y período de prueba |
 | RNF-59, RNF-60 | ✅ | Visor de licencias en Acerca de; versión semántica en Acerca de y en la cabecera del archivo |

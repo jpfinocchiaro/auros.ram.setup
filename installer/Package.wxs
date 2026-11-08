@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Instalador de auros.ram para Windows: instala el ejecutable en Program Files\auros.ram, crea los accesos
+  directos (menú Inicio y escritorio) y asocia los archivos .rmx (matrices) y .rmt (plantillas) para abrirlos
+  con doble clic. Una versión nueva reemplaza a la anterior. Al desinstalar, las matrices y las preferencias
+  del usuario (%LOCALAPPDATA%\auros.ram) no se tocan.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <!-- UpgradeCode fijo para siempre: es lo que permite que una versión nueva reemplace a la anterior. -->
+  <Package Name="auros.ram"
+           Manufacturer="Auros"
+           Version="$(Version)"
+           UpgradeCode="2739dc7e-7e04-4c23-bbeb-8375e3e74654"
+           Scope="perMachine"
+           Language="3082"
+           Codepage="1252">
+    <SummaryInformation Description="auros.ram — matrices de riesgo" Manufacturer="Auros" />
+
+    <MajorUpgrade DowngradeErrorMessage="Ya está instalada una versión más nueva de auros.ram." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Icon Id="AppIcon.ico" SourceFile="$(BrandDir)auros_ram.ico" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon.ico" />
+    <Property Id="ARPCONTACT" Value="Auros" />
+    <Property Id="ARPNOMODIFY" Value="1" />
+    <Property Id="ARPNOREPAIR" Value="1" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="auros.ram" />
+    </StandardDirectory>
+
+    <Feature Id="Main" Title="auros.ram" AllowAbsent="no">
+      <ComponentRef Id="AppExe" />
+      <ComponentRef Id="StartMenuShortcut" />
+      <ComponentRef Id="DesktopShortcut" />
+    </Feature>
+
+    <!-- Ejecutable y asociación de archivos (abrir con doble clic, con el ícono de la aplicación). -->
+    <Component Id="AppExe" Directory="INSTALLFOLDER">
+      <File Id="AurosExe" Source="$(PublishDir)auros.ram.exe" KeyPath="yes" />
+      <ProgId Id="Auros.Ram.Matrix" Description="Matriz de riesgo auros.ram" Icon="AurosExe" IconIndex="0">
+        <Extension Id="rmx" ContentType="application/x-auros-ram-matrix">
+          <Verb Id="open" Command="Abrir" TargetFile="AurosExe" Argument="&quot;%1&quot;" />
+        </Extension>
+      </ProgId>
+      <ProgId Id="Auros.Ram.Template" Description="Plantilla de parámetros auros.ram" Icon="AurosExe" IconIndex="0">
+        <Extension Id="rmt" ContentType="application/x-auros-ram-template">
+          <Verb Id="open" Command="Abrir" TargetFile="AurosExe" Argument="&quot;%1&quot;" />
+        </Extension>
+      </ProgId>
+    </Component>
+
+    <!-- Accesos directos: menú Inicio y escritorio de todos los usuarios. -->
+    <Component Id="StartMenuShortcut" Directory="ProgramMenuFolder" Guid="5d1f6c0a-2b8e-4a5f-9c3e-6f7a8b9c0d1e">
+      <Shortcut Id="StartMenuAuros" Name="auros.ram" Description="Matrices de riesgo" Target="[INSTALLFOLDER]auros.ram.exe"
+                WorkingDirectory="INSTALLFOLDER" Icon="AppIcon.ico" />
+      <RegistryValue Root="HKCU" Key="Software\Auros\auros.ram" Name="StartMenuShortcut" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+    <Component Id="DesktopShortcut" Directory="DesktopFolder" Guid="8a3b2c1d-4e5f-4a6b-8c7d-9e0f1a2b3c4d">
+      <Shortcut Id="DesktopAuros" Name="auros.ram" Description="Matrices de riesgo" Target="[INSTALLFOLDER]auros.ram.exe"
+                WorkingDirectory="INSTALLFOLDER" Icon="AppIcon.ico" />
+      <RegistryValue Root="HKCU" Key="Software\Auros\auros.ram" Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+  </Package>
+</Wix>

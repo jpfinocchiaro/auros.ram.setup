@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Auros.Ram.App.ViewModels"
              x:Class="Auros.Ram.App.App"
+             Name="auros.ram"
              RequestedThemeVariant="Default">
   <!-- RNF-45: el tema sigue la preferencia claro/oscuro del sistema operativo.
 

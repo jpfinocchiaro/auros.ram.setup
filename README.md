@@ -48,6 +48,45 @@ dotnet publish src/Auros.Ram.App -c Release -r win-x64 -o publish/win-x64
 
 Otros identificadores: `osx-arm64`, `osx-x64`, `linux-x64`.
 
+## Instalador de Windows (RNF-49, RNF-50)
+
+MSI armado con WiX 5 (se descarga como paquete NuGet; no hace falta instalar nada):
+
+```bash
+pwsh tools/build-installer.ps1
+```
+
+Publica el ejecutable y deja `publish/installer/auros.ram-<versión>-win-x64.msi`. Instala por máquina en
+`Program Filesuros.ram`, crea accesos directos en el menú Inicio y el escritorio, y asocia `.rmx` y `.rmt` para
+abrirlos con doble clic. Una versión nueva reemplaza a la anterior (el `UpgradeCode` de `installer/Package.wxs` no
+se cambia nunca). Al desinstalar no se tocan las matrices ni las preferencias. El MSI no está firmado: hasta tener
+un certificado de firma de código, Windows SmartScreen avisa al abrirlo.
+
+## Paquete de macOS (RNF-49)
+
+Se arma desde Windows (requiere Python con Pillow, para el ícono):
+
+```bash
+pwsh tools/build-macos.ps1
+```
+
+Deja `publish/macos/auros.ram-<versión>-macos-arm64.zip` (Apple Silicon) y `...-macos-x64.zip` (Intel), cada uno con
+`auros.ram.app`: el ejecutable autocontenido, el ícono y la asociación de `.rmx` y `.rmt` (`installer/macos/Info.plist`).
+El paquete sale sin firmar y en Apple Silicon una aplicación sin firma no abre, así que se termina en una Mac:
+
+```bash
+bash tools/macos/finish-on-mac.sh auros.ram-2.3.0-macos-arm64.zip
+```
+
+Firma la aplicación y arma el DMG (con el acceso a Aplicaciones para arrastrarla). Sin cuenta de Apple la firma es
+local: en otras Mac, Gatekeeper avisa que el desarrollador no está identificado (se abre desde Ajustes del Sistema →
+Privacidad y seguridad → «Abrir igualmente»). Con un certificado *Developer ID Application* y un perfil de
+`notarytool`, el mismo script firma con runtime endurecido (`installer/macos/auros.ram.entitlements`) y notariza:
+
+```bash
+bash tools/macos/finish-on-mac.sh auros.ram-2.3.0-macos-arm64.zip "Developer ID Application: Auros (TEAMID)" perfil-notario
+```
+
 ## Textos e idiomas (RNF-42)
 
 Los textos están en archivos `.resx` (`Resources/Strings.resx`, `Messages.resx`, …). Se generan desde

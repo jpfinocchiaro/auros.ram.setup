@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Descripción del paquete auros.ram.app para macOS. tools/package_macos.py reemplaza $(Version).
+  Declara los tipos .rmx (matriz) y .rmt (plantilla) para que se abran con doble clic en auros.ram.
+-->
+<plist version="1.0">
+<dict>
+  <key>CFBundleName</key>
+  <string>auros.ram</string>
+  <key>CFBundleDisplayName</key>
+  <string>auros.ram</string>
+  <key>CFBundleIdentifier</key>
+  <string>com.auros.ram</string>
+  <key>CFBundleExecutable</key>
+  <string>auros.ram</string>
+  <key>CFBundleIconFile</key>
+  <string>auros.ram.icns</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>CFBundleShortVersionString</key>
+  <string>$(Version)</string>
+  <key>CFBundleVersion</key>
+  <string>$(Version)</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>LSMinimumSystemVersion</key>
+  <string>12.0</string>
+  <key>LSApplicationCategoryType</key>
+  <string>public.app-category.business</string>
+  <key>NSHighResolutionCapable</key>
+  <true/>
+  <key>NSHumanReadableCopyright</key>
+  <string>© 2026 Auros</string>
+
+  <key>CFBundleDocumentTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleTypeName</key>
+      <string>Matriz de riesgo auros.ram</string>
+      <key>CFBundleTypeRole</key>
+      <string>Editor</string>
+      <key>LSHandlerRank</key>
+      <string>Owner</string>
+      <key>CFBundleTypeIconFile</key>
+      <string>auros.ram.icns</string>
+      <key>LSItemContentTypes</key>
+      <array>
+        <string>com.auros.ram.matrix</string>
+      </array>
+    </dict>
+    <dict>
+      <key>CFBundleTypeName</key>
+      <string>Plantilla de parámetros auros.ram</string>
+      <key>CFBundleTypeRole</key>
+      <string>Editor</string>
+      <key>LSHandlerRank</key>
+      <string>Owner</string>
+      <key>CFBundleTypeIconFile</key>
+      <string>auros.ram.icns</string>
+      <key>LSItemContentTypes</key>
+      <array>
+        <string>com.auros.ram.template</string>
+      </array>
+    </dict>
+  </array>
+
+  <key>UTExportedTypeDeclarations</key>
+  <array>
+    <dict>
+      <key>UTTypeIdentifier</key>
+      <string>com.auros.ram.matrix</string>
+      <key>UTTypeDescription</key>
+      <string>Matriz de riesgo auros.ram</string>
+      <key>UTTypeConformsTo</key>
+      <array>
+        <string>public.data</string>
+      </array>
+      <key>UTTypeIconFile</key>
+      <string>auros.ram.icns</string>
+      <key>UTTypeTagSpecification</key>
+      <dict>
+        <key>public.filename-extension</key>
+        <array>
+          <string>rmx</string>
+        </array>
+      </dict>
+    </dict>
+    <dict>
+      <key>UTTypeIdentifier</key>
+      <string>com.auros.ram.template</string>
+      <key>UTTypeDescription</key>
+      <string>Plantilla de parámetros auros.ram</string>
+      <key>UTTypeConformsTo</key>
+      <array>
+        <string>public.data</string>
+      </array>
+      <key>UTTypeIconFile</key>
+      <string>auros.ram.icns</string>
+      <key>UTTypeTagSpecification</key>
+      <dict>
+        <key>public.filename-extension</key>
+        <array>
+          <string>rmt</string>
+        </array>
+      </dict>
+    </dict>
+  </array>
+</dict>
+</plist>

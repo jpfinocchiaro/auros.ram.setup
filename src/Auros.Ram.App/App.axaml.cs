@@ -5,6 +5,7 @@ using Auros.Ram.App.Views;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 
 namespace Auros.Ram.App;
@@ -51,9 +52,37 @@ public partial class App : Application
                 _ = ui.AlertAsync(Strings.Error_UnexpectedTitle, Strings.Error_UnexpectedMessage);
             };
 
+            // macOS: un .rmx o .rmt abierto con doble clic (o soltado sobre el ícono) llega como activación, no como
+            // argumento; si la ventana todavía no se mostró, se abre cuando aparezca.
+            var pending = new List<string>(Program.StartupFiles);
+            var opened = false;
+            if (TryGetFeature(typeof(IActivatableLifetime)) is IActivatableLifetime activatable)
+            {
+                activatable.Activated += async (_, e) =>
+                {
+                    if (e is not FileActivatedEventArgs activation)
+                    {
+                        return;
+                    }
+
+                    foreach (var path in activation.Files.Select(f => f.TryGetLocalPath()).OfType<string>())
+                    {
+                        if (opened)
+                        {
+                            await vm.OpenPathAsync(path);
+                        }
+                        else
+                        {
+                            pending.Add(path);
+                        }
+                    }
+                };
+            }
+
             window.Opened += async (_, _) =>
             {
-                foreach (var file in Program.StartupFiles)
+                opened = true;
+                foreach (var file in pending.ToList())
                 {
                     await vm.OpenPathAsync(file);
                 }

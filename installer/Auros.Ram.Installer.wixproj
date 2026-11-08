@@ -1,0 +1,16 @@
+<Project Sdk="WixToolset.Sdk/5.0.2">
+  <!--
+    Instalador de Windows (RNF-49, RNF-50): MSI por máquina en Program Files, accesos directos y asociación de
+    .rmx y .rmt. Empaqueta el ejecutable publicado; se arma con tools/build-installer.ps1.
+  -->
+  <PropertyGroup>
+    <OutputName>auros.ram-$(Version)-win-x64</OutputName>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <Cultures>es-ES</Cultures>
+    <!-- Carpeta del ejecutable publicado (dotnet publish -r win-x64). -->
+    <PublishDir Condition="'$(PublishDir)' == ''">$(MSBuildThisFileDirectory)..\publish\win-x64\</PublishDir>
+    <DefineConstants>Version=$(Version);PublishDir=$(PublishDir);BrandDir=$(MSBuildThisFileDirectory)..\src\Auros.Ram.App\Assets\Brand\</DefineConstants>
+    <!-- El MSI no se firma: Windows SmartScreen avisa al abrirlo hasta que haya un certificado de firma de código. -->
+    <SuppressValidation>false</SuppressValidation>
+  </PropertyGroup>
+</Project>
