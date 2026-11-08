@@ -6,7 +6,7 @@ const CONFIG = {
   precio: "USD 100",     // por ejemplo: "USD 120" (se muestra igual en todos los idiomas)
   pagoUrl: "",      // link de pago generado en Mercado Pago o Stripe
   email: "",        // email donde se reciben los códigos de equipo
-  mac: false,       // true cuando los .dmg de Mac estén subidos a la release de GitHub
+  mac: true,        // true cuando los .dmg de Mac estén subidos a la release de GitHub
   whatsapp: "5491130372802",   // número para chatear con un consultor, con código de país y sin «+» ni espacios: "5491112345678"
 };
 
