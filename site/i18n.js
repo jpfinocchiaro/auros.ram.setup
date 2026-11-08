@@ -50,7 +50,6 @@ const I18N = {
     "shots.cap.riesgos": "La lista de riesgos con filtros por nivel, impacto y probabilidad, y las acciones mitigantes abiertas de cada uno.",
     "shots.cap.evolucion": "Qué riesgos empeoraron, mejoraron o aparecieron entre dos fechas, y por qué.",
     "shots.cap.historial": "Cada evaluación queda registrada con su fecha y un comentario sobre el cambio.",
-    "shots.lang": "",
 
     "feat.title": "Lo que necesitas para un relevamiento de riesgos",
     "feat": [
@@ -177,7 +176,6 @@ const I18N = {
     "shots.cap.riesgos": "The risk list with filters by level, impact and likelihood, and each risk's open mitigating actions.",
     "shots.cap.evolucion": "Which risks got worse, improved or appeared between two dates, and why.",
     "shots.cap.historial": "Every assessment is recorded with its date and a note about the change.",
-    "shots.lang": "Screenshots of the app in Spanish; it is also available in English.",
 
     "feat.title": "Everything you need for a risk assessment",
     "feat": [
@@ -304,7 +302,6 @@ const I18N = {
     "shots.cap.riesgos": "A lista de riscos com filtros por nível, impacto e probabilidade, e as ações mitigadoras em aberto de cada um.",
     "shots.cap.evolucion": "Quais riscos pioraram, melhoraram ou surgiram entre duas datas, e por quê.",
     "shots.cap.historial": "Cada avaliação fica registrada com a data e um comentário sobre a mudança.",
-    "shots.lang": "Capturas do aplicativo em espanhol; ele também está disponível em português.",
 
     "feat.title": "Tudo o que você precisa para um levantamento de riscos",
     "feat": [
@@ -431,7 +428,6 @@ const I18N = {
     "shots.cap.riesgos": "La liste des risques avec des filtres par niveau, impact et probabilité, et les actions d'atténuation ouvertes de chacun.",
     "shots.cap.evolucion": "Quels risques se sont aggravés, améliorés ou sont apparus entre deux dates, et pourquoi.",
     "shots.cap.historial": "Chaque évaluation est enregistrée avec sa date et un commentaire sur le changement.",
-    "shots.lang": "Captures de l'application en espagnol ; elle est aussi disponible en français.",
 
     "feat.title": "Tout ce qu'il faut pour une évaluation des risques",
     "feat": [

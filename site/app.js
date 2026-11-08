@@ -3,11 +3,11 @@
 const CONFIG = {
   version: "2.3.0",
   repo: "jpfinocchiaro/auros.ram.setup",
-  precio: "",       // por ejemplo: "USD 120" (se muestra igual en todos los idiomas)
+  precio: "USD 100",     // por ejemplo: "USD 120" (se muestra igual en todos los idiomas)
   pagoUrl: "",      // link de pago generado en Mercado Pago o Stripe
   email: "",        // email donde se reciben los códigos de equipo
   mac: false,       // true cuando los .dmg de Mac estén subidos a la release de GitHub
-  whatsapp: "",     // número para chatear con un consultor, con código de país y sin «+» ni espacios: "5491112345678"
+  whatsapp: "5491130372802",   // número para chatear con un consultor, con código de país y sin «+» ni espacios: "5491112345678"
 };
 
 const LANGS = { es: "es", en: "us", pt: "br", fr: "fr" }; // idioma → bandera (como en la aplicación)
@@ -144,10 +144,9 @@ for (const tab of tabs) {
 }
 function renderShot() {
   const img = document.getElementById("shot-img");
-  img.src = `img/${shot}.webp`;
+  img.src = lang === "es" ? `img/${shot}.webp` : `img/${shot}.${lang}.webp`;
   img.alt = t(`shots.alt.${shot}`);
   document.getElementById("shot-caption").textContent = t(`shots.cap.${shot}`);
-  document.getElementById("shot-lang").textContent = t("shots.lang");
 }
 
 // ---- Textos de toda la página ---------------------------------------------------------------

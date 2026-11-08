@@ -1,3 +1,4 @@
+using System.Globalization;
 using Auros.Ram.App;
 using Auros.Ram.App.Services;
 using Auros.Ram.App.ViewModels;
@@ -74,8 +75,9 @@ public class UiSmokeTests
         Shot(window, "00-bienvenida");
 
         var doc = SampleDocument();
-        var docVm = new DocumentViewModel(Path.Combine(Path.GetTempPath(), "Relevamiento ACME.rmx"), doc, FileKey.CreateNew("contraseña-de-prueba"), ui);
-        vm.Documents.Add(new DocumentViewModel(Path.Combine(Path.GetTempPath(), "Auditoría 2025.rmx"), SampleDocument(), FileKey.CreateNew("contraseña-de-prueba"), ui));
+        var texts = SampleTexts.Current;
+        var docVm = new DocumentViewModel(Path.Combine(Path.GetTempPath(), texts.MainFile), doc, FileKey.CreateNew("contraseña-de-prueba"), ui);
+        vm.Documents.Add(new DocumentViewModel(Path.Combine(Path.GetTempPath(), texts.OtherFile), SampleDocument(), FileKey.CreateNew("contraseña-de-prueba"), ui));
         vm.Documents.Add(docVm);
         vm.Active = docVm;
 
@@ -99,7 +101,7 @@ public class UiSmokeTests
 
         // Evolución en la matriz: el recorrido de un riesgo y la matriz a una fecha pasada.
         docVm.SelectedSection = (int)Section.Matrix;
-        docVm.Matrix.PathRisk = docVm.Matrix.PathRisks.First(p => p.Title.StartsWith("Cuentas", StringComparison.Ordinal));
+        docVm.Matrix.PathRisk = docVm.Matrix.PathRisks.First(p => p.Title.StartsWith(texts.Risks[0], StringComparison.Ordinal));
         Shot(window, "19-matriz-recorrido");
         docVm.Matrix.AsOfDate = DateTime.Today.AddDays(-100);
         Shot(window, "20-matriz-a-fecha");
@@ -779,23 +781,15 @@ public class UiSmokeTests
 
     private static RiskMatrixDocument SampleDocument()
     {
+        var t = SampleTexts.Current;
         var doc = RiskMatrixDocument.CreateNew(new ProjectInfo
         {
-            Name = "Relevamiento de seguridad 2026",
-            Company = "ACME S.A.",
+            Name = t.Project,
+            Company = t.Company,
         });
         // Impacto y probabilidad: posición del nivel, 0 = el menor.
-        (string Title, int I, int P)[] risks =
-        [
-            ("Cuentas de administrador compartidas", 4, 3),
-            ("Sin copias de seguridad fuera del sitio", 4, 1),
-            ("Contraseñas sin vencimiento", 2, 3),
-            ("Parches de servidores atrasados", 3, 3),
-            ("Falta de plan de continuidad", 4, 0),
-            ("Inventario de activos incompleto", 1, 2),
-            ("Registros de auditoría desactivados", 2, 2),
-            ("Accesos de ex empleados vigentes", 3, 4),
-        ];
+        (int I, int P)[] levels = [(4, 3), (4, 1), (2, 3), (3, 3), (4, 0), (1, 2), (2, 2), (3, 4)];
+        var risks = t.Risks.Zip(levels, (title, l) => (Title: title, l.I, l.P)).ToArray();
         // Historial de ejemplo: todos se evaluaron hace unos meses (el último, más tarde) y algunos cambiaron después.
         var today = DateOnly.FromDateTime(DateTime.Today);
         var n = 0;
@@ -805,24 +799,15 @@ public class UiSmokeTests
             doc.AddRisk(new Risk
             {
                 Title = title,
-                ShortDescription = $"Resumen ejecutivo: {title.ToLowerInvariant()}.",
-                LongDescription = """
-                    {g}Hallazgo{/g}
-                    Se detectaron **cuentas activas** de personas que ya no trabajan en la empresa.
-                    *Análisis:* el acceso permite __modificar datos de clientes__.
-                    Recomendación:
-                    - Revisar las bajas cada mes
-                    - Automatizar el bloqueo
-                    1. Inventario
-                    2. Depuración
-                    """,
+                ShortDescription = string.Format(CultureInfo.InvariantCulture, t.Summary, title.ToLowerInvariant()),
+                LongDescription = t.LongDescription,
                 ImpactLevelId = doc.ProjectScale(ScaleType.Impact)!.OrderedLevels[i].Id,
                 ProbabilityLevelId = doc.ProjectScale(ScaleType.Probability)!.OrderedLevels[p].Id,
-                ImpactJustification = i >= 3 ? "Expone información sensible de clientes." : "",
+                ImpactJustification = i >= 3 ? t.Justification : "",
                 ImpactAmount = (n * 7500m) + 2500m,
                 ConsequenceIds = [doc.Project.Consequences[n % 3].Id, doc.Project.Consequences[3 + (n % 4)].Id],
                 MaterialityId = doc.Project.MaterialityCriteria[n % 5].Id,
-            }, start, "Relevamiento inicial");
+            }, start, t.InitialNote);
         }
 
         void Reassess(int index, int impact, int probability, int daysAgo, string note)
@@ -833,21 +818,21 @@ public class UiSmokeTests
             doc.AddAssessment(r.Id, r.ImpactLevelId, r.ProbabilityLevelId, today.AddDays(-daysAgo), note);
         }
 
-        Reassess(0, 4, 4, 110, "Se detectaron más cuentas compartidas");
-        Reassess(0, 3, 2, 60, "Se aplicó un control de acceso");
-        Reassess(0, 2, 1, 12, "Cuentas nominales en todos los servidores");
-        Reassess(3, 3, 1, 30, "Se automatizó la instalación de parches");
-        Reassess(6, 3, 3, 20, "Se amplió el alcance del sistema");
+        Reassess(0, 4, 4, 110, t.Notes[0]);
+        Reassess(0, 3, 2, 60, t.Notes[1]);
+        Reassess(0, 2, 1, 12, t.Notes[2]);
+        Reassess(3, 3, 1, 30, t.Notes[3]);
+        Reassess(6, 3, 3, 20, t.Notes[4]);
 
         // Acciones mitigantes de la evaluación vigente de dos riesgos.
         doc.UpdateRisk(doc.Risks[0].Clone(),
         [
-            new MitigationAction(Guid.Empty, "Cuentas nominales para cada administrador", "Infraestructura", today.AddDays(-12), MitigationStatus.Implemented),
-            new MitigationAction(Guid.Empty, "Revisión trimestral de accesos privilegiados", "Seguridad informática", today.AddDays(45), MitigationStatus.InProgress),
-            new MitigationAction(Guid.Empty, "Bóveda de contraseñas", "", null, MitigationStatus.Pending),
+            new MitigationAction(Guid.Empty, t.Actions[0], t.Owners[0], today.AddDays(-12), MitigationStatus.Implemented),
+            new MitigationAction(Guid.Empty, t.Actions[1], t.Owners[1], today.AddDays(45), MitigationStatus.InProgress),
+            new MitigationAction(Guid.Empty, t.Actions[2], "", null, MitigationStatus.Pending),
         ]);
         doc.UpdateRisk(doc.Risks[1].Clone(),
-            [new MitigationAction(Guid.Empty, "Copia diaria en un sitio externo", "Infraestructura", today.AddDays(30), MitigationStatus.Pending)]);
+            [new MitigationAction(Guid.Empty, t.Actions[3], t.Owners[0], today.AddDays(30), MitigationStatus.Pending)]);
 
         doc.MarkSaved();
         return doc;
