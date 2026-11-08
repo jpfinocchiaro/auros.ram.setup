@@ -142,9 +142,13 @@ for (const tab of tabs) {
     renderShot();
   });
 }
+// Capturas en el idioma de la página: img/nombre.webp (español) o img/nombre.<idioma>.webp
+function shotSrc(name) {
+  return lang === "es" ? `img/${name}.webp` : `img/${name}.${lang}.webp`;
+}
 function renderShot() {
   const img = document.getElementById("shot-img");
-  img.src = lang === "es" ? `img/${shot}.webp` : `img/${shot}.${lang}.webp`;
+  img.src = shotSrc(shot);
   img.alt = t(`shots.alt.${shot}`);
   document.getElementById("shot-caption").textContent = t(`shots.cap.${shot}`);
 }
@@ -164,6 +168,8 @@ function render() {
   for (const node of document.querySelectorAll("[data-i18n]")) node.textContent = t(node.dataset.i18n);
   for (const node of document.querySelectorAll("[data-i18n-html]")) node.innerHTML = t(node.dataset.i18nHtml);
   for (const node of document.querySelectorAll("[data-i18n-aria]")) node.setAttribute("aria-label", t(node.dataset.i18nAria));
+  for (const node of document.querySelectorAll("[data-i18n-alt]")) node.alt = t(node.dataset.i18nAlt);
+  for (const node of document.querySelectorAll("img[data-img]")) node.src = shotSrc(node.dataset.img);
 
   // Selector de idioma
   document.getElementById("lang-flag").src = `img/flags/${LANGS[lang]}.svg`;

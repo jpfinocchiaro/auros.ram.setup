@@ -119,6 +119,15 @@ code { font-family: Consolas, Menlo, monospace; font-size: 0.92em; background: v
 .pill.high { background: var(--high); }
 .pill.none { background: transparent; color: var(--muted); font-weight: 400; padding: 2px 0; }
 
+/* Qué es una matriz de riesgo */
+.what { padding: 88px 0 24px; }
+.what-grid { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 56px; align-items: center; margin-bottom: 64px; }
+.what-copy p { max-width: 62ch; margin-bottom: 1em; }
+.what-copy p:last-child { margin-bottom: 0; }
+.what-size { margin: 0; justify-self: center; max-width: 520px; }
+.what-size img { border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 18px 40px -24px rgba(0, 11, 95, .35); background: var(--paper); }
+.what-size figcaption { margin-top: 12px; }
+
 /* Capturas */
 .shots { padding: 88px 0 72px; }
 .tabs { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 20px; }
@@ -187,7 +196,7 @@ code { font-family: Consolas, Menlo, monospace; font-size: 0.92em; background: v
 .foot img { width: 140px; }
 
 @media (max-width: 1000px) {
-  .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+  .hero-grid, .what-grid { grid-template-columns: 1fr; gap: 40px; }
   .feature-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .steps { grid-template-columns: 1fr; gap: 20px; }
   .steps li { padding: 4px 0 0 56px; min-height: 40px; }
@@ -207,6 +216,8 @@ code { font-family: Consolas, Menlo, monospace; font-size: 0.92em; background: v
   .files li { flex-direction: column; align-items: flex-start; gap: 12px; }
   .files .btn { width: 100%; }
   .shots, .pricing, .download { padding: 56px 0 48px; }
+  .what { padding: 56px 0 8px; }
+  .what-grid { margin-bottom: 40px; }
   .features, .buy, .faq { padding: 56px 0; }
   .foot-inner { flex-direction: column; align-items: flex-start; }
 }
