@@ -47,6 +47,7 @@ public interface IUiService
     Task EditScaleAsync(ScaleEditorViewModel vm);
     Task<bool> EditPreferencesAsync(PreferencesViewModel vm);
     Task ShowAboutAsync();
+    Task ShowLicenseAsync(LicenseViewModel vm);
 
     Task EditCatalogsAsync(CatalogsViewModel vm);
 

@@ -176,6 +176,19 @@ Language_SaveTitle=Generate language file
 Language_Saved=«{0}» was saved. Translate it following the instructions in the header and add it with «Add language file…».
 Language_SavedTitle=Language file
 Language_Unknown=\n{0} ids do not exist in this version and are ignored.
+# --- License ---
+License_Activate=Activate
+License_Activated=Done: the license is active. You can now add companies and risks with no limits.
+License_Copy=Copy code
+License_FreeBadge=Free edition
+License_FreeBadgeTip=Each matrix allows up to {0} company and {1} risks. Click to activate your license.
+License_FreeStatus=You are using the free edition: each matrix allows up to {0} company and {1} risks.
+License_HowTo=To upgrade to the full edition, send this code to Auros. You will receive a license key that only works on this computer: paste it below and click Activate.
+License_Key=License key
+License_LicensedStatus=Full edition, no limits. Licensed to {0} (issued on {1}).
+License_MachineCode=This computer's code
+License_SaveError=The key is valid, but it could not be saved on this computer. Check the permissions of the auros.ram data folder and try again.
+License_Title=auros.ram license
 # --- Lock ---
 Lock_Message=«{0}» was locked due to inactivity. Enter the file password to continue.
 Lock_Title=File locked
@@ -214,6 +227,7 @@ Menu_ExportXlsx=Excel (.xlsx)…
 Menu_File=_File
 Menu_Help=_Help
 Menu_ImportJson=Import from JSON…
+Menu_License=License…
 Menu_Lock=Lock now
 Menu_New=New…
 Menu_NewRisk=New risk…
@@ -563,6 +577,10 @@ DefaultScale_Risk=Standard risk level
 # --- Default ---
 Default_Company=Company
 Default_Unit=General
+# --- Edition ---
+Edition_CompanyLimit=The free edition allows {0} company per matrix. To add more, activate your license in Help → License.
+Edition_ReadOnly=This matrix exceeds what the free edition allows ({0} company and {1} risks): you can view and export it, but not change it. To change it, activate your license in Help → License.
+Edition_RiskLimit=The free edition allows up to {0} risks per matrix. To add more, activate your license in Help → License.
 # --- Error ---
 Error_AllAssessments=Not all assessments of «{0}» can be removed: to do that, delete the risk.
 Error_AmountNegative=The impact amount cannot be negative.
@@ -648,6 +666,9 @@ Impact_Moderate=Moderate
 Level_High=High
 Level_Low=Low
 Level_Medium=Medium
+# --- License ---
+License_Invalid=The license key is not valid. Check that it was copied in full, exactly as you received it.
+License_OtherMachine=This license key is for another computer. Each key only works on the computer whose code was sent when requesting it.
 # --- Probability ---
 Probability_AlmostCertain=Almost certain
 Probability_Likely=Likely

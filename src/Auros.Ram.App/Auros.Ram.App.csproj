@@ -47,4 +47,7 @@
       <PublicClass>true</PublicClass>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Auros.Ram.App.Tests" />
+  </ItemGroup>
 </Project>

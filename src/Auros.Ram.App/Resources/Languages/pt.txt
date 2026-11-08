@@ -176,6 +176,19 @@ Language_SaveTitle=Gerar arquivo de idioma
 Language_Saved=«{0}» foi salvo. Traduza-o seguindo as instruções do cabeçalho e adicione-o com «Adicionar arquivo de idioma…».
 Language_SavedTitle=Arquivo de idioma
 Language_Unknown=\n{0} ids não existem nesta versão e são ignorados.
+# --- License ---
+License_Activate=Ativar
+License_Activated=Pronto: a licença foi ativada. Agora você pode cadastrar empresas e riscos sem limites.
+License_Copy=Copiar código
+License_FreeBadge=Versão gratuita
+License_FreeBadgeTip=Cada matriz permite até {0} empresa e {1} riscos. Clique para ativar a licença.
+License_FreeStatus=Você está usando a versão gratuita: cada matriz permite até {0} empresa e {1} riscos.
+License_HowTo=Para passar para a versão completa, envie este código para a Auros. Você receberá uma chave de licença que funciona apenas neste computador: cole-a abaixo e clique em Ativar.
+License_Key=Chave de licença
+License_LicensedStatus=Versão completa, sem limites. Licenciada para {0} (emitida em {1}).
+License_MachineCode=Código deste computador
+License_SaveError=A chave é válida, mas não foi possível salvá-la neste computador. Verifique as permissões da pasta de dados do auros.ram e tente novamente.
+License_Title=Licença do auros.ram
 # --- Lock ---
 Lock_Message=«{0}» foi bloqueado por inatividade. Digite a senha do arquivo para continuar.
 Lock_Title=Arquivo bloqueado
@@ -214,6 +227,7 @@ Menu_ExportXlsx=Excel (.xlsx)…
 Menu_File=_Arquivo
 Menu_Help=A_juda
 Menu_ImportJson=Importar de JSON…
+Menu_License=Licença…
 Menu_Lock=Bloquear agora
 Menu_New=Novo…
 Menu_NewRisk=Novo risco…
@@ -563,6 +577,10 @@ DefaultScale_Risk=Nível de risco padrão
 # --- Default ---
 Default_Company=Empresa
 Default_Unit=Geral
+# --- Edition ---
+Edition_CompanyLimit=A versão gratuita permite {0} empresa por matriz. Para cadastrar mais, ative a licença em Ajuda → Licença.
+Edition_ReadOnly=Esta matriz excede o que a versão gratuita permite ({0} empresa e {1} riscos): é possível consultá-la e exportá-la, mas não modificá-la. Para modificá-la, ative a licença em Ajuda → Licença.
+Edition_RiskLimit=A versão gratuita permite até {0} riscos por matriz. Para cadastrar mais, ative a licença em Ajuda → Licença.
 # --- Error ---
 Error_AllAssessments=Não é possível remover todas as avaliações de «{0}»: para isso, exclua o risco.
 Error_AmountNegative=O valor do impacto não pode ser negativo.
@@ -648,6 +666,9 @@ Impact_Moderate=Moderado
 Level_High=Alto
 Level_Low=Baixo
 Level_Medium=Médio
+# --- License ---
+License_Invalid=A chave de licença não é válida. Verifique se ela foi copiada por completo, exatamente como você a recebeu.
+License_OtherMachine=Esta chave de licença é de outro computador. Cada chave funciona apenas no computador cujo código foi enviado ao solicitá-la.
 # --- Probability ---
 Probability_AlmostCertain=Quase certa
 Probability_Likely=Provável

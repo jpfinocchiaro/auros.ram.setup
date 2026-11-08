@@ -103,6 +103,8 @@ public sealed class UiService(Window owner) : IUiService
 
     public Task ShowAboutAsync() => new AboutWindow().ShowDialog(Top());
 
+    public Task ShowLicenseAsync(LicenseViewModel vm) => new LicenseWindow(vm).ShowDialog(Top());
+
     public Task EditCatalogsAsync(CatalogsViewModel vm) => new CatalogsWindow(vm).ShowDialog(Top());
 
     public Task EditOrganizationsAsync(OrganizationsViewModel vm) => new OrganizationsWindow(vm).ShowDialog(Top());

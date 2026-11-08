@@ -11,3 +11,6 @@ TestResults/
 *.rmx
 *.rmt
 !tests/Auros.Ram.Tests/Fixtures/**/*.rmx
+
+# Claves privadas de licencias: nunca al repositorio.
+*.pem

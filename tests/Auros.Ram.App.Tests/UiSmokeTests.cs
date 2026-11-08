@@ -46,6 +46,10 @@ public class UiSmokeTests
 {
     private static readonly string? ShotDir = Environment.GetEnvironmentVariable("AUROS_SCREENSHOTS");
 
+    // Las matrices de ejemplo superan los límites de la versión gratuita: las pruebas corren con licencia.
+    static UiSmokeTests() =>
+        Edition.UseForTests(new Auros.Ram.Core.Licensing.License("Pruebas", Edition.MachineCode, new DateOnly(2026, 11, 7)));
+
     [AvaloniaFact]
     public void All_sections_and_dialogs_render_without_binding_errors()
     {
@@ -169,6 +173,7 @@ public class UiSmokeTests
 
         ShowDialog(new Window { Width = 320, Height = 480, Content = flags }, "45-banderas");
         ShowDialog(new CatalogsWindow(new CatalogsViewModel(doc)), "39-catalogos");
+        ShowDialog(new LicenseWindow(new LicenseViewModel()), "46-licencia");
 
         // Varias empresas: maestro, y las vistas filtradas por la empresa y la unidad elegidas en la barra.
         var north = doc.AddCompany("Filial Norte");

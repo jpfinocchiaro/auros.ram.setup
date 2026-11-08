@@ -176,6 +176,19 @@ Language_SaveTitle=Générer un fichier de langue
 Language_Saved=«{0}» a été enregistré. Traduisez-le en suivant les instructions de l'en-tête, puis ajoutez-le avec «Ajouter un fichier de langue…».
 Language_SavedTitle=Fichier de langue
 Language_Unknown=\n{0} ids n'existent pas dans cette version et sont ignorés.
+# --- License ---
+License_Activate=Activer
+License_Activated=C'est fait : la licence est activée. Vous pouvez désormais ajouter des entreprises et des risques sans limite.
+License_Copy=Copier le code
+License_FreeBadge=Version gratuite
+License_FreeBadgeTip=Chaque matrice permet jusqu'à {0} entreprise et {1} risques. Cliquez pour activer la licence.
+License_FreeStatus=Vous utilisez la version gratuite : chaque matrice permet jusqu'à {0} entreprise et {1} risques.
+License_HowTo=Pour passer à la version complète, envoyez ce code à Auros. Vous recevrez une clé de licence qui ne fonctionne que sur cet ordinateur : collez-la ci-dessous et cliquez sur Activer.
+License_Key=Clé de licence
+License_LicensedStatus=Version complète, sans limites. Sous licence au nom de {0} (émise le {1}).
+License_MachineCode=Code de cet ordinateur
+License_SaveError=La clé est valide, mais elle n'a pas pu être enregistrée sur cet ordinateur. Vérifiez les autorisations du dossier de données d'auros.ram et réessayez.
+License_Title=Licence auros.ram
 # --- Lock ---
 Lock_Message=«{0}» a été verrouillé pour inactivité. Saisissez le mot de passe du fichier pour continuer.
 Lock_Title=Fichier verrouillé
@@ -214,6 +227,7 @@ Menu_ExportXlsx=Excel (.xlsx)…
 Menu_File=_Fichier
 Menu_Help=_Aide
 Menu_ImportJson=Importer depuis JSON…
+Menu_License=Licence…
 Menu_Lock=Verrouiller maintenant
 Menu_New=Nouveau…
 Menu_NewRisk=Nouveau risque…
@@ -563,6 +577,10 @@ DefaultScale_Risk=Niveau de risque standard
 # --- Default ---
 Default_Company=Entreprise
 Default_Unit=Général
+# --- Edition ---
+Edition_CompanyLimit=La version gratuite permet {0} entreprise par matrice. Pour en ajouter d'autres, activez la licence dans Aide → Licence.
+Edition_ReadOnly=Cette matrice dépasse ce que permet la version gratuite ({0} entreprise et {1} risques) : vous pouvez la consulter et l'exporter, mais pas la modifier. Pour la modifier, activez la licence dans Aide → Licence.
+Edition_RiskLimit=La version gratuite permet jusqu'à {0} risques par matrice. Pour en ajouter d'autres, activez la licence dans Aide → Licence.
 # --- Error ---
 Error_AllAssessments=Impossible de retirer toutes les évaluations de «{0}» : pour cela, supprimez le risque.
 Error_AmountNegative=Le montant de l'impact ne peut pas être négatif.
@@ -648,6 +666,9 @@ Impact_Moderate=Modéré
 Level_High=Élevé
 Level_Low=Faible
 Level_Medium=Moyen
+# --- License ---
+License_Invalid=La clé de licence n'est pas valide. Vérifiez qu'elle a été copiée en entier, telle que vous l'avez reçue.
+License_OtherMachine=Cette clé de licence est destinée à un autre ordinateur. Chaque clé ne fonctionne que sur l'ordinateur dont le code a été envoyé lors de la demande.
 # --- Probability ---
 Probability_AlmostCertain=Quasi certaine
 Probability_Likely=Probable

@@ -1,8 +1,8 @@
 # Fuente de FileMessages.resx (se regenera con tools/mkresx.py).
-Error_NotRmx=El archivo no es una matriz de auros.ram. Verifique que eligió el archivo correcto.
-Error_Corrupted=El archivo está dañado y no se puede abrir. No se modificó. Pruebe con una copia de respaldo.
-Error_NewerVersion=El archivo fue creado con una versión más nueva de auros.ram. Actualice la aplicación para abrirlo.
-Error_ObsoleteVersion=El archivo es de una versión de prueba anterior de auros.ram (con valor agregado y dificultad) y ya no se puede abrir. Cree una matriz nueva.
+Error_NotRmx=El archivo no es una matriz de auros.ram. Verifica que elegiste el archivo correcto.
+Error_Corrupted=El archivo está dañado y no se puede abrir. No se modificó. Prueba con una copia de respaldo.
+Error_NewerVersion=El archivo fue creado con una versión más nueva de auros.ram. Actualiza la aplicación para abrirlo.
+Error_ObsoleteVersion=El archivo es de una versión de prueba anterior de auros.ram (con valor agregado y dificultad) y ya no se puede abrir. Crea una matriz nueva.
 Error_WrongPassword=La contraseña no es correcta, o el archivo fue alterado. El archivo no se modificó.
 Error_WrongKind=El archivo no es del tipo esperado: se esperaba una matriz y es una plantilla, o al revés.
-Error_Io=No se pudo leer o escribir el archivo. Verifique que la carpeta exista, que tenga permisos y que el archivo no esté abierto en otro programa.
+Error_Io=No se pudo leer o escribir el archivo. Verifica que la carpeta exista, que tengas permisos y que el archivo no esté abierto en otro programa.

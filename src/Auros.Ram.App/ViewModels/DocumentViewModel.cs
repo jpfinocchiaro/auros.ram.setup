@@ -55,6 +55,9 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
         // Las reglas de fechas de evaluación vienen de las Preferencias, no del archivo.
         Document.DatePolicy = DisplayOptions.Current.DatePolicy;
         Document.EntryPolicy = DisplayOptions.Current.EntryPolicy;
+        // Límites de la versión gratuita (1 empresa y 5 riesgos por matriz), salvo que haya licencia.
+        Document.Limits = Edition.Limits;
+        Edition.Changed += OnEditionChanged;
         Key = key;
         Ui = ui;
         View = Document;
@@ -72,6 +75,19 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
     }
 
     public RiskMatrixDocument Document { get; }
+
+    /// <summary>La matriz supera los límites de la versión gratuita: se consulta y exporta, pero no se modifica.</summary>
+    public bool IsReadOnly => Document.IsReadOnly;
+
+    public string ReadOnlyText => string.Format(CultureInfo.CurrentCulture, Core.Resources.Messages.Edition_ReadOnly,
+        Document.Limits.MaxCompanies ?? 0, Document.Limits.MaxRisks ?? 0);
+
+    private void OnEditionChanged(object? sender, EventArgs e)
+    {
+        Document.Limits = Edition.Limits;
+        OnPropertyChanged(nameof(IsReadOnly));
+        OnPropertyChanged(nameof(ReadOnlyText));
+    }
 
     // ---- Empresa y unidad de negocio que se miran ------------------------------
 
@@ -606,6 +622,7 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
 
         _disposed = true;
         Document.Changed -= OnDocumentChanged;
+        Edition.Changed -= OnEditionChanged;
         Key.Dispose();
         _saveGate.Dispose();
     }

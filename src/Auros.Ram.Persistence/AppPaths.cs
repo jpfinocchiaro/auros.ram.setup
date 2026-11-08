@@ -22,6 +22,9 @@ public static class AppPaths
 
     public static string SettingsFile => Path.Combine(Ensure(""), "settings.json");
 
+    /// <summary>Clave de licencia de la versión completa (atada a este equipo).</summary>
+    public static string LicenseFile => Path.Combine(Ensure(""), "licencia.key");
+
     /// <summary>Borra archivos de trabajo que quedaron de una sesión anterior (todos están cifrados).</summary>
     public static void CleanWorkDirectory()
     {

@@ -7,7 +7,12 @@
              x:Class="Auros.Ram.App.Views.DocumentView"
              x:DataType="vm:DocumentViewModel">
   <Panel>
-    <TabControl Classes="rail" SelectedIndex="{Binding SelectedSection}" IsVisible="{Binding !IsLocked}">
+    <DockPanel IsVisible="{Binding !IsLocked}">
+    <!-- Matriz que supera los límites de la versión gratuita: solo consulta y exportación. -->
+    <Border DockPanel.Dock="Top" IsVisible="{Binding IsReadOnly}" Background="{DynamicResource WarningBackBrush}" Padding="16,8">
+      <TextBlock TextWrapping="Wrap" Text="{Binding ReadOnlyText}" />
+    </Border>
+    <TabControl Classes="rail" SelectedIndex="{Binding SelectedSection}">
       <TabItem>
         <TabItem.Header>
           <StackPanel Orientation="Horizontal" Spacing="10">
@@ -70,6 +75,7 @@
         <views:ScalesView DataContext="{Binding Scales}" />
       </TabItem>
     </TabControl>
+    </DockPanel>
 
     <!-- RNF-36: archivo bloqueado por inactividad; el contenido no se muestra hasta desbloquear. -->
     <Border IsVisible="{Binding IsLocked}" Background="{DynamicResource SurfaceAltBrush}">

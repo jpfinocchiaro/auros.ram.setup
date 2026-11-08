@@ -238,6 +238,23 @@ public partial class SplashWindow : Window
     }
 }
 
+public partial class LicenseWindow : Window
+{
+    public LicenseWindow() => InitializeComponent();
+
+    public LicenseWindow(LicenseViewModel vm) : this() => DataContext = vm;
+
+    private async void OnCopy(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is LicenseViewModel vm && Clipboard is { } clipboard)
+        {
+            await clipboard.SetTextAsync(vm.MachineCode);
+        }
+    }
+
+    private void OnClose(object? sender, RoutedEventArgs e) => Close();
+}
+
 public partial class AboutWindow : Window
 {
     public AboutWindow()

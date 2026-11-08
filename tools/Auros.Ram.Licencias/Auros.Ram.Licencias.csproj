@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Herramienta de licencias de auros.ram: genera las claves de la versión paga.
+    NO se distribuye con la aplicación. Usa la clave privada, que queda solo en el equipo de quien emite las licencias.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Auros.Ram.Licencias</RootNamespace>
+    <AssemblyName>auros.ram-licencias</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Auros.Ram.Core\Auros.Ram.Core.csproj" />
+  </ItemGroup>
+</Project>

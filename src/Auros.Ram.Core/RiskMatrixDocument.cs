@@ -1,3 +1,4 @@
+using Auros.Ram.Core.Licensing;
 using Auros.Ram.Core.Model;
 using Auros.Ram.Core.Resources;
 using Auros.Ram.Core.Services;
@@ -427,6 +428,15 @@ public sealed partial class RiskMatrixDocument
     /// <summary>Cómo se cargan impacto y probabilidad: dato obligatorio y ajuste automático (Preferencias).</summary>
     public RiskEntryPolicy EntryPolicy { get; set; } = RiskEntryPolicy.Default;
 
+    /// <summary>Cuántas empresas y riesgos admite la matriz según la edición (la aplicación la toma de la licencia).</summary>
+    public EditionLimits Limits { get; set; } = EditionLimits.Unlimited;
+
+    /// <summary>
+    /// La matriz supera lo que admite la edición (se hizo con la versión paga y se abrió en la gratuita):
+    /// se puede consultar y exportar, pero no modificar.
+    /// </summary>
+    public bool IsReadOnly => Limits.TooManyCompanies(Project.Companies.Count) || Limits.TooManyRisks(_risks.Count);
+
     /// <param name="assessedOn">Fecha de la primera evaluación (hoy si se omite).</param>
     /// <param name="note">Comentario de la evaluación.</param>
     /// <param name="actions">Acciones mitigantes de la primera evaluación.</param>
@@ -717,7 +727,22 @@ public sealed partial class RiskMatrixDocument
 
     private void Apply(string description, DocumentChangeKind kind, Action redo, Action undo)
     {
+        // Límites de la edición: una matriz que ya los supera no se modifica, y ningún cambio puede pasarlos.
+        if (IsReadOnly)
+        {
+            throw new DomainException(Validation.Format(Messages.Edition_ReadOnly, Limits.MaxCompanies ?? 0, Limits.MaxRisks ?? 0));
+        }
+
         redo();
+        if (Limits.TooManyCompanies(Project.Companies.Count) || Limits.TooManyRisks(_risks.Count))
+        {
+            var companies = Limits.TooManyCompanies(Project.Companies.Count);
+            undo();
+            throw new DomainException(companies
+                ? Validation.Format(Messages.Edition_CompanyLimit, Limits.MaxCompanies ?? 0)
+                : Validation.Format(Messages.Edition_RiskLimit, Limits.MaxRisks ?? 0));
+        }
+
         History.Push(description,
             () => { undo(); Raise(kind); },
             () => { redo(); Raise(kind); });

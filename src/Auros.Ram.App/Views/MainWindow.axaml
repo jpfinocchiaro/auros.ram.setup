@@ -19,6 +19,10 @@
         <TextBlock Text="{Binding Language.Name}" FontSize="13" VerticalAlignment="Center" />
       </StackPanel>
     </Button>
+    <!-- Versión gratuita: un clic abre Ayuda → Licencia para activar la versión completa. -->
+    <Button DockPanel.Dock="Right" Margin="0,0,4,0" Padding="10,3" Classes="accent" VerticalAlignment="Center"
+            IsVisible="{Binding IsFreeEdition}" ToolTip.Tip="{Binding FreeEditionTip}" Command="{Binding LicenseCommand}"
+            Content="{x:Static r:Strings.License_FreeBadge}" />
     <Menu Background="Transparent">
       <MenuItem Header="{x:Static r:Strings.Menu_File}">
         <MenuItem x:Name="MiNew" Header="{x:Static r:Strings.Menu_New}" Command="{Binding NewCommand}" />
@@ -88,6 +92,7 @@
         <MenuItem Header="{x:Static r:Strings.Menu_Preferences}" Command="{Binding PreferencesCommand}" />
       </MenuItem>
       <MenuItem Header="{x:Static r:Strings.Menu_Help}">
+        <MenuItem Header="{x:Static r:Strings.Menu_License}" Command="{Binding LicenseCommand}" />
         <MenuItem Header="{x:Static r:Strings.Menu_About}" Command="{Binding AboutCommand}" />
       </MenuItem>
     </Menu>

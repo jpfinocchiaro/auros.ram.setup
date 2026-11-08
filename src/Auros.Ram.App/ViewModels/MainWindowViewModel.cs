@@ -46,6 +46,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         };
         DisplayOptions.Current.DatePolicy = settings.DatePolicy;
         DisplayOptions.Current.EntryPolicy = settings.EntryPolicy;
+        Edition.Changed += (_, _) => OnPropertyChanged(nameof(IsFreeEdition));
         RefreshRecent();
 
         _autosaveTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(settings.AutosaveMinutes) };
@@ -88,6 +89,12 @@ public sealed partial class MainWindowViewModel : ObservableObject
     public LanguageOption Language => Languages.Current;
 
     public string LanguageTip => string.Format(CultureInfo.CurrentCulture, Strings.Language_CurrentTip, Language.Name);
+
+    /// <summary>Versión gratuita (sin licencia): se avisa arriba a la derecha.</summary>
+    public bool IsFreeEdition => !Edition.IsLicensed;
+
+    public string FreeEditionTip => string.Format(CultureInfo.CurrentCulture, Strings.License_FreeBadgeTip,
+        Edition.Limits.MaxCompanies ?? 0, Edition.Limits.MaxRisks ?? 0);
 
     /// <summary>Mapa de calor de las escalas estándar, para la pantalla de bienvenida (el impacto mayor arriba).</summary>
     public IReadOnlyList<SketchRow> SampleHeatMap { get; } = BuildSample();
@@ -165,6 +172,12 @@ public sealed partial class MainWindowViewModel : ObservableObject
             if (template.Parameters is { } parameters)
             {
                 project.CopyParametersFrom(parameters);
+            }
+
+            // En la versión gratuita, de la plantilla se toman solo las empresas que admite (la primera).
+            if (Edition.Limits.MaxCompanies is int maxCompanies && project.Companies.Count > maxCompanies)
+            {
+                project.Companies = [.. project.Companies.Take(maxCompanies)];
             }
         }
 
@@ -615,6 +628,10 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     [RelayCommand]
     private Task About() => _ui.ShowAboutAsync();
+
+    /// <summary>Ayuda → Licencia: código de este equipo y activación de la versión completa.</summary>
+    [RelayCommand]
+    private Task License() => _ui.ShowLicenseAsync(new LicenseViewModel());
 
     /// <summary>Configuración → Consecuencias y criterios: los catálogos de la matriz activa.</summary>
     [RelayCommand]

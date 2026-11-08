@@ -87,6 +87,26 @@ Privacidad y seguridad → «Abrir igualmente»). Con un certificado *Developer 
 bash tools/macos/finish-on-mac.sh auros.ram-2.3.0-macos-arm64.zip "Developer ID Application: Auros (TEAMID)" perfil-notario
 ```
 
+## Versión gratuita y licencias
+
+Sin licencia, auros.ram funciona como **versión gratuita**: cada matriz admite 1 empresa y 5 riesgos. Una matriz que ya
+los supera (hecha con la versión completa) se abre solo para consultar y exportar. Con una licencia no hay límites.
+
+La licencia está atada al equipo: en **Ayuda → Licencia** el cliente ve el *código de este equipo* y lo envía; con ese
+código se genera su clave, que solo funciona en ese equipo (si cambia de equipo o reinstala el sistema, necesita otra).
+La clave va firmada (ECDSA P-256) y la aplicación la verifica sin internet.
+
+Para emitir una licencia:
+
+```
+dotnet run --project tools/Auros.Ram.Licencias -- emitir "<código de equipo>" "<cliente>"
+```
+
+La clave privada está en `%USERPROFILE%\auros.ram-licencias\clave-privada.pem` y cada licencia emitida se anota en
+`registro.csv`, en la misma carpeta. **Hay que guardar una copia de seguridad de la clave privada**: sin ella no se pueden
+emitir más licencias, y quien la tenga puede emitirlas. Nunca va al repositorio. La herramienta no se distribuye con la
+aplicación.
+
 ## Textos e idiomas (RNF-42)
 
 Los textos están en archivos `.resx` (`Resources/Strings.resx`, `Messages.resx`, …). Se generan desde

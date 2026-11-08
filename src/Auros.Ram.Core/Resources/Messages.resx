@@ -16,37 +16,40 @@
   <data name="DefaultScale_Impact" xml:space="preserve"><value>Impacto ({0} niveles)</value></data>
   <data name="DefaultScale_Probability" xml:space="preserve"><value>Probabilidad ({0} niveles)</value></data>
   <data name="DefaultScale_Risk" xml:space="preserve"><value>Nivel de riesgo estándar</value></data>
-  <data name="Error_DuplicateLevelId" xml:space="preserve"><value>La escala tiene niveles repetidos. Quite el duplicado y vuelva a intentar.</value></data>
+  <data name="Edition_CompanyLimit" xml:space="preserve"><value>La versión gratuita admite {0} empresa por matriz. Para cargar más, activa la licencia en Ayuda → Licencia.</value></data>
+  <data name="Edition_ReadOnly" xml:space="preserve"><value>Esta matriz supera lo que admite la versión gratuita ({0} empresa y {1} riesgos): se puede consultar y exportar, pero no modificar. Para modificarla, activa la licencia en Ayuda → Licencia.</value></data>
+  <data name="Edition_RiskLimit" xml:space="preserve"><value>La versión gratuita admite hasta {0} riesgos por matriz. Para cargar más, activa la licencia en Ayuda → Licencia.</value></data>
+  <data name="Error_DuplicateLevelId" xml:space="preserve"><value>La escala tiene niveles repetidos. Quita el duplicado y vuelve a intentarlo.</value></data>
   <data name="Error_FieldTooLong" xml:space="preserve"><value>El campo «{0}» puede tener hasta {1} caracteres.</value></data>
   <data name="Error_HeatCellInvalid" xml:space="preserve"><value>La celda del mapa de calor no corresponde a las escalas del proyecto.</value></data>
   <data name="Error_JsonInvalid" xml:space="preserve"><value>El archivo no es una exportación JSON de auros.ram o está dañado.</value></data>
-  <data name="Error_JsonNewerVersion" xml:space="preserve"><value>El archivo JSON fue generado por una versión más nueva de auros.ram. Actualice la aplicación para importarlo.</value></data>
+  <data name="Error_JsonNewerVersion" xml:space="preserve"><value>El archivo JSON fue generado por una versión más nueva de auros.ram. Actualiza la aplicación para importarlo.</value></data>
   <data name="Error_JsonObsoleteVersion" xml:space="preserve"><value>El JSON es de una versión de prueba anterior de auros.ram (con valor agregado y dificultad) y ya no se puede importar.</value></data>
   <data name="Error_JsonRisk" xml:space="preserve"><value>No se pudo importar el riesgo «{0}»: {1}</value></data>
-  <data name="Error_LevelColorInvalid" xml:space="preserve"><value>El color de fondo del nivel «{0}» no es válido. Use un código como #2E9E44 o elija uno de la lista.</value></data>
-  <data name="Error_LevelInUse" xml:space="preserve"><value>No se puede quitar el nivel «{0}» porque hay riesgos que lo usan. Cambie el nivel de esos riesgos primero.</value></data>
+  <data name="Error_LevelColorInvalid" xml:space="preserve"><value>El color de fondo del nivel «{0}» no es válido. Usa un código como #2E9E44 o elige uno de la lista.</value></data>
+  <data name="Error_LevelInUse" xml:space="preserve"><value>No se puede quitar el nivel «{0}» porque hay riesgos que lo usan. Cambia el nivel de esos riesgos primero.</value></data>
   <data name="Error_LevelNameRequired" xml:space="preserve"><value>Todos los niveles necesitan un nombre.</value></data>
   <data name="Error_LevelNameTooLong" xml:space="preserve"><value>El nombre del nivel «{0}» supera los {1} caracteres.</value></data>
   <data name="Error_LevelOrderRange" xml:space="preserve"><value>El orden del nivel «{0}» debe ser un número entero entre {1} y {2}.</value></data>
-  <data name="Error_LevelTextColorInvalid" xml:space="preserve"><value>El color de fuente del nivel «{0}» no es válido. Use un código como #FFFFFF o elija uno de la lista.</value></data>
+  <data name="Error_LevelTextColorInvalid" xml:space="preserve"><value>El color de fuente del nivel «{0}» no es válido. Usa un código como #FFFFFF o elige uno de la lista.</value></data>
   <data name="Error_ProjectNameRequired" xml:space="preserve"><value>El proyecto necesita un nombre.</value></data>
-  <data name="Error_ProjectScaleMissing" xml:space="preserve"><value>La escala de {0} asignada al proyecto no existe. Elija otra.</value></data>
-  <data name="Error_ProjectScaleRequired" xml:space="preserve"><value>Asigne al proyecto una escala de {0}.</value></data>
-  <data name="Error_ProjectScaleWrongType" xml:space="preserve"><value>La escala «{0}» no es de tipo {1}. Elija una escala de ese tipo.</value></data>
-  <data name="Error_RiskLevelNotInScale" xml:space="preserve"><value>El nivel de {0} elegido no pertenece a la escala «{1}» del proyecto. Elija uno de los niveles disponibles.</value></data>
-  <data name="Error_RiskLevelRequired" xml:space="preserve"><value>Elija el nivel de {0}.</value></data>
-  <data name="Error_RiskLongRequired" xml:space="preserve"><value>Escriba la descripción larga (detalle, análisis y recomendación).</value></data>
+  <data name="Error_ProjectScaleMissing" xml:space="preserve"><value>La escala de {0} asignada al proyecto no existe. Elige otra.</value></data>
+  <data name="Error_ProjectScaleRequired" xml:space="preserve"><value>Asigna al proyecto una escala de {0}.</value></data>
+  <data name="Error_ProjectScaleWrongType" xml:space="preserve"><value>La escala «{0}» no es de tipo {1}. Elige una escala de ese tipo.</value></data>
+  <data name="Error_RiskLevelNotInScale" xml:space="preserve"><value>El nivel de {0} elegido no pertenece a la escala «{1}» del proyecto. Elige uno de los niveles disponibles.</value></data>
+  <data name="Error_RiskLevelRequired" xml:space="preserve"><value>Elige el nivel de {0}.</value></data>
+  <data name="Error_RiskLongRequired" xml:space="preserve"><value>Escribe la descripción larga (detalle, análisis y recomendación).</value></data>
   <data name="Error_RiskNotFound" xml:space="preserve"><value>El riesgo ya no existe en el archivo.</value></data>
-  <data name="Error_RiskShortRequired" xml:space="preserve"><value>Escriba la descripción corta (resumen ejecutivo).</value></data>
+  <data name="Error_RiskShortRequired" xml:space="preserve"><value>Escribe la descripción corta (resumen ejecutivo).</value></data>
   <data name="Error_RiskShortTooLong" xml:space="preserve"><value>La descripción corta puede tener hasta {0} caracteres.</value></data>
   <data name="Error_RiskTitleRequired" xml:space="preserve"><value>El riesgo necesita un título.</value></data>
   <data name="Error_RiskTitleTooLong" xml:space="preserve"><value>El título puede tener hasta {0} caracteres.</value></data>
   <data name="Error_ScaleAssigned" xml:space="preserve"><value>No se puede eliminar la escala «{0}» porque está asignada al proyecto.</value></data>
   <data name="Error_ScaleNameRequired" xml:space="preserve"><value>La escala necesita un nombre.</value></data>
   <data name="Error_ScaleNameTooLong" xml:space="preserve"><value>El nombre de la escala puede tener hasta {0} caracteres.</value></data>
-  <data name="Error_ScaleNeedsLevel" xml:space="preserve"><value>La escala debe tener al menos un nivel. Agregue uno antes de guardar.</value></data>
+  <data name="Error_ScaleNeedsLevel" xml:space="preserve"><value>La escala debe tener al menos un nivel. Agrega uno antes de guardar.</value></data>
   <data name="Error_ScaleNotFound" xml:space="preserve"><value>La escala ya no existe en el archivo.</value></data>
-  <data name="Error_ScaleTypeInvalid" xml:space="preserve"><value>Elija el tipo de la escala: Nivel de riesgo, Impacto o Probabilidad de ocurrencia.</value></data>
+  <data name="Error_ScaleTypeInvalid" xml:space="preserve"><value>Elige el tipo de la escala: Nivel de riesgo, Impacto o Probabilidad de ocurrencia.</value></data>
   <data name="Error_ScalesLockedByRisks" xml:space="preserve"><value>Las escalas del proyecto no se pueden cambiar porque ya tiene riesgos cargados.</value></data>
   <data name="Field_Company" xml:space="preserve"><value>Empresa</value></data>
   <data name="Field_ProjectName" xml:space="preserve"><value>Nombre del proyecto</value></data>
@@ -65,6 +68,8 @@
   <data name="Level_High" xml:space="preserve"><value>Alto</value></data>
   <data name="Level_Low" xml:space="preserve"><value>Bajo</value></data>
   <data name="Level_Medium" xml:space="preserve"><value>Medio</value></data>
+  <data name="License_Invalid" xml:space="preserve"><value>La clave de licencia no es válida. Revisa que esté copiada completa, tal como la recibiste.</value></data>
+  <data name="License_OtherMachine" xml:space="preserve"><value>Esta clave de licencia es para otro equipo. Cada clave funciona solo en el equipo cuyo código se envió al pedirla.</value></data>
   <data name="Probability_AlmostCertain" xml:space="preserve"><value>Casi segura</value></data>
   <data name="Probability_Likely" xml:space="preserve"><value>Probable</value></data>
   <data name="Probability_Possible" xml:space="preserve"><value>Posible</value></data>
@@ -117,12 +122,12 @@
   <data name="Graded_ModerateHigh" xml:space="preserve"><value>Moderado alto</value></data>
   <data name="Suggested_Consequences" xml:space="preserve"><value>Accidente laboral|Pérdida de rentabilidad|Pérdida de reputación|Sanción regulatoria|Interrupción de la operación|Pérdida o fuga de información|Fraude|Daño ambiental</value></data>
   <data name="Suggested_Materiality" xml:space="preserve"><value>Impacto económico significativo|Incumplimiento legal o regulatorio|Afecta la reputación|Afecta la seguridad de las personas|Afecta la continuidad del negocio</value></data>
-  <data name="Error_CatalogNameRequired" xml:space="preserve"><value>Escriba una descripción.</value></data>
+  <data name="Error_CatalogNameRequired" xml:space="preserve"><value>Escribe una descripción.</value></data>
   <data name="Error_CatalogNameTooLong" xml:space="preserve"><value>La descripción no puede tener más de {0} caracteres.</value></data>
   <data name="Error_CatalogItemNotFound" xml:space="preserve"><value>La opción ya no existe en el catálogo de la matriz.</value></data>
   <data name="Error_CatalogDuplicate" xml:space="preserve"><value>Ya hay una opción «{0}».</value></data>
-  <data name="Error_CatalogItemInUse" xml:space="preserve"><value>No se puede quitar «{0}»: la usan {1} riesgo(s). Quítela primero de esos riesgos.</value></data>
-  <data name="Error_AllAssessments" xml:space="preserve"><value>No se pueden quitar todas las evaluaciones de «{0}»: para eso elimine el riesgo.</value></data>
+  <data name="Error_CatalogItemInUse" xml:space="preserve"><value>No se puede quitar «{0}»: la usan {1} riesgo(s). Quítala primero de esos riesgos.</value></data>
+  <data name="Error_AllAssessments" xml:space="preserve"><value>No se pueden quitar todas las evaluaciones de «{0}»: para eso elimina el riesgo.</value></data>
   <data name="Undo_AddCatalogItem" xml:space="preserve"><value>Agregar «{0}» al catálogo</value></data>
   <data name="Undo_EditCatalogItem" xml:space="preserve"><value>Renombrar opción «{0}»</value></data>
   <data name="Undo_RemoveCatalogItem" xml:space="preserve"><value>Quitar «{0}» del catálogo</value></data>
@@ -130,8 +135,8 @@
   <data name="Undo_RemoveAssessments" xml:space="preserve"><value>Quitar {0} evaluación(es)</value></data>
   <data name="Default_Company" xml:space="preserve"><value>Empresa</value></data>
   <data name="Default_Unit" xml:space="preserve"><value>General</value></data>
-  <data name="Error_RiskCompanyRequired" xml:space="preserve"><value>Elija la empresa del riesgo.</value></data>
-  <data name="Error_RiskUnitRequired" xml:space="preserve"><value>Elija una unidad de negocio de «{0}».</value></data>
+  <data name="Error_RiskCompanyRequired" xml:space="preserve"><value>Elige la empresa del riesgo.</value></data>
+  <data name="Error_RiskUnitRequired" xml:space="preserve"><value>Elige una unidad de negocio de «{0}».</value></data>
   <data name="Error_CompanyNotFound" xml:space="preserve"><value>La empresa ya no existe en la matriz.</value></data>
   <data name="Error_UnitNotFound" xml:space="preserve"><value>La unidad de negocio ya no existe en la matriz.</value></data>
   <data name="Error_LastCompany" xml:space="preserve"><value>La matriz necesita al menos una empresa.</value></data>

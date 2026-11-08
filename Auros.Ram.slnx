@@ -5,6 +5,9 @@
     <Project Path="src/Auros.Ram.Export/Auros.Ram.Export.csproj" />
     <Project Path="src/Auros.Ram.Persistence/Auros.Ram.Persistence.csproj" />
   </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Auros.Ram.Licencias/Auros.Ram.Licencias.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Auros.Ram.App.Tests/Auros.Ram.App.Tests.csproj" />
     <Project Path="tests/Auros.Ram.Tests/Auros.Ram.Tests.csproj" />

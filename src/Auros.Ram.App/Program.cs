@@ -29,6 +29,7 @@ internal static class Program
 
         // El idioma elegido en Preferencias, antes de crear cualquier ventana.
         Languages.Startup(AppSettings.Load().Language);
+        Edition.Load();
         StartupFiles = [.. args.Where(File.Exists)];
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
