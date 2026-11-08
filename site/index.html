@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>auros.ram — Matrices de riesgo para auditoría y consultoría</title>
+  <meta name="description" content="Aplicación de escritorio para armar matrices de riesgo: escalas a medida, mapa de calor, historial de evaluaciones, acciones mitigantes e informes en PDF y Excel. Gratis hasta 5 riesgos por matriz.">
+  <meta property="og:title" content="auros.ram">
+  <meta property="og:image" content="img/matriz.webp">
+  <link rel="icon" type="image/png" href="img/favicon.png">
+  <link rel="preload" href="fonts/IBMPlexSansCondensed-SemiBold.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#contenido" data-i18n="skip">Ir al contenido</a>
+
+  <header class="top">
+    <div class="wrap top-inner">
+      <a class="brand" href="#" aria-label="auros.ram"><img src="img/logo.png" alt="auros.ram — risk assessment matrix" width="180" height="36"></a>
+      <nav aria-label="auros.ram">
+        <a href="#funciones" data-i18n="nav.features">Funciones</a>
+        <a href="#precios" data-i18n="nav.pricing">Precios</a>
+        <a href="#preguntas" data-i18n="nav.faq">Preguntas</a>
+        <div class="lang">
+          <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="true" aria-expanded="false" aria-controls="lang-menu">
+            <img id="lang-flag" src="img/flags/es.svg" alt="" width="24" height="16">
+            <span id="lang-code">ES</span>
+            <span class="sr-only" data-i18n="lang.label">Idioma</span>
+          </button>
+          <ul class="lang-menu" id="lang-menu" role="menu" hidden>
+            <li role="none"><button type="button" role="menuitemradio" data-lang="es" lang="es"><img src="img/flags/es.svg" alt="" width="24" height="16">Español</button></li>
+            <li role="none"><button type="button" role="menuitemradio" data-lang="en" lang="en"><img src="img/flags/us.svg" alt="" width="24" height="16">English</button></li>
+            <li role="none"><button type="button" role="menuitemradio" data-lang="pt" lang="pt"><img src="img/flags/br.svg" alt="" width="24" height="16">Português</button></li>
+            <li role="none"><button type="button" role="menuitemradio" data-lang="fr" lang="fr"><img src="img/flags/fr.svg" alt="" width="24" height="16">Français</button></li>
+          </ul>
+        </div>
+        <a class="btn btn-small" href="#descargar" data-i18n="nav.download">Descargar gratis</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="contenido">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <h1 data-i18n="hero.title">Clasifica cada riesgo y sigue cómo cambia en el tiempo.</h1>
+          <p class="lead" data-i18n="hero.lead"></p>
+          <div class="cta">
+            <a class="btn" id="cta-primary" href="#descargar" data-i18n="hero.cta">Descargar gratis</a>
+            <a class="btn btn-ghost" href="#precios" data-i18n="hero.pricing">Ver precios</a>
+          </div>
+          <p class="fine" id="cta-note"></p>
+        </div>
+
+        <figure class="demo" aria-labelledby="demo-title">
+          <div class="demo-head">
+            <p id="demo-title" class="demo-title" data-i18n="demo.title"></p>
+            <div class="seg" role="radiogroup" data-i18n-aria="demo.dates">
+              <button type="button" role="radio" aria-checked="true" data-date="jun" data-i18n="demo.jun"></button>
+              <button type="button" role="radio" aria-checked="false" data-date="oct" data-i18n="demo.oct"></button>
+            </div>
+          </div>
+          <div class="matrix">
+            <p class="axis axis-y" data-i18n="demo.impact"></p>
+            <ol class="levels levels-y" id="levels-y" aria-hidden="true"></ol>
+            <div class="grid" id="grid" role="img" data-i18n-aria="demo.aria"></div>
+            <ol class="levels levels-x" id="levels-x" aria-hidden="true"></ol>
+            <p class="axis axis-x" data-i18n="demo.prob"></p>
+          </div>
+          <ol class="legend" id="legend" aria-live="polite"></ol>
+          <figcaption class="fine" data-i18n="demo.caption"></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="shots" aria-labelledby="shots-title">
+      <div class="wrap">
+        <h2 id="shots-title" data-i18n="shots.title"></h2>
+        <div class="tabs" role="tablist" data-i18n-aria="shots.tabs">
+          <button type="button" role="tab" aria-selected="true" aria-controls="shot" data-shot="matriz" data-i18n="shots.matriz"></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="shot" data-shot="riesgos" data-i18n="shots.riesgos"></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="shot" data-shot="evolucion" data-i18n="shots.evolucion"></button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="shot" data-shot="historial" data-i18n="shots.historial"></button>
+        </div>
+        <figure class="shot" id="shot" role="tabpanel">
+          <img id="shot-img" src="img/matriz.webp" width="1366" height="768" alt="" loading="lazy">
+          <figcaption><span id="shot-caption"></span> <span id="shot-lang" class="shot-lang"></span></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="funciones" class="features" aria-labelledby="funciones-title">
+      <div class="wrap">
+        <h2 id="funciones-title" data-i18n="feat.title"></h2>
+        <dl class="feature-list" id="feature-list"></dl>
+      </div>
+    </section>
+
+    <section id="precios" class="pricing" aria-labelledby="precios-title">
+      <div class="wrap">
+        <h2 id="precios-title" data-i18n="price.title"></h2>
+        <div class="table-scroll">
+          <table class="compare">
+            <caption class="sr-only" data-i18n="price.caption"></caption>
+            <thead>
+              <tr>
+                <th scope="col"><span class="sr-only" data-i18n="price.feature"></span></th>
+                <th scope="col"><span data-i18n="price.free"></span><span class="price" data-i18n="price.free.price"></span></th>
+                <th scope="col" class="full"><span data-i18n="price.full"></span><span class="price" id="price"></span></th>
+              </tr>
+            </thead>
+            <tbody id="price-rows"></tbody>
+            <tfoot>
+              <tr>
+                <td></td>
+                <td><a class="btn btn-ghost" href="#descargar" data-i18n="nav.download"></a></td>
+                <td class="full"><a class="btn" href="#comprar" data-i18n="price.buy"></a></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="comprar" class="buy" aria-labelledby="comprar-title">
+      <div class="wrap">
+        <h2 id="comprar-title" data-i18n="buy.title"></h2>
+        <p class="section-lead" data-i18n="buy.lead"></p>
+        <ol class="steps">
+          <li><h3 data-i18n="buy.1.t"></h3><p data-i18n-html="buy.1.d_html"></p></li>
+          <li><h3 data-i18n="buy.2.t"></h3><p data-i18n-html="buy.2.d_html"></p></li>
+          <li>
+            <h3 data-i18n="buy.3.t"></h3><p data-i18n-html="buy.3.d_html"></p>
+            <a class="btn" id="pay-link" href="#comprar" data-i18n="buy.3.btn"></a>
+          </li>
+          <li>
+            <h3 data-i18n="buy.4.t"></h3><p data-i18n-html="buy.4.d_html"></p>
+            <a class="btn btn-ghost" id="mail-link" href="#comprar" data-i18n="buy.4.btn"></a>
+          </li>
+          <li><h3 data-i18n="buy.5.t"></h3><p data-i18n-html="buy.5.d_html"></p></li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="descargar" class="download" aria-labelledby="descargar-title">
+      <div class="wrap">
+        <h2 id="descargar-title"><span data-i18n="dl.title"></span> <span class="version" id="version"></span></h2>
+        <ul class="files">
+          <li data-os="windows">
+            <div><h3 data-i18n="dl.win"></h3><p data-i18n="dl.win.req"></p></div>
+            <a class="btn" data-file="win-x64.msi" data-i18n="dl.win.btn" href="#descargar"></a>
+          </li>
+          <li data-os="mac">
+            <div><h3 data-i18n="dl.arm"></h3><p data-i18n="dl.arm.req"></p></div>
+            <a class="btn" data-file="macos-arm64.dmg" data-i18n="dl.arm.btn" href="#descargar"></a>
+          </li>
+          <li data-os="mac">
+            <div><h3 data-i18n="dl.intel"></h3><p data-i18n="dl.intel.req"></p></div>
+            <a class="btn btn-ghost" data-file="macos-x64.dmg" data-i18n="dl.intel.btn" href="#descargar"></a>
+          </li>
+        </ul>
+        <p class="fine" data-i18n="dl.which"></p>
+      </div>
+    </section>
+
+    <section id="preguntas" class="faq" aria-labelledby="preguntas-title">
+      <div class="wrap narrow">
+        <h2 id="preguntas-title" data-i18n="faq.title"></h2>
+        <div id="faq-list"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-inner">
+      <img src="img/logo.png" alt="auros.ram" width="140" height="28">
+      <p>© 2026 Auros · <a id="foot-mail" href="#comprar" data-i18n="foot.contact"></a></p>
+    </div>
+  </footer>
+
+
+  <script src="i18n.js" defer></script>
+  <script src="app.js" defer></script>
+</body>
+</html>

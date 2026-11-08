@@ -57,7 +57,7 @@ pwsh tools/build-installer.ps1
 ```
 
 Publica el ejecutable y deja `publish/installer/auros.ram-<versión>-win-x64.msi`. Instala por máquina en
-`Program Filesuros.ram`, crea accesos directos en el menú Inicio y el escritorio, y asocia `.rmx` y `.rmt` para
+`Program Files\auros.ram`, crea accesos directos en el menú Inicio y el escritorio, y asocia `.rmx` y `.rmt` para
 abrirlos con doble clic. Una versión nueva reemplaza a la anterior (el `UpgradeCode` de `installer/Package.wxs` no
 se cambia nunca). Al desinstalar no se tocan las matrices ni las preferencias. El MSI no está firmado: hasta tener
 un certificado de firma de código, Windows SmartScreen avisa al abrirlo.
@@ -96,16 +96,40 @@ La licencia está atada al equipo: en **Ayuda → Licencia** el cliente ve el *c
 código se genera su clave, que solo funciona en ese equipo (si cambia de equipo o reinstala el sistema, necesita otra).
 La clave va firmada (ECDSA P-256) y la aplicación la verifica sin internet.
 
-Para emitir una licencia:
+Para emitir una licencia (cada licencia es una venta):
 
 ```
-dotnet run --project tools/Auros.Ram.Licencias -- emitir "<código de equipo>" "<cliente>"
+dotnet run --project tools/Auros.Ram.Licencias -- emitir "<código de equipo>" "<cliente>" --email <correo> --monto 120 --pago "Mercado Pago"
 ```
 
-La clave privada está en `%USERPROFILE%\auros.ram-licencias\clave-privada.pem` y cada licencia emitida se anota en
-`registro.csv`, en la misma carpeta. **Hay que guardar una copia de seguridad de la clave privada**: sin ella no se pueden
-emitir más licencias, y quien la tenga puede emitirlas. Nunca va al repositorio. La herramienta no se distribuye con la
+`--email`, `--monto`, `--moneda` (USD si no se indica), `--pago` y `--nota` son opcionales. Para ver las ventas, con
+totales por moneda y por mes:
+
+```
+dotnet run --project tools/Auros.Ram.Licencias -- ventas
+```
+
+La clave privada está en `%USERPROFILE%\auros.ram-licencias\clave-privada.pem`, y cada venta se anota en `ventas.csv`, en
+la misma carpeta (separado por «;», se abre con Excel): fecha, cliente, email, equipo, monto, moneda, medio de pago, nota
+y la clave entregada. **Hay que guardar una copia de seguridad de esa carpeta**: sin la clave privada no se pueden emitir
+más licencias, y quien la tenga puede emitirlas. Nunca va al repositorio. La herramienta no se distribuye con la
 aplicación.
+
+## Landing page (site/)
+
+La página para descargar y comprar auros.ram está en `site/` (HTML, CSS y JS, sin dependencias). Se publica sola en
+GitHub Pages con `.github/workflows/pages.yml` al cambiar algo en `site/`; antes hay que elegir una sola vez
+**Settings → Pages → Source: GitHub Actions** en el repositorio.
+
+- Precio, link de pago y email de ventas: al principio de `site/app.js` (`CONFIG`). Mientras estén vacíos, la página
+  muestra «Precio a confirmar» y los botones de pago y de envío del código quedan deshabilitados.
+- Descargas: apuntan a la última versión publicada en GitHub Releases, con los nombres
+  `auros.ram-<versión>-win-x64.msi`, `auros.ram-<versión>-macos-arm64.dmg` y `auros.ram-<versión>-macos-x64.dmg`.
+  Al publicar una versión nueva, actualizar `version` en `CONFIG`.
+- Idiomas: español, inglés, portugués y francés, con su bandera (España, Estados Unidos, Brasil y Francia, como en la
+  aplicación). Los textos están en `site/i18n.js`. La página elige el idioma del navegador; también se puede forzar con
+  `?lang=en`, `?lang=pt` o `?lang=fr`.
+- Para verla en el equipo: `python -m http.server 8765 --directory site` y abrir http://localhost:8765.
 
 ## Textos e idiomas (RNF-42)
 
