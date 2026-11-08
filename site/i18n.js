@@ -13,7 +13,7 @@ const I18N = {
     "nav.faq": "Preguntas",
     "nav.download": "Descargar gratis",
 
-    "hero.title": "Software para gestionar matrices de riesgo.",
+    "hero.title": "Software para la gestión de matrices de riesgo",
     "hero.lead": "Clasifica cada riesgo según su impacto y su probabilidad, y sigue cómo cambia en el tiempo. auros.ram es una aplicación de escritorio con escalas a medida, mapa de calor, historial de evaluaciones, acciones mitigantes e informes en PDF y Excel. Tus datos quedan en tu equipo, en archivos cifrados.",
     "hero.cta": "Descargar gratis",
     "hero.cta.win": "Descargar gratis para Windows",
@@ -146,7 +146,7 @@ const I18N = {
     "nav.faq": "FAQ",
     "nav.download": "Download free",
 
-    "hero.title": "Software for managing risk matrices.",
+    "hero.title": "Software for managing risk matrices",
     "hero.lead": "Rate every risk by impact and likelihood, and track how it changes over time. auros.ram is a desktop app with custom scales, heat map, assessment history, mitigating actions, and PDF and Excel reports. Your data stays on your computer, in encrypted files.",
     "hero.cta": "Download free",
     "hero.cta.win": "Download free for Windows",
@@ -279,7 +279,7 @@ const I18N = {
     "nav.faq": "Perguntas",
     "nav.download": "Baixar grátis",
 
-    "hero.title": "Software para gerenciar matrizes de risco.",
+    "hero.title": "Software para a gestão de matrizes de risco",
     "hero.lead": "Classifique cada risco por impacto e probabilidade e acompanhe como ele muda ao longo do tempo. auros.ram é um aplicativo de desktop com escalas sob medida, mapa de calor, histórico de avaliações, ações mitigadoras e relatórios em PDF e Excel. Seus dados ficam no seu computador, em arquivos criptografados.",
     "hero.cta": "Baixar grátis",
     "hero.cta.win": "Baixar grátis para Windows",
@@ -412,7 +412,7 @@ const I18N = {
     "nav.faq": "Questions",
     "nav.download": "Télécharger gratuitement",
 
-    "hero.title": "Logiciel de gestion des matrices des risques.",
+    "hero.title": "Logiciel de gestion des matrices des risques",
     "hero.lead": "Évaluez chaque risque selon son impact et sa probabilité, et suivez son évolution dans le temps. auros.ram est une application de bureau avec échelles sur mesure, carte de chaleur, historique des évaluations, actions d'atténuation et rapports PDF et Excel. Vos données restent sur votre ordinateur, dans des fichiers chiffrés.",
     "hero.cta": "Télécharger gratuitement",
     "hero.cta.win": "Télécharger gratuitement pour Windows",
