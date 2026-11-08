@@ -3,10 +3,12 @@ using System.Security.Cryptography;
 using System.Text;
 using Auros.Ram.Core.Licensing;
 using Auros.Ram.Core.Services;
+using Auros.Ram.Licencias;
 
 // Herramienta de licencias y control de ventas de auros.ram (no se distribuye con la aplicación).
 //
 //   dotnet run --project tools/Auros.Ram.Licencias -- emitir "<código de equipo>" "<cliente>" [opciones de la venta]
+//   dotnet run --project tools/Auros.Ram.Licencias -- reenviar "<código de equipo>"
 //   dotnet run --project tools/Auros.Ram.Licencias -- ventas
 //   dotnet run --project tools/Auros.Ram.Licencias -- clave-publica
 //   dotnet run --project tools/Auros.Ram.Licencias -- crear-claves      (una sola vez: ya está hecho)
@@ -16,7 +18,8 @@ using Auros.Ram.Core.Services;
 // alguien la obtiene puede emitirlas. Nunca se sube al repositorio.
 //
 // Cada licencia emitida es una venta y queda como fila en ventas.csv, en la misma carpeta (separado por «;», se abre
-// con Excel): fecha, cliente, email, equipo, monto, moneda, medio de pago, nota y la clave entregada.
+// con Excel): fecha, cliente, email, equipo, monto, moneda, medio de pago, nota y la clave entregada. Si la venta
+// tiene email, la licencia se le envía al cliente con la cuenta configurada en correo.json (ver Correo.cs).
 Console.OutputEncoding = Encoding.UTF8;
 
 var folder = Environment.GetEnvironmentVariable("AUROS_LICENCIAS") is { Length: > 0 } custom
@@ -69,6 +72,9 @@ int Run()
         case ["emitir", var machine, var customer, .. var rest]:
             return Issue(machine, customer, ParseOptions(rest));
 
+        case ["reenviar", var machine, .. var rest]:
+            return Resend(machine, ParseOptions(rest));
+
         case ["ventas"]:
             return ListSales();
 
@@ -81,6 +87,10 @@ int Run()
                       --moneda <código>      USD, ARS, EUR… (si no se indica: USD)
                       --pago <medio>         por ejemplo "Mercado Pago", "transferencia", "PayPal"
                       --nota <texto>         cualquier aclaración (factura, reemplazo de equipo…)
+                      --idioma <es|en|pt|fr> idioma del email al cliente (si no se indica: es)
+                      --no-enviar            anota la venta pero no envía el email
+                  reenviar "<código de equipo>" [--email <correo>] [--idioma <es|en|pt|fr>]
+                                             vuelve a enviar la última licencia de ese equipo
                   ventas                     lista las ventas y los totales por moneda y por mes
                   clave-publica              muestra la clave pública que lleva la aplicación
                   crear-claves               crea el par de claves (una sola vez)
@@ -108,6 +118,8 @@ int Issue(string machine, string customer, Dictionary<string, string> options)
     }
 
     var currency = options.GetValueOrDefault("moneda", amount.Length > 0 ? "USD" : "").Trim().ToUpperInvariant();
+    var email = options.GetValueOrDefault("email", "");
+    var language = Language(options);
 
     using var key = LoadPrivateKey();
     var today = DateOnly.FromDateTime(DateTime.Today);
@@ -116,7 +128,7 @@ int Issue(string machine, string customer, Dictionary<string, string> options)
 
     PrepareSalesFile();
     File.AppendAllText(sales, Row(
-        today.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), customer, options.GetValueOrDefault("email", ""),
+        today.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), customer, email,
         machine, amount, currency, options.GetValueOrDefault("pago", ""), options.GetValueOrDefault("nota", ""), license), utf8Bom);
 
     Console.WriteLine($"Licencia para «{customer}», equipo {machine}:");
@@ -129,7 +141,58 @@ int Issue(string machine, string customer, Dictionary<string, string> options)
         Console.WriteLine("Aviso: no indicaste --monto; la venta quedó sin importe. Puedes completarlo en la planilla.");
     }
 
+    if (email.Length == 0)
+    {
+        Console.WriteLine("No indicaste --email: la licencia no se envió. Pásasela al cliente tú o usa «reenviar» con --email.");
+    }
+    else if (!options.ContainsKey("no-enviar"))
+    {
+        Deliver(email, customer, machine, license, language);
+    }
+
     return 0;
+}
+
+int Resend(string machine, Dictionary<string, string> options)
+{
+    machine = machine.Trim().ToUpperInvariant();
+    PrepareSalesFile();
+    var row = File.ReadAllLines(sales, utf8Bom).Skip(1).Where(l => l.Length > 0).Select(ParseRow)
+        .LastOrDefault(r => string.Equals(r[3], machine, StringComparison.Ordinal));
+    if (row is null)
+    {
+        return Fail($"No hay ninguna licencia emitida para el equipo {machine} en {sales}.");
+    }
+
+    var email = options.GetValueOrDefault("email", row[2]);
+    if (email.Length == 0)
+    {
+        return Fail($"La venta del equipo {machine} no tiene email. Indícalo con --email.");
+    }
+
+    return Deliver(email, row[1], machine, row[8], Language(options)) ? 0 : 1;
+}
+
+bool Deliver(string email, string customer, string machine, string license, string language)
+{
+    var error = Correo.Send(folder, email, customer, machine, license, language);
+    if (error is null)
+    {
+        Console.WriteLine($"Licencia enviada a {email}.");
+        return true;
+    }
+
+    Console.Error.WriteLine($"No se pudo enviar el email a {email}: {error}");
+    Console.Error.WriteLine($"La venta quedó anotada igual. Para reintentar: reenviar \"{machine}\"");
+    return false;
+}
+
+static string Language(Dictionary<string, string> options)
+{
+    var language = options.GetValueOrDefault("idioma", "es").ToLowerInvariant();
+    return Correo.Languages.Contains(language)
+        ? language
+        : throw new ArgumentException($"Idioma no reconocido: {language}. Usa es, en, pt o fr.");
 }
 
 int ListSales()
@@ -207,14 +270,20 @@ void PrepareSalesFile()
 
 Dictionary<string, string> ParseOptions(string[] rest)
 {
-    string[] known = ["email", "monto", "moneda", "pago", "nota"];
+    string[] known = ["email", "monto", "moneda", "pago", "nota", "idioma"];
     var options = new Dictionary<string, string>(StringComparer.Ordinal);
     for (var i = 0; i < rest.Length; i++)
     {
+        if (rest[i] == "--no-enviar")
+        {
+            options["no-enviar"] = "";
+            continue;
+        }
+
         var name = rest[i].StartsWith("--", StringComparison.Ordinal) ? rest[i][2..] : "";
         if (!known.Contains(name) || i + 1 >= rest.Length)
         {
-            throw new ArgumentException($"Opción no reconocida o sin valor: {rest[i]}. Opciones: --email, --monto, --moneda, --pago, --nota.");
+            throw new ArgumentException($"Opción no reconocida o sin valor: {rest[i]}. Opciones: --email, --monto, --moneda, --pago, --nota, --idioma, --no-enviar.");
         }
 
         options[name] = rest[++i].Trim();

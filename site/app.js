@@ -7,6 +7,7 @@ const CONFIG = {
   pagoUrl: "",      // link de pago generado en Mercado Pago o Stripe
   email: "",        // email donde se reciben los códigos de equipo
   mac: false,       // true cuando los .dmg de Mac estén subidos a la release de GitHub
+  whatsapp: "",     // número para chatear con un consultor, con código de país y sin «+» ni espacios: "5491112345678"
 };
 
 const LANGS = { es: "es", en: "us", pt: "br", fr: "fr" }; // idioma → bandera (como en la aplicación)
@@ -222,6 +223,13 @@ function render() {
   const mail = document.getElementById("mail-link");
   if (mailto) mail.href = mailto; else mail.setAttribute("aria-disabled", "true");
   if (CONFIG.email) document.getElementById("foot-mail").href = `mailto:${CONFIG.email}`;
+  const phone = CONFIG.whatsapp.replace(/\D/g, "");
+  if (phone) {
+    const chat = `https://wa.me/${phone}?text=${encodeURIComponent(t("wa.text"))}`;
+    for (const id of ["wa", "foot-wa", "foot-wa-sep"]) document.getElementById(id).hidden = false;
+    document.getElementById("wa").href = chat;
+    document.getElementById("foot-wa").href = chat;
+  }
 
   renderShot();
   place();

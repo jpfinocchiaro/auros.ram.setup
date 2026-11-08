@@ -122,6 +122,8 @@ const I18N = {
     ],
 
     "foot.contact": "Contacto",
+    "wa.label": "Habla con un consultor",
+    "wa.text": "Hola, quiero hacer una consulta sobre auros.ram.",
 
     "mail.subject": "Licencia de auros.ram",
     "mail.body": "Hola, quiero la licencia de auros.ram.\n\nCódigo de equipo (Ayuda → Licencia): \nEmpresa que figura en la licencia: \nComprobante de pago: ",
@@ -247,6 +249,8 @@ const I18N = {
     ],
 
     "foot.contact": "Contact",
+    "wa.label": "Talk to a consultant",
+    "wa.text": "Hello, I have a question about auros.ram.",
 
     "mail.subject": "auros.ram license",
     "mail.body": "Hello, I'd like an auros.ram license.\n\nComputer code (Help → License): \nCompany shown on the license: \nPayment receipt: ",
@@ -372,6 +376,8 @@ const I18N = {
     ],
 
     "foot.contact": "Contato",
+    "wa.label": "Fale com um consultor",
+    "wa.text": "Olá, quero tirar uma dúvida sobre o auros.ram.",
 
     "mail.subject": "Licença do auros.ram",
     "mail.body": "Olá, quero a licença do auros.ram.\n\nCódigo do computador (Ajuda → Licença): \nEmpresa que consta na licença: \nComprovante de pagamento: ",
@@ -497,6 +503,8 @@ const I18N = {
     ],
 
     "foot.contact": "Contact",
+    "wa.label": "Parler à un conseiller",
+    "wa.text": "Bonjour, j'ai une question sur auros.ram.",
 
     "mail.subject": "Licence auros.ram",
     "mail.body": "Bonjour, je souhaite une licence auros.ram.\n\nCode de l'ordinateur (Aide → Licence) : \nEntreprise figurant sur la licence : \nJustificatif de paiement : ",

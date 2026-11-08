@@ -175,10 +175,13 @@
   <footer class="foot">
     <div class="wrap foot-inner">
       <img src="img/logo.png" alt="auros.ram" width="140" height="28">
-      <p>© 2026 Auros · <a id="foot-mail" href="#comprar" data-i18n="foot.contact"></a></p>
+      <p>© 2026 Auros · <a id="foot-mail" href="#comprar" data-i18n="foot.contact"></a><span id="foot-wa-sep" hidden> · </span><a id="foot-wa" target="_blank" rel="noopener" hidden>WhatsApp</a></p>
     </div>
   </footer>
 
+
+  <!-- Chat por WhatsApp (se muestra solo si CONFIG.whatsapp tiene un número) -->
+  <a class="wa" id="wa" target="_blank" rel="noopener" hidden><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9.2 7.6c-.5.4-.9 1-.8 1.8.3 2.9 3.3 5.9 6.2 6.2.8.1 1.4-.3 1.8-.8l.3-.6-2.2-1.1-.9.9a5 5 0 0 1-2.6-2.6l.9-.9-1.1-2.2-.6.3z" fill="currentColor"/></svg><span data-i18n="wa.label"></span></a>
 
   <script src="i18n.js" defer></script>
   <script src="app.js" defer></script>

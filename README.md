@@ -102,17 +102,44 @@ Para emitir una licencia (cada licencia es una venta):
 dotnet run --project tools/Auros.Ram.Licencias -- emitir "<código de equipo>" "<cliente>" --email <correo> --monto 120 --pago "Mercado Pago"
 ```
 
-`--email`, `--monto`, `--moneda` (USD si no se indica), `--pago` y `--nota` son opcionales. Para ver las ventas, con
-totales por moneda y por mes:
+`--email`, `--monto`, `--moneda` (USD si no se indica), `--pago` y `--nota` son opcionales. Si la venta tiene email, la
+licencia **se le envía al cliente** con las instrucciones para activarla, en el idioma de `--idioma` (`es`, `en`, `pt` o
+`fr`; si no se indica, `es`). Con `--no-enviar` se anota la venta sin enviar nada. Si el envío falla, la venta queda
+anotada igual y se puede volver a enviar:
+
+```
+dotnet run --project tools/Auros.Ram.Licencias -- reenviar "<código de equipo>" [--email <otro correo>] [--idioma en]
+```
+
+Para ver las ventas, con totales por moneda y por mes:
 
 ```
 dotnet run --project tools/Auros.Ram.Licencias -- ventas
 ```
 
+**Cuenta de correo para los envíos.** La primera vez que se intenta enviar, la herramienta crea `correo.json` en la
+carpeta de las licencias; hay que completarlo:
+
+```json
+{
+  "servidor": "smtp.gmail.com",
+  "puerto": 587,
+  "usuario": "tu-cuenta@gmail.com",
+  "clave": "<contraseña de aplicación>",
+  "remitente": "auros.ram <tu-cuenta@gmail.com>",
+  "copia": "tu-cuenta@gmail.com"
+}
+```
+
+Con Gmail, la clave no es la contraseña de la cuenta sino una *contraseña de aplicación* (Cuenta de Google → Seguridad →
+Verificación en dos pasos → Contraseñas de aplicaciones). `copia` recibe una copia oculta de cada envío; puede quedar
+vacío. Si prefieres no guardar la clave en el archivo, déjala vacía y define la variable de entorno `AUROS_SMTP_CLAVE`.
+Sirve cualquier servidor SMTP con STARTTLS (puerto 587); el puerto 465 no está soportado.
+
 La clave privada está en `%USERPROFILE%\auros.ram-licencias\clave-privada.pem`, y cada venta se anota en `ventas.csv`, en
 la misma carpeta (separado por «;», se abre con Excel): fecha, cliente, email, equipo, monto, moneda, medio de pago, nota
 y la clave entregada. **Hay que guardar una copia de seguridad de esa carpeta**: sin la clave privada no se pueden emitir
-más licencias, y quien la tenga puede emitirlas. Nunca va al repositorio. La herramienta no se distribuye con la
+más licencias, y quien la tenga puede emitirlas. Ni la clave privada ni `correo.json` van al repositorio. La herramienta no se distribuye con la
 aplicación.
 
 ## Landing page (site/)
@@ -123,6 +150,9 @@ GitHub Pages con `.github/workflows/pages.yml` al cambiar algo en `site/`; antes
 
 - Precio, link de pago y email de ventas: al principio de `site/app.js` (`CONFIG`). Mientras estén vacíos, la página
   muestra «Precio a confirmar» y los botones de pago y de envío del código quedan deshabilitados.
+- WhatsApp: con un número en `whatsapp` (código de país y número, sin «+» ni espacios, por ejemplo `5491112345678`)
+  aparece un botón flotante «Habla con un consultor» y un enlace en el pie. Abre el chat con un mensaje inicial en el
+  idioma de la página. Sin número, no se muestra.
 - Descargas: apuntan a la última versión publicada en GitHub Releases, con los nombres
   `auros.ram-<versión>-win-x64.msi`, `auros.ram-<versión>-macos-arm64.dmg` y `auros.ram-<versión>-macos-x64.dmg`.
   Al publicar una versión nueva, actualizar `version` en `CONFIG`.
