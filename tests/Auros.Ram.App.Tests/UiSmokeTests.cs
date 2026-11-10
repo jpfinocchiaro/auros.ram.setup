@@ -11,6 +11,7 @@ using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Logging;
+using Avalonia.VisualTree;
 
 [assembly: AvaloniaTestApplication(typeof(Auros.Ram.App.Tests.TestAppBuilder))]
 
@@ -766,6 +767,77 @@ public class UiSmokeTests
 
         Shot(dialog, name);
         dialog.Close();
+    }
+
+    [AvaloniaFact]
+    public void Ribbon_fits_the_minimum_width_and_its_buttons_run_commands()
+    {
+        AppPaths.UseRoot(Path.Combine(Path.GetTempPath(), "auros-ram-uitests", Guid.NewGuid().ToString("N")));
+        var language = Environment.GetEnvironmentVariable("AUROS_LANGUAGE");
+        if (!string.IsNullOrEmpty(language))
+        {
+            Languages.Startup(language);
+        }
+
+        var window = new MainWindow { Width = 1024, Height = 700 };
+        var ui = new UiService(window);
+        var vm = new MainWindowViewModel(ui, new AppSettings { RecentFiles = ["reciente.rmx"] });
+        window.DataContext = vm;
+        var docVm = new DocumentViewModel("x.rmx", SampleDocument(), FileKey.CreateNew("contraseña-de-prueba"), ui);
+        vm.Documents.Add(docVm);
+        vm.Active = docVm;
+        window.Show();
+
+        var ribbon = window.GetVisualDescendants().OfType<TabControl>().First(t => t.Classes.Contains("ribbon"));
+        for (var tab = 0; tab < ribbon.ItemCount; tab++)
+        {
+            ribbon.SelectedIndex = tab;
+            Shot(window, $"50-cinta-{tab}");
+            var buttons = ribbon.GetVisualDescendants().OfType<Button>().Where(b => b.Classes.Contains("ribbon")).ToList();
+            Assert.NotEmpty(buttons);
+            foreach (var button in buttons)
+            {
+                Assert.NotNull(button.Command);
+                Assert.EndsWith(")", ToolTip.GetTip(button)?.ToString(), StringComparison.Ordinal);   // cada botón muestra su atajo
+                var right = button.TranslatePoint(new Point(button.Bounds.Width, 0), window)!.Value.X;
+                Assert.True(right <= window.Bounds.Width, $"{button.Content} se sale de la ventana ({right})");
+            }
+        }
+
+        Assert.Empty(window.GetVisualDescendants().OfType<Menu>());   // la cinta reemplaza al menú
+        var strip = window.GetVisualDescendants().OfType<Ribbon>().First();
+        var file = strip.FindControl<Button>("FileButton")!;
+        file.Flyout!.ShowAt(file);
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        var save = strip.FindControl<MenuItem>("FmSave")!;
+        Assert.NotNull(save.Command);
+        Assert.True(save.IsEffectivelyEnabled);
+        Assert.NotNull(save.InputGesture);
+        var recent = strip.FindControl<MenuItem>("FmRecent")!;
+        Assert.True(recent.IsEffectivelyEnabled);
+        Assert.Equal(1, recent.ItemCount);
+        recent.IsSubMenuOpen = true;
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        var recentFile = Assert.IsType<MenuItem>(recent.ContainerFromIndex(0));
+        Assert.Same(vm.OpenRecentCommand, recentFile.Command);
+        Assert.Same(vm.Recent[0], recentFile.CommandParameter);
+        recent.IsSubMenuOpen = false;
+        if (TopLevel.GetTopLevel(save) is { } popup)
+        {
+            Shot(popup, "51-archivo");
+        }
+        file.Flyout.Hide();
+
+        vm.ToggleRibbonCommand.Execute(null);
+        Shot(window, "52-cinta-contraida");
+        Assert.Contains("collapsed", ribbon.Classes);
+        vm.ToggleRibbonCommand.Execute(null);
+        Assert.DoesNotContain("collapsed", ribbon.Classes);
+
+        var matrix = window.GetVisualDescendants().OfType<Ribbon>().First().FindControl<Button>("RbMatrix")!;
+        Assert.EndsWith(")", ToolTip.GetTip(matrix)?.ToString(), StringComparison.Ordinal);   // muestra el atajo de teclado
+        matrix.Command!.Execute(matrix.CommandParameter);
+        Assert.Equal((int)Section.Matrix, docVm.SelectedSection);
     }
 
     private static void Shot(TopLevel top, string name)

@@ -16,9 +16,9 @@
   <data name="DefaultScale_Impact" xml:space="preserve"><value>Impacto ({0} niveles)</value></data>
   <data name="DefaultScale_Probability" xml:space="preserve"><value>Probabilidad ({0} niveles)</value></data>
   <data name="DefaultScale_Risk" xml:space="preserve"><value>Nivel de riesgo estándar</value></data>
-  <data name="Edition_CompanyLimit" xml:space="preserve"><value>La versión gratuita admite {0} empresa por matriz. Para cargar más, activa la licencia en Ayuda → Licencia.</value></data>
-  <data name="Edition_ReadOnly" xml:space="preserve"><value>Esta matriz supera lo que admite la versión gratuita ({0} empresa y {1} riesgos): se puede consultar y exportar, pero no modificar. Para modificarla, activa la licencia en Ayuda → Licencia.</value></data>
-  <data name="Edition_RiskLimit" xml:space="preserve"><value>La versión gratuita admite hasta {0} riesgos por matriz. Para cargar más, activa la licencia en Ayuda → Licencia.</value></data>
+  <data name="Edition_CompanyLimit" xml:space="preserve"><value>La versión gratuita admite {0} empresa por matriz. Para cargar más, activa la licencia en Configuración → Licencia.</value></data>
+  <data name="Edition_ReadOnly" xml:space="preserve"><value>Esta matriz supera lo que admite la versión gratuita ({0} empresa y {1} riesgos): se puede consultar y exportar, pero no modificar. Para modificarla, activa la licencia en Configuración → Licencia.</value></data>
+  <data name="Edition_RiskLimit" xml:space="preserve"><value>La versión gratuita admite hasta {0} riesgos por matriz. Para cargar más, activa la licencia en Configuración → Licencia.</value></data>
   <data name="Error_DuplicateLevelId" xml:space="preserve"><value>La escala tiene niveles repetidos. Quita el duplicado y vuelve a intentarlo.</value></data>
   <data name="Error_FieldTooLong" xml:space="preserve"><value>El campo «{0}» puede tener hasta {1} caracteres.</value></data>
   <data name="Error_HeatCellInvalid" xml:space="preserve"><value>La celda del mapa de calor no corresponde a las escalas del proyecto.</value></data>

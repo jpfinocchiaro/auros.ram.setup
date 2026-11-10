@@ -7,7 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace Auros.Ram.App.ViewModels;
 
-/// <summary>Ayuda → Licencia: edición en uso, código de este equipo y activación de la clave de licencia.</summary>
+/// <summary>Configuración → Licencia: edición en uso, código de este equipo y activación de la clave de licencia.</summary>
 public sealed partial class LicenseViewModel : ObservableObject
 {
     public string MachineCode => Edition.MachineCode;

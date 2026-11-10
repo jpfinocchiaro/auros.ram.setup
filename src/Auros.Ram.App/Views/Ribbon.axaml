@@ -1,0 +1,173 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Auros.Ram.App.ViewModels"
+             xmlns:ui="using:Auros.Ram.App.Views"
+             xmlns:r="using:Auros.Ram.App.Resources"
+             x:Class="Auros.Ram.App.Views.Ribbon"
+             x:DataType="vm:MainWindowViewModel">
+  <!-- Cinta de opciones: las mismas acciones del menú, a un clic. -->
+  <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1">
+    <Panel>
+    <TabControl x:Name="Tabs" Classes="ribbon" Classes.collapsed="{Binding RibbonCollapsed}">
+    <TabItem Header="{x:Static r:Strings.Ribbon_TabHome}">
+      <StackPanel Orientation="Horizontal">
+        <Border Classes="ribbongroup">
+          <DockPanel>
+            <TextBlock DockPanel.Dock="Bottom" Classes="ribbongroup" Text="{x:Static r:Strings.Ribbon_GroupFile}" />
+            <StackPanel Orientation="Horizontal" Spacing="2">
+              <Button x:Name="RbNew" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconNew}" Content="{x:Static r:Strings.Ribbon_New}" ToolTip.Tip="{x:Static r:Strings.Menu_New}" Command="{Binding NewCommand}" />
+              <Button x:Name="RbOpen" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconOpen}" Content="{x:Static r:Strings.Ribbon_Open}" ToolTip.Tip="{x:Static r:Strings.Menu_Open}" Command="{Binding OpenCommand}" />
+              <Button x:Name="RbSave" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconSave}" Content="{x:Static r:Strings.Menu_Save}" ToolTip.Tip="{x:Static r:Strings.Menu_Save}" Command="{Binding SaveCommand}" IsEnabled="{Binding CanEdit}" />
+              <Button x:Name="RbSaveAs" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconSaveAs}" Content="{x:Static r:Strings.Ribbon_SaveAs}" ToolTip.Tip="{x:Static r:Strings.Menu_SaveAs}" Command="{Binding SaveAsCommand}" IsEnabled="{Binding CanEdit}" />
+              <Button x:Name="RbClose" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconClose}" Content="{x:Static r:Strings.Menu_Close}" ToolTip.Tip="{x:Static r:Strings.Menu_Close}" Command="{Binding CloseCommand}" CommandParameter="{x:Null}" IsEnabled="{Binding HasActive}" />
+            </StackPanel>
+          </DockPanel>
+        </Border>
+        <Border Classes="ribbongroup">
+          <DockPanel>
+            <TextBlock DockPanel.Dock="Bottom" Classes="ribbongroup" Text="{x:Static r:Strings.Ribbon_GroupEdit}" />
+            <StackPanel Orientation="Horizontal" Spacing="2">
+              <Button x:Name="RbUndo" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconUndo}" Content="{x:Static r:Strings.Menu_Undo}" ToolTip.Tip="{x:Static r:Strings.Menu_Undo}" Command="{Binding UndoCommand}" IsEnabled="{Binding CanEdit}" />
+              <Button x:Name="RbRedo" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconRedo}" Content="{x:Static r:Strings.Menu_Redo}" ToolTip.Tip="{x:Static r:Strings.Menu_Redo}" Command="{Binding RedoCommand}" IsEnabled="{Binding CanEdit}" />
+              <Button x:Name="RbNewRisk" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconAdd}" Content="{x:Static r:Strings.Ribbon_NewRisk}" ToolTip.Tip="{x:Static r:Strings.Menu_NewRisk}" Command="{Binding NewRiskCommand}" IsEnabled="{Binding CanEdit}" />
+            </StackPanel>
+          </DockPanel>
+        </Border>
+        <Border Classes="ribbongroup">
+          <DockPanel>
+            <TextBlock DockPanel.Dock="Bottom" Classes="ribbongroup" Text="{x:Static r:Strings.Ribbon_GroupSecurity}" />
+            <StackPanel Orientation="Horizontal" Spacing="2">
+              <Button x:Name="RbLock" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconLock}" Content="{x:Static r:Strings.Ribbon_Lock}" ToolTip.Tip="{x:Static r:Strings.Menu_Lock}" Command="{Binding LockNowCommand}" IsEnabled="{Binding HasDocuments}" />
+              <Button x:Name="RbPassword" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconKey}" Content="{x:Static r:Strings.Ribbon_Password}" ToolTip.Tip="{x:Static r:Strings.Menu_ChangePassword}" Command="{Binding ChangePasswordCommand}" IsEnabled="{Binding CanEdit}" />
+            </StackPanel>
+          </DockPanel>
+        </Border>
+      </StackPanel>
+    </TabItem>
+    <TabItem Header="{x:Static r:Strings.Menu_Export}">
+      <StackPanel Orientation="Horizontal">
+        <Border Classes="ribbongroup">
+          <DockPanel>
+            <TextBlock DockPanel.Dock="Bottom" Classes="ribbongroup" Text="{x:Static r:Strings.Section_Reports}" />
+            <StackPanel Orientation="Horizontal" Spacing="2">
+              <Button x:Name="RbExcel" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconTable}" Content="{x:Static r:Strings.Ribbon_Excel}" ToolTip.Tip="{x:Static r:Strings.Menu_ExportXlsx}" Command="{Binding ExportCommand}" CommandParameter="Xlsx" IsEnabled="{Binding CanEdit}" />
+              <Button x:Name="RbPdfAll" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconPdf}" Content="{x:Static r:Strings.Ribbon_PdfAll}" ToolTip.Tip="{x:Static r:Strings.Menu_ExportPdfAll}" Command="{Binding ExportCommand}" CommandParameter="PdfAll" IsEnabled="{Binding CanEdit}" />
+              <Button x:Name="RbPdfMatrix" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconPdf}" Content="{x:Static r:Strings.Ribbon_PdfMatrix}" ToolTip.Tip="{x:Static r:Strings.Menu_ExportPdfMatrix}" Command="{Binding ExportCommand}" CommandParameter="PdfMatrix" IsEnabled="{Binding CanEdit}" />
+              <Button x:Name="RbPdfSummary" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconPdf}" Content="{x:Static r:Strings.Ribbon_PdfSummary}" ToolTip.Tip="{x:Static r:Strings.Menu_ExportPdfSummary}" Command="{Binding ExportCommand}" CommandParameter="PdfSummary" IsEnabled="{Binding CanEdit}" />
+              <Button x:Name="RbPdfDetail" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconPdf}" Content="{x:Static r:Strings.Ribbon_PdfDetail}" ToolTip.Tip="{x:Static r:Strings.Menu_ExportPdfDetail}" Command="{Binding ExportCommand}" CommandParameter="PdfDetail" IsEnabled="{Binding CanEdit}" />
+              <Button x:Name="RbPdfEvolution" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconPdf}" Content="{x:Static r:Strings.Ribbon_PdfEvolution}" ToolTip.Tip="{x:Static r:Strings.Menu_ExportPdfEvolution}" Command="{Binding ExportCommand}" CommandParameter="PdfEvolution" IsEnabled="{Binding CanEdit}" />
+              <Button x:Name="RbPrint" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconPrint}" Content="{x:Static r:Strings.Ribbon_Print}" ToolTip.Tip="{x:Static r:Strings.Menu_Print}" Command="{Binding ExportCommand}" CommandParameter="Print" IsEnabled="{Binding CanEdit}" />
+            </StackPanel>
+          </DockPanel>
+        </Border>
+        <Border Classes="ribbongroup">
+          <DockPanel>
+            <TextBlock DockPanel.Dock="Bottom" Classes="ribbongroup" Text="{x:Static r:Strings.Ribbon_GroupData}" />
+            <StackPanel Orientation="Horizontal" Spacing="2">
+              <Button x:Name="RbCsvRisks" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconCsv}" Content="{x:Static r:Strings.Ribbon_CsvRisks}" ToolTip.Tip="{x:Static r:Strings.Menu_ExportCsvRisks}" Command="{Binding ExportCommand}" CommandParameter="CsvRisks" IsEnabled="{Binding CanEdit}" />
+              <Button x:Name="RbCsvMatrix" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconCsv}" Content="{x:Static r:Strings.Ribbon_CsvMatrix}" ToolTip.Tip="{x:Static r:Strings.Menu_ExportCsvMatrix}" Command="{Binding ExportCommand}" CommandParameter="CsvMatrix" IsEnabled="{Binding CanEdit}" />
+              <Button x:Name="RbJson" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconJson}" Content="{x:Static r:Strings.Ribbon_Json}" ToolTip.Tip="{x:Static r:Strings.Menu_ExportJson}" Command="{Binding ExportCommand}" CommandParameter="Json" IsEnabled="{Binding CanEdit}" />
+              <Button x:Name="RbImportJson" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconImport}" Content="{x:Static r:Strings.Ribbon_ImportJson}" ToolTip.Tip="{x:Static r:Strings.Menu_ImportJson}" Command="{Binding ImportJsonCommand}" />
+            </StackPanel>
+          </DockPanel>
+        </Border>
+      </StackPanel>
+    </TabItem>
+    <TabItem Header="{x:Static r:Strings.Ribbon_TabView}">
+      <StackPanel Orientation="Horizontal">
+        <Border Classes="ribbongroup">
+          <DockPanel>
+            <TextBlock DockPanel.Dock="Bottom" Classes="ribbongroup" Text="{x:Static r:Strings.Ribbon_TabView}" />
+            <StackPanel Orientation="Horizontal" Spacing="2">
+              <Button x:Name="RbProject" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconProject}" Content="{x:Static r:Strings.Section_Project}" ToolTip.Tip="{x:Static r:Strings.Section_Project}" Command="{Binding ShowSectionCommand}" CommandParameter="Project" IsEnabled="{Binding HasActive}" />
+              <Button x:Name="RbRisks" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconRisks}" Content="{x:Static r:Strings.Section_Risks}" ToolTip.Tip="{x:Static r:Strings.Section_Risks}" Command="{Binding ShowSectionCommand}" CommandParameter="Risks" IsEnabled="{Binding HasActive}" />
+              <Button x:Name="RbMatrix" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconMatrix}" Content="{x:Static r:Strings.Section_Matrix}" ToolTip.Tip="{x:Static r:Strings.Section_Matrix}" Command="{Binding ShowSectionCommand}" CommandParameter="Matrix" IsEnabled="{Binding HasActive}" />
+              <Button x:Name="RbReports" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconReports}" Content="{x:Static r:Strings.Section_Reports}" ToolTip.Tip="{x:Static r:Strings.Section_Reports}" Command="{Binding ShowSectionCommand}" CommandParameter="Reports" IsEnabled="{Binding HasActive}" />
+            </StackPanel>
+          </DockPanel>
+        </Border>
+      </StackPanel>
+    </TabItem>
+    <TabItem Header="{x:Static r:Strings.Ribbon_TabSettings}">
+      <StackPanel Orientation="Horizontal">
+        <Border Classes="ribbongroup">
+          <DockPanel>
+            <TextBlock DockPanel.Dock="Bottom" Classes="ribbongroup" Text="{x:Static r:Strings.Ribbon_GroupMatrix}" />
+            <StackPanel Orientation="Horizontal" Spacing="2">
+              <Button x:Name="RbScales" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconScales}" Content="{x:Static r:Strings.Section_Scales}" ToolTip.Tip="{x:Static r:Strings.Section_Scales}" Command="{Binding ShowSectionCommand}" CommandParameter="Scales" IsEnabled="{Binding HasActive}" />
+              <Button x:Name="RbCompanies" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconCompany}" Content="{x:Static r:Strings.Ribbon_Companies}" ToolTip.Tip="{x:Static r:Strings.Org_Menu}" Command="{Binding OrganizationsCommand}" IsEnabled="{Binding HasActive}" />
+              <Button x:Name="RbCatalogs" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconList}" Content="{x:Static r:Strings.Ribbon_Catalogs}" ToolTip.Tip="{x:Static r:Strings.Catalog_Menu}" Command="{Binding CatalogsCommand}" IsEnabled="{Binding HasActive}" />
+              <Button x:Name="RbTemplate" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconTemplate}" Content="{x:Static r:Strings.Ribbon_Template}" ToolTip.Tip="{x:Static r:Strings.Menu_SaveTemplate}" Command="{Binding SaveTemplateCommand}" IsEnabled="{Binding CanEdit}" />
+            </StackPanel>
+          </DockPanel>
+        </Border>
+        <Border Classes="ribbongroup">
+          <DockPanel>
+            <TextBlock DockPanel.Dock="Bottom" Classes="ribbongroup" Text="{x:Static r:Strings.Ribbon_GroupApp}" />
+            <StackPanel Orientation="Horizontal" Spacing="2">
+              <Button x:Name="RbPreferences" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconSettings}" Content="{x:Static r:Strings.Ribbon_Preferences}" ToolTip.Tip="{x:Static r:Strings.Menu_Preferences}" Command="{Binding PreferencesCommand}" />
+            </StackPanel>
+          </DockPanel>
+        </Border>
+        <Border Classes="ribbongroup">
+          <DockPanel>
+            <TextBlock DockPanel.Dock="Bottom" Classes="ribbongroup" Text="{x:Static r:Strings.Ribbon_GroupHelp}" />
+            <StackPanel Orientation="Horizontal" Spacing="2">
+              <Button x:Name="RbLicense" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconLicense}" Content="{x:Static r:Strings.Ribbon_License}" ToolTip.Tip="{x:Static r:Strings.Menu_License}" Command="{Binding LicenseCommand}" />
+              <Button x:Name="RbAbout" Classes="ribbon" ui:ButtonIcon.Ribbon="{StaticResource IconInfo}" Content="{x:Static r:Strings.Ribbon_About}" ToolTip.Tip="{x:Static r:Strings.Menu_About}" Command="{Binding AboutCommand}" />
+            </StackPanel>
+          </DockPanel>
+        </Border>
+      </StackPanel>
+    </TabItem>
+    </TabControl>
+
+    <!-- Archivo, como en Office: lo que antes estaba en el menú y no tiene lugar en una pestaña. -->
+    <Button x:Name="FileButton" Classes="accent ribbonfile" HorizontalAlignment="Left" VerticalAlignment="Top" Content="{x:Static r:Strings.Ribbon_GroupFile}">
+      <Button.Flyout>
+        <MenuFlyout Placement="BottomEdgeAlignedLeft">
+          <MenuItem x:Name="FmNew" Header="{x:Static r:Strings.Menu_New}" Command="{Binding NewCommand}" />
+          <MenuItem x:Name="FmOpen" Header="{x:Static r:Strings.Menu_Open}" Command="{Binding OpenCommand}" />
+          <MenuItem x:Name="FmRecent" Header="{x:Static r:Strings.Menu_Recent}" ItemsSource="{Binding Recent}" IsEnabled="{Binding HasRecent}">
+            <MenuItem.ItemContainerTheme>
+              <ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                <Setter Property="Header" Value="{ReflectionBinding Path}" />
+                <Setter Property="Command" Value="{ReflectionBinding Open}" />
+                <Setter Property="CommandParameter" Value="{ReflectionBinding}" />
+              </ControlTheme>
+            </MenuItem.ItemContainerTheme>
+          </MenuItem>
+          <Separator />
+          <MenuItem x:Name="FmSave" Header="{x:Static r:Strings.Menu_Save}" Command="{Binding SaveCommand}" IsEnabled="{Binding CanEdit}" />
+          <MenuItem x:Name="FmSaveAs" Header="{x:Static r:Strings.Menu_SaveAs}" Command="{Binding SaveAsCommand}" IsEnabled="{Binding CanEdit}" />
+          <Separator />
+          <MenuItem x:Name="FmPrint" Header="{x:Static r:Strings.Menu_Print}" Command="{Binding ExportCommand}" CommandParameter="Print" IsEnabled="{Binding CanEdit}" />
+          <Separator />
+          <MenuItem x:Name="FmClose" Header="{x:Static r:Strings.Menu_Close}" Command="{Binding CloseCommand}" CommandParameter="{x:Null}" IsEnabled="{Binding HasActive}" />
+          <MenuItem Header="{x:Static r:Strings.Menu_Exit}" Click="OnExitClick" />
+        </MenuFlyout>
+      </Button.Flyout>
+    </Button>
+
+    <!-- A la derecha de las pestañas: versión gratuita, idioma y contraer la cinta. -->
+    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Orientation="Horizontal" Height="30" Spacing="4" Margin="0,0,6,0">
+      <Button Padding="10,3" Classes="accent" VerticalAlignment="Center" IsVisible="{Binding IsFreeEdition}"
+              ToolTip.Tip="{Binding FreeEditionTip}" Command="{Binding LicenseCommand}" Content="{x:Static r:Strings.License_FreeBadge}" />
+      <Button Padding="8,3" Background="Transparent" BorderThickness="0" VerticalAlignment="Center"
+              ToolTip.Tip="{Binding LanguageTip}" Command="{Binding PreferencesCommand}">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <ui:Flag Region="{Binding Language.Region}" VerticalAlignment="Center" />
+          <TextBlock Text="{Binding Language.Name}" FontSize="13" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
+      <Button x:Name="RbToggle" Padding="6,3" Background="Transparent" BorderThickness="0" VerticalAlignment="Center"
+              ToolTip.Tip="{Binding RibbonTip}" Command="{Binding ToggleRibbonCommand}">
+        <Panel>
+          <Path Classes="nav" Data="{StaticResource IconCollapse}" IsVisible="{Binding !RibbonCollapsed}" />
+          <Path Classes="nav" Data="{StaticResource IconExpand}" IsVisible="{Binding RibbonCollapsed}" />
+        </Panel>
+      </Button>
+    </StackPanel>
+    </Panel>
+  </Border>
+</UserControl>

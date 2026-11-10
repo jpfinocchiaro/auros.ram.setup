@@ -92,7 +92,7 @@ bash tools/macos/finish-on-mac.sh auros.ram-2.3.0-macos-arm64.zip "Developer ID 
 Sin licencia, auros.ram funciona como **versión gratuita**: cada matriz admite 1 empresa y 5 riesgos. Una matriz que ya
 los supera (hecha con la versión completa) se abre solo para consultar y exportar. Con una licencia no hay límites.
 
-La licencia está atada al equipo: en **Ayuda → Licencia** el cliente ve el *código de este equipo* y lo envía; con ese
+La licencia está atada al equipo: en **Configuración → Licencia** el cliente ve el *código de este equipo* y lo envía; con ese
 código se genera su clave, que solo funciona en ese equipo (si cambia de equipo o reinstala el sistema, necesita otra).
 La clave va firmada (ECDSA P-256) y la aplicación la verifica sin internet.
 
@@ -177,4 +177,4 @@ Para inglés o portugués, agregar `Strings.en.resx` / `Strings.pt.resx` con las
 - [Formato de archivo `.rmx`](docs/formato-archivo.md)
 - [Exportación JSON](docs/formato-json.md)
 - [Estado de cumplimiento de requerimientos](docs/estado-requerimientos.md)
-- Licencias de terceros: `THIRD-PARTY-NOTICES.txt` (también en Ayuda → Acerca de)
+- Licencias de terceros: `THIRD-PARTY-NOTICES.txt` (también en Configuración → Acerca de)

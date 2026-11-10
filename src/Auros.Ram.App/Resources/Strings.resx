@@ -214,7 +214,7 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Risks_ClearFilters" xml:space="preserve"><value>Limpiar</value></data>
   <data name="Risks_ColRisk" xml:space="preserve"><value>Riesgo / oportunidad de mejora</value></data>
   <data name="Risks_Count" xml:space="preserve"><value>Mostrando {0} de {1} riesgos</value></data>
-  <data name="Risks_DeleteMessage" xml:space="preserve"><value>Se eliminará «{0}» con todas sus evaluaciones ({1}). Se puede deshacer con Edición → Deshacer.</value></data>
+  <data name="Risks_DeleteMessage" xml:space="preserve"><value>Se eliminará «{0}» con todas sus evaluaciones ({1}). Se puede deshacer con Inicio → Deshacer.</value></data>
   <data name="Risks_DeleteTitle" xml:space="preserve"><value>Eliminar riesgo</value></data>
   <data name="Risks_DescendingTip" xml:space="preserve"><value>Orden descendente (de mayor a menor)</value></data>
   <data name="Risks_EmptyHint" xml:space="preserve"><value>Carga el primer riesgo: título, descripciones, impacto y probabilidad de ocurrencia. El nivel de riesgo se calcula solo.</value></data>
@@ -252,7 +252,7 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Scales_Add" xml:space="preserve"><value>+ Nueva escala</value></data>
   <data name="Scales_Assigned" xml:space="preserve"><value>Asignada al proyecto</value></data>
   <data name="Scales_DeleteAssigned" xml:space="preserve"><value>La escala «{0}» está asignada al proyecto y no se puede eliminar. Asigna otra escala en la ficha del proyecto primero.</value></data>
-  <data name="Scales_DeleteMessage" xml:space="preserve"><value>¿Eliminar la escala «{0}»? Puedes deshacerlo con Edición → Deshacer.</value></data>
+  <data name="Scales_DeleteMessage" xml:space="preserve"><value>¿Eliminar la escala «{0}»? Puedes deshacerlo con Inicio → Deshacer.</value></data>
   <data name="Scales_DeleteTitle" xml:space="preserve"><value>Eliminar escala</value></data>
   <data name="Scales_Intro" xml:space="preserve"><value>Las escalas viven dentro de este archivo. Para reutilizarlas en otras matrices, guárdalas como plantilla (junto con el resto de los parámetros).</value></data>
   <data name="Scales_LevelCount" xml:space="preserve"><value>{0} niveles</value></data>
@@ -324,7 +324,7 @@ Se quitó de la lista de recientes.</value></data>
   <data name="History_WarnBeforeRecorded" xml:space="preserve"><value>Es anterior a la última evaluación registrada ({0}): se intercala en el historial y el estado actual sigue siendo el de la evaluación más reciente.</value></data>
   <data name="History_WarnBeforeRecordedNotAllowed" xml:space="preserve"><value>Es anterior a la última evaluación registrada ({0}) y la configuración no lo permite: no se podrá guardar (se puede habilitar en Preferencias).</value></data>
   <data name="History_WarnFuture" xml:space="preserve"><value>La fecha no puede ser posterior a hoy.</value></data>
-  <data name="History_DateEditHint" xml:space="preserve"><value>Para corregir la fecha de una evaluación, elige otra en su fila. El cambio se aplica en el momento y se puede deshacer (Edición → Deshacer).</value></data>
+  <data name="History_DateEditHint" xml:space="preserve"><value>Para corregir la fecha de una evaluación, elige otra en su fila. El cambio se aplica en el momento y se puede deshacer (Inicio → Deshacer).</value></data>
   <data name="History_DateEditTip" xml:space="preserve"><value>Corregir la fecha de esta evaluación</value></data>
   <data name="Prefs_Dates" xml:space="preserve"><value>Fechas de evaluación de los riesgos: permitir usar</value></data>
   <data name="Prefs_DatePastOnCreate" xml:space="preserve"><value>en el alta, una fecha anterior a hoy</value></data>
@@ -415,7 +415,7 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Risk_MaterialityHint" xml:space="preserve"><value>Elige un criterio o escribe uno nuevo… (opcional)</value></data>
   <data name="Catalog_Menu" xml:space="preserve"><value>Consecuencias y criterios de materialidad…</value></data>
   <data name="Catalog_Title" xml:space="preserve"><value>Consecuencias y criterios de materialidad</value></data>
-  <data name="Catalog_Hint" xml:space="preserve"><value>Son las opciones de los combos de cada riesgo en esta matriz. También se pueden agregar escribiendo una nueva en el combo del riesgo. Una opción que usa algún riesgo no se puede quitar. Los cambios se pueden deshacer (Edición → Deshacer).</value></data>
+  <data name="Catalog_Hint" xml:space="preserve"><value>Son las opciones de los combos de cada riesgo en esta matriz. También se pueden agregar escribiendo una nueva en el combo del riesgo. Una opción que usa algún riesgo no se puede quitar. Los cambios se pueden deshacer (Inicio → Deshacer).</value></data>
   <data name="Catalog_NewHint" xml:space="preserve"><value>Nueva opción (descripción corta)</value></data>
   <data name="Catalog_Remove" xml:space="preserve"><value>Quitar esta opción del catálogo</value></data>
   <data name="Catalog_Unused" xml:space="preserve"><value>sin usar</value></data>
@@ -425,7 +425,7 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Risks_DeleteCheckedTitle" xml:space="preserve"><value>Eliminar riesgos y evaluaciones</value></data>
   <data name="Risks_DeleteCheckedRisks" xml:space="preserve"><value>Se eliminarán {0} riesgo(s) con todas sus evaluaciones ({1} en total).</value></data>
   <data name="Risks_DeleteCheckedEntries" xml:space="preserve"><value>Se quitarán {0} evaluación(es) de otros riesgos; cada uno vuelve al estado de su evaluación más reciente que quede.</value></data>
-  <data name="Risks_DeleteCheckedUndo" xml:space="preserve"><value>Se puede deshacer con Edición → Deshacer.</value></data>
+  <data name="Risks_DeleteCheckedUndo" xml:space="preserve"><value>Se puede deshacer con Inicio → Deshacer.</value></data>
   <data name="Risks_ExpandAll" xml:space="preserve"><value>Expandir todo</value></data>
   <data name="Risks_CollapseAll" xml:space="preserve"><value>Contraer todo</value></data>
   <data name="Risks_CheckAll" xml:space="preserve"><value>Marcar todos</value></data>
@@ -456,7 +456,7 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Risk_UnitHint" xml:space="preserve"><value>Elegir o escribir una unidad</value></data>
   <data name="Org_Menu" xml:space="preserve"><value>Empresas y unidades de negocio…</value></data>
   <data name="Org_Title" xml:space="preserve"><value>Empresas y unidades de negocio</value></data>
-  <data name="Org_Hint" xml:space="preserve"><value>Cada riesgo pertenece a una empresa y a una unidad de negocio de esa empresa. Elige una empresa para ver sus unidades. El logo de la empresa aparece en la matriz y en los informes cuando se mira esa empresa. Una empresa o unidad con riesgos no se puede quitar. Los cambios se pueden deshacer (Edición → Deshacer).</value></data>
+  <data name="Org_Hint" xml:space="preserve"><value>Cada riesgo pertenece a una empresa y a una unidad de negocio de esa empresa. Elige una empresa para ver sus unidades. El logo de la empresa aparece en la matriz y en los informes cuando se mira esa empresa. Una empresa o unidad con riesgos no se puede quitar. Los cambios se pueden deshacer (Inicio → Deshacer).</value></data>
   <data name="Org_Companies" xml:space="preserve"><value>Empresas</value></data>
   <data name="Org_Units" xml:space="preserve"><value>Unidades de negocio</value></data>
   <data name="Org_UnitsOf" xml:space="preserve"><value>Unidades de negocio de {0}</value></data>
@@ -495,7 +495,7 @@ Faltan {0} textos: se muestran en español.</value></data>
   <data name="Language_Restart" xml:space="preserve"><value>El idioma elegido se aplica al reiniciar auros.ram.</value></data>
   <data name="Scales_TranslateNames" xml:space="preserve"><value>Traducir nombres estándar</value></data>
   <data name="Scales_TranslateNamesTip" xml:space="preserve"><value>Pasa al idioma actual los nombres estándar de las escalas y de sus niveles (los de los tamaños 2 × 2 a 10 × 10). Los nombres modificados quedan igual. Se puede deshacer.</value></data>
-  <data name="Scales_TranslateNamesDone" xml:space="preserve"><value>Se tradujeron {0} nombres de escalas y niveles al idioma actual. Se puede deshacer (Edición → Deshacer).</value></data>
+  <data name="Scales_TranslateNamesDone" xml:space="preserve"><value>Se tradujeron {0} nombres de escalas y niveles al idioma actual. Se puede deshacer (Inicio → Deshacer).</value></data>
   <data name="Scales_TranslateNamesNone" xml:space="preserve"><value>No hay nombres estándar para traducir: las escalas ya están en el idioma actual o sus nombres fueron modificados.</value></data>
   <data name="Language_CurrentTip" xml:space="preserve"><value>La aplicación está en {0}. Para cambiar el idioma: Configuración → Preferencias.</value></data>
   <data name="Actions_Title" xml:space="preserve"><value>Acciones mitigantes</value></data>
@@ -511,4 +511,39 @@ Faltan {0} textos: se muestran en español.</value></data>
   <data name="Actions_Remove" xml:space="preserve"><value>Quitar esta acción</value></data>
   <data name="Actions_GridOpen" xml:space="preserve"><value>Abiertas: {1} de {0}</value></data>
   <data name="Actions_GridDone" xml:space="preserve"><value>Todas cerradas ({0})</value></data>
+  <data name="Ribbon_TabHome" xml:space="preserve"><value>Inicio</value></data>
+  <data name="Ribbon_TabView" xml:space="preserve"><value>Vista</value></data>
+  <data name="Ribbon_TabSettings" xml:space="preserve"><value>Configuración</value></data>
+  <data name="Ribbon_GroupFile" xml:space="preserve"><value>Archivo</value></data>
+  <data name="Ribbon_GroupEdit" xml:space="preserve"><value>Edición</value></data>
+  <data name="Ribbon_GroupSecurity" xml:space="preserve"><value>Seguridad</value></data>
+  <data name="Ribbon_GroupData" xml:space="preserve"><value>Datos</value></data>
+  <data name="Ribbon_GroupMatrix" xml:space="preserve"><value>Matriz</value></data>
+  <data name="Ribbon_GroupApp" xml:space="preserve"><value>Aplicación</value></data>
+  <data name="Ribbon_GroupHelp" xml:space="preserve"><value>Ayuda</value></data>
+  <data name="Ribbon_New" xml:space="preserve"><value>Nuevo</value></data>
+  <data name="Ribbon_Open" xml:space="preserve"><value>Abrir</value></data>
+  <data name="Ribbon_SaveAs" xml:space="preserve"><value>Guardar como</value></data>
+  <data name="Ribbon_NewRisk" xml:space="preserve"><value>Nuevo riesgo</value></data>
+  <data name="Ribbon_Lock" xml:space="preserve"><value>Bloquear</value></data>
+  <data name="Ribbon_Password" xml:space="preserve"><value>Contraseña</value></data>
+  <data name="Ribbon_Excel" xml:space="preserve"><value>Excel</value></data>
+  <data name="Ribbon_PdfAll" xml:space="preserve"><value>Informe completo</value></data>
+  <data name="Ribbon_PdfMatrix" xml:space="preserve"><value>Matriz</value></data>
+  <data name="Ribbon_PdfSummary" xml:space="preserve"><value>Ficha resumen</value></data>
+  <data name="Ribbon_PdfDetail" xml:space="preserve"><value>Ficha detallada</value></data>
+  <data name="Ribbon_PdfEvolution" xml:space="preserve"><value>Evolución</value></data>
+  <data name="Ribbon_CsvRisks" xml:space="preserve"><value>CSV riesgos</value></data>
+  <data name="Ribbon_CsvMatrix" xml:space="preserve"><value>CSV matriz</value></data>
+  <data name="Ribbon_Json" xml:space="preserve"><value>JSON</value></data>
+  <data name="Ribbon_ImportJson" xml:space="preserve"><value>Importar JSON</value></data>
+  <data name="Ribbon_Print" xml:space="preserve"><value>Imprimir</value></data>
+  <data name="Ribbon_Template" xml:space="preserve"><value>Guardar plantilla</value></data>
+  <data name="Ribbon_Companies" xml:space="preserve"><value>Empresas</value></data>
+  <data name="Ribbon_Catalogs" xml:space="preserve"><value>Consecuencias</value></data>
+  <data name="Ribbon_Preferences" xml:space="preserve"><value>Preferencias</value></data>
+  <data name="Ribbon_License" xml:space="preserve"><value>Licencia</value></data>
+  <data name="Ribbon_About" xml:space="preserve"><value>Acerca de</value></data>
+  <data name="Ribbon_Collapse" xml:space="preserve"><value>Contraer la cinta</value></data>
+  <data name="Ribbon_Expand" xml:space="preserve"><value>Expandir la cinta</value></data>
 </root>

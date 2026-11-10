@@ -16,6 +16,9 @@ public sealed class AppSettings
     public int AutosaveMinutes { get; set; } = 5;
     public int LockMinutes { get; set; } = 15;
 
+    /// <summary>Cinta de opciones contraída: solo se ven sus pestañas.</summary>
+    public bool RibbonCollapsed { get; set; }
+
     /// <summary>Código del idioma de la aplicación (es = español, el de origen). Se aplica al iniciar.</summary>
     public string Language { get; set; } = "es";
 

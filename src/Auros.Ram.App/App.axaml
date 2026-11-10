@@ -50,6 +50,22 @@
       <StreamGeometry x:Key="IconUnlock">M4.5,7 V5 A3.5,3.5 0 0 1 11.5,5 M3,7 H13 V14.5 H3 Z M8,9.5 V12</StreamGeometry>
       <StreamGeometry x:Key="IconExport">M8,10.5 V1.5 M4.5,5 L8,1.5 L11.5,5 M2.5,10 V14.5 H13.5 V10</StreamGeometry>
       <StreamGeometry x:Key="IconSplit">M2,14 H14 M3.5,14 V10 M6.5,14 V7.5 M9.5,14 V5 M12.5,14 V2.5</StreamGeometry>
+      <!-- Cinta de opciones -->
+      <StreamGeometry x:Key="IconNew">M3.5,1.5 H10 L13.5,5 V14.5 H3.5 Z M10,1.5 V5 H13.5 M8.5,7.5 V12.5 M6,10 H11</StreamGeometry>
+      <StreamGeometry x:Key="IconOpen">M1.5,13 V3 H6 L7.5,5 H12.5 V7.5 M1.5,13 L3.5,7.5 H14.5 L12.5,13 Z</StreamGeometry>
+      <StreamGeometry x:Key="IconSaveAs">M7,14.5 H3 Q1.5,14.5 1.5,13 V3 Q1.5,1.5 3,1.5 H11.5 L14.5,4.5 V7 M4.5,1.5 V5.5 H10.5 V1.5 M12.5,8.5 L15,11 L10.5,15.5 H8 V13 Z</StreamGeometry>
+      <StreamGeometry x:Key="IconRedo">M10.5,3 L13.5,6 L10.5,9 M13.5,6 H6 A3.75,3.75 0 0 0 6,13.5 H10</StreamGeometry>
+      <StreamGeometry x:Key="IconLock">M4.5,7 V5 A3.5,3.5 0 0 1 11.5,5 V7 M3,7 H13 V14.5 H3 Z M8,9.5 V12</StreamGeometry>
+      <StreamGeometry x:Key="IconKey">M8,5 A3,3 0 1 0 14,5 A3,3 0 1 0 8,5 M8.9,7.1 L2,14 M4,12 L6,14 M6,10 L8,12</StreamGeometry>
+      <StreamGeometry x:Key="IconCsv">M3.5,1.5 H10 L13.5,5 V14.5 H3.5 Z M10,1.5 V5 H13.5 M5.5,8 H11.5 M5.5,10.5 H11.5 M5.5,13 H11.5 M8.5,8 V13</StreamGeometry>
+      <StreamGeometry x:Key="IconJson">M6,2 Q4,2 4,4 V6.5 Q4,8 2.5,8 Q4,8 4,9.5 V12 Q4,14 6,14 M10,2 Q12,2 12,4 V6.5 Q12,8 13.5,8 Q12,8 12,9.5 V12 Q12,14 10,14</StreamGeometry>
+      <StreamGeometry x:Key="IconImport">M8,1.5 V10.5 M4.5,7 L8,10.5 L11.5,7 M2.5,10 V14.5 H13.5 V10</StreamGeometry>
+      <StreamGeometry x:Key="IconTemplate">M2.5,2 H13.5 V14 H2.5 Z M2.5,6 H13.5 M6.5,6 V14</StreamGeometry>
+      <StreamGeometry x:Key="IconCompany">M2.5,14.5 V2 H9.5 V14.5 M9.5,6.5 H13.5 V14.5 M1,14.5 H15 M5,5 H7 M5,8 H7 M5,11 H7 M11,9.5 H12 M11,12 H12</StreamGeometry>
+      <StreamGeometry x:Key="IconList">M6,3.5 H14 M6,8 H14 M6,12.5 H14 M2,3.5 H3 M2,8 H3 M2,12.5 H3</StreamGeometry>
+      <StreamGeometry x:Key="IconSettings">M2,4.5 H8.5 M12.5,4.5 H14 M8.5,2.5 H12.5 V6.5 H8.5 Z M2,11.5 H3.5 M7.5,11.5 H14 M3.5,9.5 H7.5 V13.5 H3.5 Z</StreamGeometry>
+      <StreamGeometry x:Key="IconLicense">M8,1.5 A4.5,4.5 0 1 0 8,10.5 A4.5,4.5 0 1 0 8,1.5 M5.5,9.5 L4.5,14.5 L8,12.5 L11.5,14.5 L10.5,9.5</StreamGeometry>
+      <StreamGeometry x:Key="IconInfo">M8,1.5 A6.5,6.5 0 1 0 8,14.5 A6.5,6.5 0 1 0 8,1.5 M8,7.5 V11.5 M8,4.7 V4.9</StreamGeometry>
 
       <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
@@ -281,6 +297,65 @@
     </Style>
     <Style Selector="TabControl.rail > TabItem /template/ Border#PART_SelectedPipe">
       <Setter Property="IsVisible" Value="False" />
+    </Style>
+
+    <!-- Cinta de opciones: pestañas arriba y botones con ícono grande y texto, en grupos con su nombre. -->
+    <Style Selector="TabControl.ribbon">
+      <Setter Property="Padding" Value="0" />
+    </Style>
+    <!-- A la izquierda de las pestañas queda el botón Archivo. -->
+    <Style Selector="TabControl.ribbon /template/ ItemsPresenter#PART_ItemsPresenter">
+      <Setter Property="Margin" Value="84,0,0,0" />
+    </Style>
+    <Style Selector="TabControl.ribbon.collapsed /template/ ContentPresenter#PART_SelectedContentHost">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="Button.ribbonfile">
+      <Setter Property="Width" Value="76" />
+      <Setter Property="Height" Value="30" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="CornerRadius" Value="0,0,3,0" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="TabControl.ribbon > TabItem">
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="MinHeight" Value="30" />
+      <Setter Property="Padding" Value="12,0" />
+    </Style>
+    <Style Selector="TabControl.ribbon > TabItem:selected">
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="Border.ribbongroup">
+      <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}" />
+      <Setter Property="BorderThickness" Value="0,0,1,0" />
+      <Setter Property="Padding" Value="6,0" />
+      <Setter Property="Margin" Value="0,4" />
+    </Style>
+    <Style Selector="TextBlock.ribbongroup">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="Margin" Value="0,2,0,0" />
+    </Style>
+    <Style Selector="Button.ribbon">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="6,5,6,3" />
+      <Setter Property="MinWidth" Value="58" />
+      <Setter Property="MaxWidth" Value="100" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="VerticalAlignment" Value="Stretch" />
+      <Setter Property="VerticalContentAlignment" Value="Top" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.ribbon:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundDisabled}" />
+    </Style>
+    <Style Selector="Button.ribbon:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
     </Style>
   </Application.Styles>
 </Application>

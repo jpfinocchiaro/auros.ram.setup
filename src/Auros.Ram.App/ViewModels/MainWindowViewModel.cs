@@ -15,7 +15,7 @@ namespace Auros.Ram.App.ViewModels;
 
 public sealed record SketchRow(IReadOnlyList<LevelChip> Cells);
 
-public sealed record RecentItem(string Path)
+public sealed record RecentItem(string Path, System.Windows.Input.ICommand? Open = null)
 {
     public string Name => System.IO.Path.GetFileName(Path);
     public string Folder => System.IO.Path.GetDirectoryName(Path) ?? "";
@@ -83,6 +83,27 @@ public sealed partial class MainWindowViewModel : ObservableObject
     public bool HasActive => Active is not null;
     public bool CanEdit => Active is { IsLocked: false };
     public bool HasRecent => Recent.Count > 0;
+
+    /// <summary>Cinta de opciones contraída (solo pestañas); se recuerda entre sesiones.</summary>
+    public bool RibbonCollapsed
+    {
+        get => _settings.RibbonCollapsed;
+        set
+        {
+            if (_settings.RibbonCollapsed != value)
+            {
+                _settings.RibbonCollapsed = value;
+                _settings.Save();
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(RibbonTip));
+            }
+        }
+    }
+
+    public string RibbonTip => RibbonCollapsed ? Strings.Ribbon_Expand : Strings.Ribbon_Collapse;
+
+    [RelayCommand]
+    private void ToggleRibbon() => RibbonCollapsed = !RibbonCollapsed;
     public string Version => AppInfo.Version;
 
     /// <summary>Idioma con el que está funcionando la aplicación (arriba a la derecha).</summary>
@@ -198,7 +219,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private Task OpenRecent(RecentItem item) => OpenPathAsync(item.Path);
 
-    /// <summary>Archivo → Guardar parámetros como plantilla: todos los parámetros de la matriz activa.</summary>
+    /// <summary>Configuración → Guardar plantilla: todos los parámetros de la matriz activa.</summary>
     [RelayCommand]
     private Task SaveTemplate() =>
         Active is { IsLocked: false } doc ? doc.SaveTemplateAsync() : Task.CompletedTask;
@@ -629,7 +650,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private Task About() => _ui.ShowAboutAsync();
 
-    /// <summary>Ayuda → Licencia: código de este equipo y activación de la versión completa.</summary>
+    /// <summary>Configuración → Licencia: código de este equipo y activación de la versión completa.</summary>
     [RelayCommand]
     private Task License() => _ui.ShowLicenseAsync(new LicenseViewModel());
 
@@ -648,7 +669,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         Recent.Clear();
         foreach (var path in _settings.RecentFiles)
         {
-            Recent.Add(new RecentItem(path));
+            Recent.Add(new RecentItem(path, OpenRecentCommand));
         }
 
         OnPropertyChanged(nameof(HasRecent));

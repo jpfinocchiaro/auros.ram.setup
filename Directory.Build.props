@@ -7,7 +7,7 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <Version>2.3.0</Version>
+    <Version>2.4.0</Version>
     <Company>Auros</Company>
     <Product>auros.ram</Product>
     <Copyright>© 2026 Auros</Copyright>

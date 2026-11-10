@@ -104,7 +104,7 @@ internal static class Correo
 
                 To activate it:
                 1. Open auros.ram on the computer with code {machine}.
-                2. Go to Help → License.
+                2. Go to Settings → License.
                 3. Paste the key in "License key" and click Activate.
 
                 The key works only on that computer. If you change computers or reinstall the system, write to us and we will send you a new one.
@@ -123,7 +123,7 @@ internal static class Correo
 
                 Para ativá-la:
                 1. Abra o auros.ram no computador com o código {machine}.
-                2. Vá em Ajuda → Licença.
+                2. Vá em Configurações → Licença.
                 3. Cole a chave em "Chave de licença" e clique em Ativar.
 
                 A chave funciona apenas nesse computador. Se trocar de computador ou reinstalar o sistema, escreva para nós e enviaremos uma nova.
@@ -142,7 +142,7 @@ internal static class Correo
 
                 Pour l'activer :
                 1. Ouvrez auros.ram sur l'ordinateur dont le code est {machine}.
-                2. Allez dans Aide → Licence.
+                2. Allez dans Paramètres → Licence.
                 3. Collez la clé dans « Clé de licence » et cliquez sur Activer.
 
                 La clé ne fonctionne que sur cet ordinateur. Si vous changez d'ordinateur ou réinstallez le système, écrivez-nous et nous vous en enverrons une nouvelle.
@@ -161,7 +161,7 @@ internal static class Correo
 
                 Para activarla:
                 1. Abre auros.ram en el equipo con el código {machine}.
-                2. Ve a Ayuda → Licencia.
+                2. Ve a Configuración → Licencia.
                 3. Pega la clave en «Clave de licencia» y haz clic en Activar.
 
                 La clave funciona solo en ese equipo. Si cambias de equipo o reinstalas el sistema, escríbenos y te enviamos una nueva.
