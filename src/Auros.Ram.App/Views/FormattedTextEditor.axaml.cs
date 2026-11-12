@@ -60,6 +60,9 @@ public partial class FormattedTextEditor : UserControl
         // Pegar lo hace esta clase: el de la biblioteca falla con lo copiado de otras aplicaciones (formato RTF o HTML).
         Editor.AddHandler(KeyDownEvent, OnPasteKey, RoutingStrategies.Tunnel, handledEventsToo: true);
 
+        // Enter también: el de la biblioteca a veces falla al partir el párrafo (error inesperado al escribir).
+        Editor.AddHandler(KeyDownEvent, OnEnterKey, RoutingStrategies.Tunnel);
+
         // Cada cambio del usuario se pasa a Text (teclado, mouse, pegar).
         Editor.AddHandler(KeyUpEvent, OnKeyUp, RoutingStrategies.Bubble, handledEventsToo: true);
         Editor.AddHandler(TextInputEvent, (_, _) => Publish(), RoutingStrategies.Bubble, handledEventsToo: true);
@@ -293,13 +296,33 @@ public partial class FormattedTextEditor : UserControl
     /// <summary>El cursor está oculto (el editor no tiene el foco); para las pruebas.</summary>
     public bool CaretHidden => _caret?.OpacityMask is not null;
 
-    private void OnKeyUp(object? sender, KeyEventArgs e)
+    private void OnKeyUp(object? sender, KeyEventArgs e) => Publish();
+
+    /// <summary>Enter parte el párrafo donde está el cursor (reemplaza lo seleccionado) y sigue la lista si hay una.</summary>
+    private void OnEnterKey(object? sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Enter && _loaded)
+        if (e.Key is not (Key.Enter or Key.Return) || (e.KeyModifiers & ~KeyModifiers.Shift) != 0 || Editor.IsReadOnly ||
+            !_loaded)
         {
-            ContinueList();
+            return;
         }
 
+        e.Handled = true;
+        try
+        {
+            NewParagraph();
+        }
+        catch (Exception ex)
+        {
+            Services.Log.Error(ex, "Editor.Enter");
+        }
+    }
+
+    /// <summary>Lo que hace Enter: un párrafo nuevo en el cursor.</summary>
+    public void NewParagraph()
+    {
+        PasteText("\n");
+        ContinueList();
         Publish();
     }
 

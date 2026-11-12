@@ -110,7 +110,8 @@ public static class RichDocument
         var all = runs.Take(startPar).Concat(inserted).Concat(runs.Skip(endPar + 1));
         var lines = all.Select(r => Line(Merge([.. r.Where(x => x.Text.Length > 0)]))).ToList();
         var offset = pasted.Length == 1 ? startOff + pasted[0].Length : pasted[^1].Length;
-        return (Join(lines), startPar + pasted.Length - 1, offset);
+        // Sin quitar los párrafos vacíos del final: ahí puede quedar el cursor (Enter al final del texto).
+        return (string.Join('\n', lines), startPar + pasted.Length - 1, offset);
     }
 
     /// <summary>Los tramos de un párrafo del editor, con su formato.</summary>

@@ -594,6 +594,46 @@ public class UiSmokeTests
     }
 
     [AvaloniaFact]
+    public void Formatted_editor_splits_paragraphs_with_enter()
+    {
+        var editor = new FormattedTextEditor { Text = "Uno **dos** tres", EditorHeight = 120 };
+        var window = new Window { Content = editor, Width = 600, Height = 300 };
+        window.Show();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        editor.FocusText();
+
+        void Enter()
+        {
+            window.KeyPress(Avalonia.Input.Key.Enter, Avalonia.Input.RawInputModifiers.None, Avalonia.Input.PhysicalKey.Enter, null);
+            window.KeyRelease(Avalonia.Input.Key.Enter, Avalonia.Input.RawInputModifiers.None, Avalonia.Input.PhysicalKey.Enter, null);
+            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        }
+
+        // En medio de un tramo con formato: el formato sigue en las dos partes.
+        editor.Box.FlowDocument.Select(5, 0);
+        Enter();
+        window.KeyTextInput("x");
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        editor.Publish();
+        Assert.Equal("Uno **d**\n**xos** tres", editor.Text);
+
+        // Al final del texto: el cursor pasa a la línea nueva.
+        editor.Box.FlowDocument.Select(editor.Box.FlowDocument.Blocks.Sum(b => b.BlockLength) - 1, 0);
+        Enter();
+        window.KeyTextInput("fin");
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        editor.Publish();
+        Assert.Equal("Uno **d**\n**xos** tres\nfin", editor.Text);
+
+        // Con texto seleccionado: lo reemplaza.
+        editor.Box.FlowDocument.Select(0, 4);
+        Enter();
+        editor.Publish();
+        Assert.Equal("\n**d**\n**xos** tres\nfin", editor.Text);
+        window.Close();
+    }
+
+    [AvaloniaFact]
     public void Formatted_editor_pastes_plain_text_from_the_clipboard()
     {
         var editor = new FormattedTextEditor { Text = "Hola **mundo**\n- uno", EditorHeight = 200 };
