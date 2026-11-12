@@ -558,6 +558,42 @@ public class UiSmokeTests
     }
 
     [AvaloniaFact]
+    public void Formatted_editor_puts_the_caret_where_clicked_or_at_the_end()
+    {
+        var title = new TextBox { Text = "Título" };
+        var editor = new FormattedTextEditor { Text = "Uno dos tres\nsegunda línea", EditorHeight = 120 };
+        var window = new Window { Content = new StackPanel { Spacing = 8, Children = { title, editor } }, Width = 600, Height = 400 };
+        window.Show();
+        for (var i = 0; i < 5; i++)
+        {
+            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+            Thread.Sleep(20);
+        }
+
+        const int end = 26; // "Uno dos tres" (12) + salto + "segunda línea" (13)
+        Assert.Equal(end, editor.Box.FlowDocument.Selection.Start);
+
+        int ClickAt(double x, double y)
+        {
+            title.Focus();
+            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+            var point = editor.Box.TranslatePoint(new Point(x, y), window)!.Value;
+            window.MouseMove(point);
+            window.MouseDown(point, Avalonia.Input.MouseButton.Left);
+            window.MouseUp(point, Avalonia.Input.MouseButton.Left);
+            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+            Assert.True(editor.IsKeyboardFocusWithin);
+            return editor.Box.FlowDocument.Selection.Start;
+        }
+
+        Assert.Equal(end, ClickAt(200, 100));   // espacio libre debajo del texto: al final
+        Assert.Equal(0, ClickAt(2, 12));        // margen izquierdo de la primera línea: al principio de la línea
+        Assert.Equal(12, ClickAt(400, 12));     // a la derecha de la primera línea: al final de esa línea
+        Assert.InRange(ClickAt(40, 12), 1, 11); // sobre el texto: donde se hizo clic
+        window.Close();
+    }
+
+    [AvaloniaFact]
     public void Formatted_editor_pastes_plain_text_from_the_clipboard()
     {
         var editor = new FormattedTextEditor { Text = "Hola **mundo**\n- uno", EditorHeight = 200 };

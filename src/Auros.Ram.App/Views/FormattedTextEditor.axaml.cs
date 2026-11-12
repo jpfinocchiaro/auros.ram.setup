@@ -11,6 +11,7 @@ using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 
 namespace Auros.Ram.App.Views;
@@ -70,12 +71,21 @@ public partial class FormattedTextEditor : UserControl
         // no hacía nada porque la otra recuperaba el foco. Solo se acepta el foco que pide el usuario (clic o Tab) o esta
         // clase; el que toma la biblioteca vuelve al control que eligió el usuario.
         // El clic da el foco al editor: la biblioteca marca el clic como atendido y solo a veces toma el foco (más tarde).
-        Editor.AddHandler(PointerPressedEvent, (_, _) =>
+        Editor.AddHandler(PointerPressedEvent, (_, e) =>
         {
             _userFocus = true;
             if (!Editor.IsKeyboardFocusWithin)
             {
                 Editor.Focus(NavigationMethod.Pointer);
+            }
+
+            // Un clic fuera del texto (en el margen de una línea o en el espacio libre de abajo) ubica el cursor en esa
+            // línea o al final, como en un procesador de textos. La biblioteca solo ubica el cursor si el clic cae sobre
+            // un párrafo; si no, lo deja donde estaba (al principio).
+            if (!OverText(e.Source) && !e.KeyModifiers.HasFlag(KeyModifiers.Shift))
+            {
+                var point = e.GetPosition(Editor);
+                Dispatcher.UIThread.Post(() => CaretAt(point));
             }
         }, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(GotFocusEvent, OnGotFocus, RoutingStrategies.Bubble, handledEventsToo: true);
@@ -84,6 +94,44 @@ public partial class FormattedTextEditor : UserControl
         // Si un párrafo tuviera el foco, la biblioteca lo reclamaría para su editor en cualquier momento (al cargarse,
         // al perderlo), aunque el usuario esté escribiendo en otro lado.
         Editor.LayoutUpdated += (_, _) => KeepFocusOnEditor();
+    }
+
+    private static bool OverText(object? source) =>
+        source is Visual v && v.GetSelfAndVisualAncestors().Any(a => a.GetType().Name == "EditableParagraph");
+
+    /// <summary>Ubica el cursor en la línea a la altura del punto (del editor), o al final si está debajo del texto.</summary>
+    private void CaretAt(Point point)
+    {
+        foreach (var block in Editor.GetVisualDescendants().OfType<TextBlock>())
+        {
+            if (block.GetType().Name != "EditableParagraph" || block.DataContext is not AvRichTextBox.Paragraph paragraph ||
+                block.TranslatePoint(new Point(0, 0), Editor) is not { } origin ||
+                point.Y < origin.Y || point.Y >= origin.Y + block.Bounds.Height)
+            {
+                continue;
+            }
+
+            var x = Math.Clamp(point.X - origin.X, 0, Math.Max(0, block.Bounds.Width - 1));
+            var hit = block.TextLayout.HitTestPoint(new Point(x, point.Y - origin.Y));
+            var start = Editor.FlowDocument.Blocks.TakeWhile(b => !ReferenceEquals(b, paragraph)).Sum(b => b.BlockLength);
+            Editor.FlowDocument.Select(start + hit.TextPosition, 0);
+            return;
+        }
+
+        CaretToEnd();
+    }
+
+    /// <summary>Lleva el cursor al final del texto.</summary>
+    private void CaretToEnd()
+    {
+        var paragraphs = Editor.FlowDocument?.Blocks.OfType<AvRichTextBox.Paragraph>().ToList();
+        if (paragraphs is not { Count: > 0 })
+        {
+            return;
+        }
+
+        var start = paragraphs.Take(paragraphs.Count - 1).Sum(p => p.BlockLength);
+        Editor.FlowDocument!.Select(start + paragraphs[^1].TextLength, 0);
     }
 
     private void KeepFocusOnEditor()
@@ -218,6 +266,9 @@ public partial class FormattedTextEditor : UserControl
 
         RichDocument.Load(Editor, Text);
         _loaded = true;
+
+        // Al entrar al editor (con Tab o un clic fuera del texto) se sigue escribiendo al final.
+        CaretToEnd();
     }
 
     /// <summary>
