@@ -413,6 +413,7 @@ Risk_RemoveConsequence=Remove this consequence
 Risk_Required=(required)
 Risk_Short=Short description
 Risk_ShortHint=Short description — executive summary (required)
+Risk_RepeatTitle=Repeat the title in the short and long descriptions
 Risk_Title=Title (required)
 Risk_Unit=Business unit
 Risk_UnitHint=Choose or type a unit

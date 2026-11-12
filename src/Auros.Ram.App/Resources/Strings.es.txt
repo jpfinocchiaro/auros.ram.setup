@@ -199,6 +199,7 @@ Risk_New=Nuevo riesgo
 Risk_NoLevel=sin elegir
 Risk_Short=Descripción corta
 Risk_ShortHint=Descripción corta — resumen ejecutivo (obligatoria)
+Risk_RepeatTitle=Repetir el título en las descripciones corta y larga
 Risk_Title=Título (obligatorio)
 Risks_Add=Nuevo riesgo
 Risks_ClearFilters=Limpiar

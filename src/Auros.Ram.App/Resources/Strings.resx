@@ -209,6 +209,7 @@ Se quitó de la lista de recientes.</value></data>
   <data name="Risk_NoLevel" xml:space="preserve"><value>sin elegir</value></data>
   <data name="Risk_Short" xml:space="preserve"><value>Descripción corta</value></data>
   <data name="Risk_ShortHint" xml:space="preserve"><value>Descripción corta — resumen ejecutivo (obligatoria)</value></data>
+  <data name="Risk_RepeatTitle" xml:space="preserve"><value>Repetir el título en las descripciones corta y larga</value></data>
   <data name="Risk_Title" xml:space="preserve"><value>Título (obligatorio)</value></data>
   <data name="Risks_Add" xml:space="preserve"><value>Nuevo riesgo</value></data>
   <data name="Risks_ClearFilters" xml:space="preserve"><value>Limpiar</value></data>

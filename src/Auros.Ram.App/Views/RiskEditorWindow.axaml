@@ -47,6 +47,9 @@
             <TextBlock Classes="label" Text="{x:Static r:Strings.Risk_Title}" />
           </DockPanel>
           <TextBox x:Name="TitleBox" Text="{Binding Title}" MaxLength="{Binding TitleMax}" />
+          <!-- En el alta, las descripciones pueden repetir el título mientras se escribe. -->
+          <CheckBox x:Name="RepeatTitleBox" Margin="0,6,0,0" IsVisible="{Binding IsNew}" IsChecked="{Binding RepeatTitle}"
+                    Content="{x:Static r:Strings.Risk_RepeatTitle}" />
         </StackPanel>
         <StackPanel IsVisible="{Binding CanEditTexts}">
           <DockPanel>
@@ -54,11 +57,11 @@
             <TextBlock Classes="label" Text="{x:Static r:Strings.Risk_ShortHint}" />
           </DockPanel>
           <!-- Descripciones con formato directo: barra de botones sobre el texto. -->
-          <views:FormattedTextEditor Text="{Binding ShortDescription}" EditorHeight="90" />
+          <views:FormattedTextEditor Text="{Binding ShortDescription}" IsEnabled="{Binding CanEditDescriptions}" EditorHeight="90" />
         </StackPanel>
         <StackPanel IsVisible="{Binding CanEditTexts}">
           <TextBlock Classes="label" Text="{x:Static r:Strings.Risk_LongHint}" />
-          <views:FormattedTextEditor Text="{Binding LongDescription}" EditorHeight="190" />
+          <views:FormattedTextEditor Text="{Binding LongDescription}" IsEnabled="{Binding CanEditDescriptions}" EditorHeight="190" />
         </StackPanel>
 
         <!-- Consecuencias potenciales (varias) y criterio de materialidad (uno), de los catálogos de la matriz.

@@ -413,6 +413,7 @@ Risk_RemoveConsequence=Retirer cette conséquence
 Risk_Required=(obligatoire)
 Risk_Short=Description courte
 Risk_ShortHint=Description courte — synthèse (obligatoire)
+Risk_RepeatTitle=Répéter le titre dans les descriptions courte et longue
 Risk_Title=Titre (obligatoire)
 Risk_Unit=Unité d'affaires
 Risk_UnitHint=Choisir ou saisir une unité

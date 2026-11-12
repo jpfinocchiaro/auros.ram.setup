@@ -53,6 +53,54 @@ public class UiSmokeTests
         Edition.UseForTests(new Auros.Ram.Core.Licensing.License("Pruebas", Edition.MachineCode, new DateOnly(2026, 11, 7)));
 
     [AvaloniaFact]
+    public void New_risk_can_repeat_its_title_in_both_descriptions()
+    {
+        var doc = SampleDocument();
+        var vm = new RiskEditorViewModel(doc, null);
+        var dialog = new RiskEditorWindow(vm);
+        dialog.Show();
+        for (var i = 0; i < 10; i++)
+        {
+            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+            Thread.Sleep(20);
+        }
+
+        var repeat = dialog.FindControl<CheckBox>("RepeatTitleBox")!;
+        Assert.True(repeat.IsEffectivelyVisible);
+        repeat.IsChecked = true;
+        var title = dialog.FindControl<TextBox>("TitleBox")!;
+        title.Focus();
+        dialog.KeyTextInput("Fraude en compras");
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        Assert.Equal("Fraude en compras", vm.ShortDescription);
+        Assert.Equal("Fraude en compras", vm.LongDescription);
+        var editors = dialog.GetVisualDescendants<FormattedTextEditor>().ToList();
+        Assert.All(editors, e =>
+        {
+            Assert.False(e.IsEnabled);
+            var box = e.FindControl<AvRichTextBox.RichTextBox>("Editor")!;
+            Assert.Equal("Fraude en compras", RichDocument.Save(box.FlowDocument));
+        });
+
+        // Sin el tilde, las descripciones conservan el texto y se pueden editar.
+        repeat.IsChecked = false;
+        dialog.KeyTextInput(" de insumos");
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Assert.Equal("Fraude en compras de insumos", vm.Title);
+        Assert.Equal("Fraude en compras", vm.ShortDescription);
+        Assert.All(editors, e => Assert.True(e.IsEnabled));
+        dialog.Close();
+
+        // Al editar un riesgo existente el tilde no aparece.
+        var edit = new RiskEditorWindow(new RiskEditorViewModel(doc, doc.Risks[0]));
+        edit.Show();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Assert.False(edit.FindControl<CheckBox>("RepeatTitleBox")!.IsEffectivelyVisible);
+        edit.Close();
+    }
+
+    [AvaloniaFact]
     public void All_sections_and_dialogs_render_without_binding_errors()
     {
         AppPaths.UseRoot(Path.Combine(Path.GetTempPath(), "auros-ram-uitests", Guid.NewGuid().ToString("N")));

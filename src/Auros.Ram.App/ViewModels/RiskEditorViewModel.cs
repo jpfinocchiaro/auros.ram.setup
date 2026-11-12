@@ -783,6 +783,36 @@ public sealed partial class RiskEditorViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(TitleCounter))]
     private string _title;
 
+    partial void OnTitleChanged(string value)
+    {
+        if (RepeatTitle)
+        {
+            CopyTitle();
+        }
+    }
+
+    /// <summary>En el alta: las descripciones corta y larga repiten lo que se escribe en el título.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanEditDescriptions))]
+    private bool _repeatTitle;
+
+    partial void OnRepeatTitleChanged(bool value)
+    {
+        if (value)
+        {
+            CopyTitle();
+        }
+    }
+
+    /// <summary>Las descripciones se escriben a mano salvo que repitan el título.</summary>
+    public bool CanEditDescriptions => !RepeatTitle;
+
+    private void CopyTitle()
+    {
+        ShortDescription = Title;
+        LongDescription = Title;
+    }
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShortCounter))]
     private string _shortDescription;
