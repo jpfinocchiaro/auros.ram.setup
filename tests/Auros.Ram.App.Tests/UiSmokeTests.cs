@@ -471,6 +471,74 @@ public class UiSmokeTests
     }
 
     [AvaloniaFact]
+    public void Formatted_editors_take_focus_and_text_on_every_click()
+    {
+        var title = new TextBox { Text = "Título" };
+        var first = new FormattedTextEditor { Text = "Uno", EditorHeight = 80 };
+        var second = new FormattedTextEditor { Text = "Dos", EditorHeight = 80 };
+        var window = new Window { Content = new StackPanel { Spacing = 8, Children = { title, first, second } }, Width = 600, Height = 400 };
+        window.Show();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        title.Focus();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+
+        void ClickAndType(FormattedTextEditor editor, string text)
+        {
+            var point = editor.TranslatePoint(new Point(200, 50), window)!.Value;
+            window.MouseDown(point, Avalonia.Input.MouseButton.Left);
+            window.MouseUp(point, Avalonia.Input.MouseButton.Left);
+            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+            Assert.True(editor.IsKeyboardFocusWithin, $"el clic no llevó el foco al editor «{editor.Text}»");
+            Assert.False(editor.CaretHidden);
+            window.KeyTextInput(text);
+            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+            editor.Publish();
+            Assert.Contains(text, editor.Text, StringComparison.Ordinal);
+        }
+
+        for (var round = 0; round < 3; round++)
+        {
+            ClickAndType(first, $"a{round}");
+            Assert.True(second.CaretHidden);
+            ClickAndType(second, $"b{round}");
+            Assert.True(first.CaretHidden);
+            title.Focus();
+            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        }
+
+        window.Close();
+    }
+
+    [AvaloniaFact]
+    public void Formatted_editor_pastes_plain_text_from_the_clipboard()
+    {
+        var editor = new FormattedTextEditor { Text = "Hola **mundo**\n- uno", EditorHeight = 200 };
+        var window = new Window { Content = editor, Width = 600, Height = 300 };
+        window.Show();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        editor.FocusText();
+
+        // Varias líneas en medio de un texto con formato: cada línea es un párrafo y el formato de alrededor se mantiene.
+        editor.Box.FlowDocument.Select(5, 0);
+        editor.PasteText("A\r\nB ");
+        Assert.Equal("Hola A\nB **mundo**\n- uno", editor.Text);
+        Assert.Equal(1, editor.Box.FlowDocument.Blocks.IndexOf(editor.Box.FlowDocument.Selection.GetStartPar()!));
+
+        // Lo seleccionado se reemplaza, también entre párrafos.
+        editor.Box.FlowDocument.Select(0, 7);
+        editor.PasteText("Chau ");
+        Assert.Equal("Chau B **mundo**\n- uno", editor.Text);
+
+        // Con el teclado (Ctrl+V), desde el portapapeles.
+        window.Clipboard!.SetTextAsync("fin").GetAwaiter().GetResult();
+        editor.Box.FlowDocument.Select(0, 0);
+        window.KeyPress(Avalonia.Input.Key.V, Avalonia.Input.RawInputModifiers.Control, Avalonia.Input.PhysicalKey.V, "v");
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        Assert.Equal("finChau B **mundo**\n- uno", editor.Text);
+        window.Close();
+    }
+
+    [AvaloniaFact]
     public void Two_formatted_editors_keep_their_own_text()
     {
         // La descripción corta y la larga están en la misma ventana: cada editor debe tener su propio documento.

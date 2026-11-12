@@ -65,22 +65,113 @@ public static class RichDocument
     /// <summary>El contenido del documento como texto con marcas.</summary>
     public static string Save(FlowDocument doc)
     {
-        var lines = new List<string>();
-        foreach (var p in doc.Blocks.OfType<Paragraph>())
+        var lines = doc.Blocks.OfType<Paragraph>().Select(p => Line(Merge(Runs(p)))).ToList();
+        return Join(lines);
+    }
+
+    /// <summary>
+    /// Pega texto sin formato en lugar de lo seleccionado (de <paramref name="start"/> a <paramref name="end"/>, posiciones
+    /// del documento). Cada línea del texto es un párrafo. Devuelve el contenido nuevo con marcas y dónde queda el cursor.
+    /// </summary>
+    public static (string Markup, int Paragraph, int Offset) Paste(FlowDocument doc, int start, int end, string text)
+    {
+        var paragraphs = doc.Blocks.OfType<Paragraph>().ToList();
+        var runs = paragraphs.Select(Runs).ToList();
+        if (runs.Count == 0)
         {
-            var runs = p.Inlines.OfType<EditableRun>()
-                .Select(r => new RichRun(
-                    (r.Text ?? "").Replace("\r", "", StringComparison.Ordinal).Replace("\n", "", StringComparison.Ordinal),
-                    r.FontWeight >= FontWeight.SemiBold,
-                    r.FontStyle == FontStyle.Italic,
-                    r.TextDecorations is { Count: > 0 },
-                    r.FontSize < (SmallSize + NormalSize) / 2 ? RichSize.Small
-                        : r.FontSize > (NormalSize + LargeSize) / 2 ? RichSize.Large : RichSize.Normal))
-                .Where(r => r.Text.Length > 0)
-                .ToList();
-            lines.Add(Line(Merge(runs)));
+            runs.Add([]);
         }
 
+        var (startPar, startOff) = Spot(paragraphs, runs, Math.Min(start, end));
+        var (endPar, endOff) = Spot(paragraphs, runs, Math.Max(start, end));
+        var pasted = text.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n').Replace('\t', ' ').Split('\n');
+
+        RichRun Plain(string s) => new(s, false, false, false, RichSize.Normal);
+        var (left, _) = Split(runs[startPar], startOff);
+        var (_, right) = Split(runs[endPar], endOff);
+        var inserted = new List<List<RichRun>>();
+        for (var i = 0; i < pasted.Length; i++)
+        {
+            var line = new List<RichRun>();
+            if (i == 0)
+            {
+                line.AddRange(left);
+            }
+
+            line.Add(Plain(pasted[i]));
+            if (i == pasted.Length - 1)
+            {
+                line.AddRange(right);
+            }
+
+            inserted.Add(line);
+        }
+
+        var all = runs.Take(startPar).Concat(inserted).Concat(runs.Skip(endPar + 1));
+        var lines = all.Select(r => Line(Merge([.. r.Where(x => x.Text.Length > 0)]))).ToList();
+        var offset = pasted.Length == 1 ? startOff + pasted[0].Length : pasted[^1].Length;
+        return (Join(lines), startPar + pasted.Length - 1, offset);
+    }
+
+    /// <summary>Los tramos de un párrafo del editor, con su formato.</summary>
+    private static List<RichRun> Runs(Paragraph p) =>
+        [.. p.Inlines.OfType<EditableRun>()
+            .Select(r => new RichRun(
+                (r.Text ?? "").Replace("\r", "", StringComparison.Ordinal).Replace("\n", "", StringComparison.Ordinal),
+                r.FontWeight >= FontWeight.SemiBold,
+                r.FontStyle == FontStyle.Italic,
+                r.TextDecorations is { Count: > 0 },
+                r.FontSize < (SmallSize + NormalSize) / 2 ? RichSize.Small
+                    : r.FontSize > (NormalSize + LargeSize) / 2 ? RichSize.Large : RichSize.Normal))
+            .Where(r => r.Text.Length > 0)];
+
+    /// <summary>Párrafo y posición dentro de su texto de una posición del documento.</summary>
+    private static (int Paragraph, int Offset) Spot(List<Paragraph> paragraphs, List<List<RichRun>> runs, int position)
+    {
+        var start = 0;
+        for (var i = 0; i < paragraphs.Count; i++)
+        {
+            if (position < start + paragraphs[i].BlockLength || i == paragraphs.Count - 1)
+            {
+                return (i, Math.Clamp(position - start, 0, runs[i].Sum(r => r.Text.Length)));
+            }
+
+            start += paragraphs[i].BlockLength;
+        }
+
+        return (0, 0);
+    }
+
+    /// <summary>Divide los tramos de un párrafo en una posición de su texto.</summary>
+    private static (List<RichRun> Left, List<RichRun> Right) Split(List<RichRun> runs, int offset)
+    {
+        var left = new List<RichRun>();
+        var right = new List<RichRun>();
+        var pos = 0;
+        foreach (var r in runs)
+        {
+            if (pos + r.Text.Length <= offset)
+            {
+                left.Add(r);
+            }
+            else if (pos >= offset)
+            {
+                right.Add(r);
+            }
+            else
+            {
+                left.Add(r with { Text = r.Text[..(offset - pos)] });
+                right.Add(r with { Text = r.Text[(offset - pos)..] });
+            }
+
+            pos += r.Text.Length;
+        }
+
+        return (left, right);
+    }
+
+    private static string Join(List<string> lines)
+    {
         // Los párrafos vacíos del final no aportan nada.
         while (lines.Count > 1 && lines[^1].Length == 0)
         {

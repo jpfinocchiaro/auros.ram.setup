@@ -8,6 +8,7 @@ using Avalonia.Controls.Documents;
 using Avalonia.Controls.Shapes;
 using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.VisualTree;
@@ -55,26 +56,62 @@ public partial class FormattedTextEditor : UserControl
             HookCaret();
         };
 
+        // Pegar lo hace esta clase: el de la biblioteca falla con lo copiado de otras aplicaciones (formato RTF o HTML).
+        Editor.AddHandler(KeyDownEvent, OnPasteKey, RoutingStrategies.Tunnel, handledEventsToo: true);
+
         // Cada cambio del usuario se pasa a Text (teclado, mouse, pegar).
         Editor.AddHandler(KeyUpEvent, OnKeyUp, RoutingStrategies.Bubble, handledEventsToo: true);
         Editor.AddHandler(TextInputEvent, (_, _) => Publish(), RoutingStrategies.Bubble, handledEventsToo: true);
         Editor.AddHandler(PointerReleasedEvent, (_, _) => Publish(), RoutingStrategies.Bubble, handledEventsToo: true);
         Editor.LostFocus += (_, _) => Publish();
 
-        // La biblioteca toma el foco por su cuenta al terminar de cargar un documento: al abrir la ventana del riesgo,
-        // lo que se escribía en el título terminaba en una descripción. Solo se acepta el foco que pide el usuario
-        // (clic o Tab) o esta clase; el que toma la biblioteca vuelve al control que lo tenía.
-        Editor.AddHandler(PointerPressedEvent, (_, _) => _focusAllowed = true, RoutingStrategies.Tunnel, handledEventsToo: true);
+        // La biblioteca toma el foco por su cuenta (al cargar un documento, cuando uno de sus párrafos lo pierde, al
+        // actualizar el texto): lo que se escribía en el título terminaba en una descripción, o un clic en una descripción
+        // no hacía nada porque la otra recuperaba el foco. Solo se acepta el foco que pide el usuario (clic o Tab) o esta
+        // clase; el que toma la biblioteca vuelve al control que eligió el usuario.
+        // El clic da el foco al editor: la biblioteca marca el clic como atendido y solo a veces toma el foco (más tarde).
+        Editor.AddHandler(PointerPressedEvent, (_, _) =>
+        {
+            _userFocus = true;
+            if (!Editor.IsKeyboardFocusWithin)
+            {
+                Editor.Focus(NavigationMethod.Pointer);
+            }
+        }, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(GotFocusEvent, OnGotFocus, RoutingStrategies.Bubble, handledEventsToo: true);
+
+        // Los párrafos internos de la biblioteca no toman el foco: lo tiene siempre el editor, que recibe el teclado.
+        // Si un párrafo tuviera el foco, la biblioteca lo reclamaría para su editor en cualquier momento (al cargarse,
+        // al perderlo), aunque el usuario esté escribiendo en otro lado.
+        Editor.LayoutUpdated += (_, _) => KeepFocusOnEditor();
     }
 
-    private bool _focusAllowed;
+    private void KeepFocusOnEditor()
+    {
+        foreach (var element in Editor.GetVisualDescendants().OfType<InputElement>())
+        {
+            if (element.Focusable && element.GetType().Name == "EditableParagraph")
+            {
+                element.Focusable = false;
+            }
+        }
+    }
+
+    /// <summary>El usuario acaba de pedir el foco para este editor (clic, o esta clase por él).</summary>
+    private bool _userFocus;
 
     /// <summary>
-    /// Último control que recibió el foco por decisión del usuario (fuera de los editores, o dentro de uno con
-    /// permiso): a él vuelve el foco que toma la biblioteca.
+    /// Control que eligió el usuario (con un clic, Tab o esta clase): es el único editor que puede tener el foco, y a él
+    /// vuelve el foco que toma la biblioteca.
     /// </summary>
-    private static WeakReference<IInputElement>? s_lastLegit;
+    private static WeakReference<IInputElement>? s_owner;
+
+    /// <summary>El control elegido por el usuario está en este editor.</summary>
+    private bool Owns => s_owner?.TryGetTarget(out var owner) == true && owner is Visual v &&
+                         v.FindAncestorOfType<FormattedTextEditor>(includeSelf: true) == this;
+
+    private static bool ByUser(NavigationMethod method) =>
+        method is NavigationMethod.Tab or NavigationMethod.Directional or NavigationMethod.Pointer;
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
@@ -88,44 +125,54 @@ public partial class FormattedTextEditor : UserControl
         base.OnDetachedFromVisualTree(e);
     }
 
-    // Se ejecuta después de OnGotFocus (el evento sube del editor a la ventana): el foco bloqueado no se registra.
+    // Se ejecuta después de OnGotFocus (el evento sube del editor a la ventana). Fuera de los editores, todo foco es del
+    // usuario; dentro de uno, solo el que pidió el usuario o el que se mueve dentro del editor que ya eligió.
     private static void TrackFocus(object? sender, GotFocusEventArgs e)
     {
-        if (e.Source is Visual v && e.Source is IInputElement input &&
-            v.FindAncestorOfType<FormattedTextEditor>(includeSelf: true) is not { _focusAllowed: false })
+        if (e.Source is not Visual v || e.Source is not IInputElement input)
         {
-            s_lastLegit = new WeakReference<IInputElement>(input);
+            return;
+        }
+
+        var editor = v.FindAncestorOfType<FormattedTextEditor>(includeSelf: true);
+        if (editor is null || ByUser(e.NavigationMethod) || editor._userFocus || editor.Owns)
+        {
+            s_owner = new WeakReference<IInputElement>(input);
+            if (editor is not null)
+            {
+                editor._userFocus = false;
+            }
         }
     }
 
     private void OnGotFocus(object? sender, GotFocusEventArgs e)
     {
-        // El permiso dura mientras el foco siga dentro del editor (la biblioteca lo pasa entre sus partes).
-        _focusAllowed |= e.NavigationMethod is NavigationMethod.Tab or NavigationMethod.Directional or NavigationMethod.Pointer;
-        if (_focusAllowed)
+        // Un párrafo interno de la biblioteca tomó el foco (un clic sobre el texto): el foco pasa al editor. Si quedara
+        // en el párrafo, al perderlo la biblioteca se lo devuelve al editor, aunque el usuario haya hecho clic en otro lado.
+        if (e.Source is Visual source && !ReferenceEquals(source, Editor) && source.FindAncestorOfType<RichTextBox>() == Editor)
+        {
+            _userFocus |= ByUser(e.NavigationMethod);
+            Editor.Focus(e.NavigationMethod);
+            return;
+        }
+
+        if (ByUser(e.NavigationMethod) || _userFocus || Owns)
         {
             return;
         }
 
-        if (s_lastLegit?.TryGetTarget(out var previous) == true && previous is Visual visual && TopLevel.GetTopLevel(visual) is not null &&
-            visual.FindAncestorOfType<FormattedTextEditor>(includeSelf: true) != this &&
-            TopLevel.GetTopLevel(visual) == TopLevel.GetTopLevel(this))
+        // Foco que tomó la biblioteca: vuelve en el acto al control que eligió el usuario.
+        if (s_owner?.TryGetTarget(out var owner) == true && owner is Visual visual && owner.IsEffectivelyEnabled &&
+            TopLevel.GetTopLevel(visual) is { } top && top == TopLevel.GetTopLevel(this))
         {
-            // Se revisa al ejecutarse: si mientras tanto el usuario entró al editor (o salió), no se toca el foco.
-            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-            {
-                if (IsKeyboardFocusWithin && !_focusAllowed)
-                {
-                    previous.Focus();
-                }
-            });
+            owner.Focus();
         }
     }
 
     /// <summary>Pone el foco en el texto (como un clic del usuario).</summary>
     public void FocusText()
     {
-        _focusAllowed = true;
+        _userFocus = true;
         Editor.Focus();
     }
 
@@ -154,10 +201,6 @@ public partial class FormattedTextEditor : UserControl
         else if (change.Property == IsKeyboardFocusWithinProperty)
         {
             UpdateCaret();
-            if (!IsKeyboardFocusWithin)
-            {
-                _focusAllowed = false;
-            }
         }
         else if (change.Property == TextProperty && !_syncing && Editor?.FlowDocument is not null &&
                  (Text ?? "") != RichDocument.Save(Editor.FlowDocument))
@@ -296,6 +339,48 @@ public partial class FormattedTextEditor : UserControl
         paragraph = Math.Clamp(paragraph, 0, paragraphs.Count - 1);
         var start = paragraphs.Take(paragraph).Sum(p => p.BlockLength);
         Editor.FlowDocument.Select(start + Math.Clamp(offset, 0, paragraphs[paragraph].TextLength), 0);
+    }
+
+    private async void OnPasteKey(object? sender, KeyEventArgs e)
+    {
+        var top = TopLevel.GetTopLevel(this);
+        var gestures = top?.PlatformSettings?.HotkeyConfiguration.Paste;
+        var isPaste = gestures is { Count: > 0 }
+            ? gestures.Any(g => g.Matches(e))
+            : e.Key == Key.V && e.KeyModifiers == KeyModifiers.Control;
+        if (!isPaste || e.Handled || Editor.IsReadOnly)
+        {
+            return;
+        }
+
+        e.Handled = true;
+        try
+        {
+            if (top?.Clipboard is { } clipboard && await clipboard.TryGetTextAsync() is { Length: > 0 } text)
+            {
+                PasteText(text);
+            }
+        }
+        catch (Exception ex)
+        {
+            Services.Log.Error(ex, "Editor.Paste");
+        }
+    }
+
+    /// <summary>
+    /// Pega texto sin formato donde está el cursor (reemplaza lo seleccionado). Cada línea del texto es un párrafo.
+    /// </summary>
+    public void PasteText(string text)
+    {
+        if (!_loaded || Editor.FlowDocument is null)
+        {
+            return;
+        }
+
+        var selection = Editor.FlowDocument.Selection;
+        var (markup, paragraph, offset) = RichDocument.Paste(Editor.FlowDocument, selection.Start, selection.End, text);
+        ApplyLines([.. markup.Split('\n')], paragraph, offset);
+        Editor.ScrollToSelection();
     }
 
     /// <summary>Pasa el contenido del editor a <see cref="Text"/> (con marcas).</summary>
