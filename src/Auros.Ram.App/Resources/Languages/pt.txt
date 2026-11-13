@@ -287,6 +287,11 @@ Org_Title=Empresas e unidades de negócio
 Org_Units=Unidades de negócio
 Org_UnitsOf=Unidades de negócio de {0}
 # --- Password ---
+OfferPassword_NewText=Com uma senha, o arquivo é salvo criptografado e ninguém pode abri-lo sem ela. Sem senha, qualquer pessoa que tenha o auros.ram e o arquivo pode abri-lo. Quer protegê-lo com uma senha?
+OfferPassword_No=Agora não
+OfferPassword_Text=O arquivo foi salvo sem senha, então qualquer pessoa que tenha o auros.ram e o arquivo pode abri-lo. Quer protegê-lo com uma senha?
+OfferPassword_Title=Proteger o arquivo com senha?
+OfferPassword_Yes=Definir senha
 Password_AckRequired=Confirme que entende que a senha não pode ser recuperada.
 Password_Acknowledge=Entendo que, se eu esquecer a senha, não poderei abrir o arquivo.
 Password_ChangeTitle=Alterar senha

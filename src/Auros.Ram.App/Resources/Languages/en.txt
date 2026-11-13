@@ -287,6 +287,11 @@ Org_Title=Companies and business units
 Org_Units=Business units
 Org_UnitsOf=Business units of {0}
 # --- Password ---
+OfferPassword_NewText=With a password, the file is saved encrypted and no one can open it without it. Without a password, anyone who has auros.ram and the file can open it. Do you want to protect it with a password?
+OfferPassword_No=Not now
+OfferPassword_Text=The file was saved without a password, so anyone who has auros.ram and the file can open it. Do you want to protect it with a password?
+OfferPassword_Title=Protect the file with a password?
+OfferPassword_Yes=Set password
 Password_AckRequired=Confirm that you understand the password cannot be recovered.
 Password_Acknowledge=I understand that if I forget the password I will not be able to open the file.
 Password_ChangeTitle=Change password

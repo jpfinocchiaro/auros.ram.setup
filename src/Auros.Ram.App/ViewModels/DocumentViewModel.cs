@@ -184,6 +184,9 @@ public sealed partial class DocumentViewModel : ObservableObject, IDisposable
         ScopeUnit = UnitOptions.FirstOrDefault(o => o.Id == keep) ?? UnitOptions[0];
     }
     public FileKey Key { get; private set; }
+
+    /// <summary>Ya se preguntó, en esta sesión, si se quería poner contraseña a este archivo.</summary>
+    public bool PasswordOffered { get; set; }
     public IUiService Ui { get; }
 
     public ProjectViewModel Project { get; }

@@ -141,10 +141,15 @@ Clic: editar · Clic derecho: nueva evaluación</value></data>
 Se quitó de la lista de recientes.</value></data>
   <data name="Open_PasswordTitle" xml:space="preserve"><value>Abrir matriz</value></data>
   <data name="Open_Title" xml:space="preserve"><value>Abrir matriz de riesgo</value></data>
+  <data name="OfferPassword_NewText" xml:space="preserve"><value>Con una contraseña, el archivo se guarda cifrado y nadie puede abrirlo sin ella. Sin contraseña, cualquier persona que tenga auros.ram y el archivo puede abrirlo. ¿Quieres protegerlo con una contraseña?</value></data>
+  <data name="OfferPassword_No" xml:space="preserve"><value>Ahora no</value></data>
+  <data name="OfferPassword_Text" xml:space="preserve"><value>El archivo se guardó sin contraseña, así que cualquier persona que tenga auros.ram y el archivo puede abrirlo. ¿Quieres protegerlo con una contraseña?</value></data>
+  <data name="OfferPassword_Title" xml:space="preserve"><value>¿Proteger el archivo con contraseña?</value></data>
+  <data name="OfferPassword_Yes" xml:space="preserve"><value>Poner contraseña</value></data>
   <data name="Password_AckRequired" xml:space="preserve"><value>Confirma que entiendes que la contraseña no se puede recuperar.</value></data>
   <data name="Password_Acknowledge" xml:space="preserve"><value>Entiendo que si olvido la contraseña no podré abrir el archivo.</value></data>
   <data name="Password_ChangeTitle" xml:space="preserve"><value>Cambiar contraseña</value></data>
-  <data name="Password_Confirm" xml:space="preserve"><value>Repita la contraseña</value></data>
+  <data name="Password_Confirm" xml:space="preserve"><value>Repite la contraseña</value></data>
   <data name="Password_Current" xml:space="preserve"><value>Contraseña actual</value></data>
   <data name="Password_CurrentRequired" xml:space="preserve"><value>Escribe la contraseña actual.</value></data>
   <data name="Password_CurrentWrong" xml:space="preserve"><value>La contraseña actual no es correcta.</value></data>

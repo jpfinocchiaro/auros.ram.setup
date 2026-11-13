@@ -428,32 +428,52 @@ public sealed partial class MainWindowViewModel : ObservableObject
             return;
         }
 
+        // Primero se pregunta si se quiere contraseña; si se acepta, aparece la pantalla de contraseña. Si se responde
+        // que no, o se cancela esa pantalla, el archivo se guarda igual, sin contraseña.
         FileKey? key = null;
-        var vm = new PasswordDialogViewModel(PasswordMode.Create, Strings.New_PasswordTitle, Path.GetFileName(path));
-        vm.Submit = async d =>
+        if (await _ui.ConfirmAsync(Strings.OfferPassword_Title, Strings.OfferPassword_NewText, Strings.OfferPassword_Yes,
+                Strings.OfferPassword_No))
         {
-            var candidate = await Task.Run(() => FileKey.Create(d.NewPassword));
+            var vm = new PasswordDialogViewModel(PasswordMode.Create, Strings.New_PasswordTitle, Path.GetFileName(path));
+            vm.Submit = async d =>
+            {
+                var candidate = await Task.Run(() => FileKey.Create(d.NewPassword));
+                try
+                {
+                    await Task.Run(() => RmxFile.Save(doc, path, candidate));
+                }
+                catch (RmxFileException ex)
+                {
+                    candidate.Dispose();
+                    return ex.Message;
+                }
+
+                key = candidate;
+                return null;
+            };
+            await _ui.AskPasswordAsync(vm);
+        }
+
+        if (key is null)
+        {
+            var unprotected = FileKey.Create(null);
             try
             {
-                await Task.Run(() => RmxFile.Save(doc, path, candidate));
+                await Task.Run(() => RmxFile.Save(doc, path, unprotected));
             }
             catch (RmxFileException ex)
             {
-                candidate.Dispose();
-                return ex.Message;
+                unprotected.Dispose();
+                await _ui.AlertAsync(Strings.Error_SaveTitle, ex.Message);
+                return;
             }
 
-            key = candidate;
-            return null;
-        };
-        await _ui.AskPasswordAsync(vm);
-        if (key is null)
-        {
-            return;
+            key = unprotected;
         }
 
         doc.MarkSaved();
-        var docVm = new DocumentViewModel(path, doc, key, _ui) { SelectedSection = (int)Section.Project };
+        // La contraseña se acaba de elegir (o de dejar en blanco): no se vuelve a preguntar al guardar.
+        var docVm = new DocumentViewModel(path, doc, key, _ui) { SelectedSection = (int)Section.Project, PasswordOffered = true };
         AddDocument(docVm);
         _settings.AddRecent(path);
         RefreshRecent();
@@ -470,9 +490,28 @@ public sealed partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private async Task Save()
     {
-        if (Active is { IsLocked: false } doc)
+        if (Active is { IsLocked: false } doc && await doc.SaveAsync())
         {
-            await doc.SaveAsync();
+            await OfferPasswordAsync(doc);
+        }
+    }
+
+    /// <summary>
+    /// Después de guardar un archivo sin contraseña, pregunta (una vez por archivo abierto) si se le quiere poner una.
+    /// Si se acepta, aparece la pantalla de contraseña, que también se puede cancelar: el archivo ya quedó guardado.
+    /// </summary>
+    private async Task OfferPasswordAsync(DocumentViewModel doc)
+    {
+        if (doc.Key.IsProtected || doc.PasswordOffered)
+        {
+            return;
+        }
+
+        doc.PasswordOffered = true;
+        if (await _ui.ConfirmAsync(Strings.OfferPassword_Title, Strings.OfferPassword_Text, Strings.OfferPassword_Yes,
+                Strings.OfferPassword_No))
+        {
+            await doc.ChangePasswordAsync();
         }
     }
 
@@ -501,6 +540,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         {
             _settings.AddRecent(full);
             RefreshRecent();
+            await OfferPasswordAsync(doc);
         }
     }
 

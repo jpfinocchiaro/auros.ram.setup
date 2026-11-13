@@ -287,6 +287,11 @@ Org_Title=Entreprises et unités d'affaires
 Org_Units=Unités d'affaires
 Org_UnitsOf=Unités d'affaires de {0}
 # --- Password ---
+OfferPassword_NewText=Avec un mot de passe, le fichier est enregistré chiffré et personne ne peut l’ouvrir sans lui. Sans mot de passe, toute personne disposant d’auros.ram et du fichier peut l’ouvrir. Voulez-vous le protéger par un mot de passe ?
+OfferPassword_No=Pas maintenant
+OfferPassword_Text=Le fichier a été enregistré sans mot de passe : toute personne disposant d’auros.ram et du fichier peut l’ouvrir. Voulez-vous le protéger par un mot de passe ?
+OfferPassword_Title=Protéger le fichier par un mot de passe ?
+OfferPassword_Yes=Définir un mot de passe
 Password_AckRequired=Confirmez que vous comprenez que le mot de passe ne peut pas être récupéré.
 Password_Acknowledge=Je comprends que si j'oublie le mot de passe, je ne pourrai pas ouvrir le fichier.
 Password_ChangeTitle=Changer le mot de passe
