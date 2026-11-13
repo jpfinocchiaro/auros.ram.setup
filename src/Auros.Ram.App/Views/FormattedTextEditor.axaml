@@ -1,9 +1,10 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:rtb="using:AvRichTextBox"
+             xmlns:ae="using:AvaloniaEdit"
              xmlns:r="using:Auros.Ram.App.Resources"
              x:Class="Auros.Ram.App.Views.FormattedTextEditor">
-  <!-- Editor de descripción con formato directo: el texto se ve con su formato mientras se escribe. -->
+  <!-- Editor de descripción: el texto con marcas (**negrita**, *itálica*...) se ve con su formato mientras se escribe,
+       y las marcas en gris tenue. -->
   <UserControl.Styles>
     <Style Selector="Button.fmt">
       <Setter Property="MinWidth" Value="32" />
@@ -54,7 +55,9 @@
         </StackPanel>
       </Border>
 
-      <rtb:RichTextBox x:Name="Editor" Padding="8,6" FontSize="14" />
+      <ae:TextEditor x:Name="Editor" Padding="8,6" FontSize="14" WordWrap="True" ShowLineNumbers="False"
+                     FontFamily="{StaticResource ContentControlThemeFontFamily}" Foreground="{DynamicResource InkBrush}"
+                     Background="Transparent" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" />
     </DockPanel>
   </Border>
 </UserControl>

@@ -9,9 +9,9 @@
     <PackageVersion Include="Avalonia.Themes.Fluent" Version="11.3.22" />
     <PackageVersion Include="Avalonia.Headless.XUnit" Version="11.3.22" />
     <PackageVersion Include="Avalonia.Skia" Version="11.3.22" />
-    <!-- Editor de texto enriquecido (MIT); 1.6.5 es la última compatible con Avalonia 11. -->
-    <PackageVersion Include="Simplecto.Avalonia.RichTextBox" Version="1.6.5" />
-    <!-- Transitiva del editor: se fija la versión corregida (GHSA-xrw6-gwf8-vvr9). -->
+    <!-- Editor de texto de las descripciones (MIT), del equipo de Avalonia. -->
+    <PackageVersion Include="Avalonia.AvaloniaEdit" Version="11.4.1" />
+    <!-- Transitiva de Avalonia (Linux): se fija la versión corregida (GHSA-xrw6-gwf8-vvr9). -->
     <PackageVersion Include="Tmds.DBus.Protocol" Version="0.21.3" />
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageVersion Include="Microsoft.Data.Sqlite.Core" Version="10.0.14" />

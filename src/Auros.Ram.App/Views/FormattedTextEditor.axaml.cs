@@ -1,27 +1,27 @@
-using System.Collections.ObjectModel;
-using System.Reflection;
 using Auros.Ram.Core.Text;
-using AvRichTextBox;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Documents;
-using Avalonia.Controls.Shapes;
 using Avalonia.Data;
 using Avalonia.Input;
-using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Media;
-using Avalonia.Threading;
-using Avalonia.VisualTree;
+using AvaloniaEdit;
+using AvaloniaEdit.Document;
+using AvaloniaEdit.Rendering;
 
 namespace Auros.Ram.App.Views;
 
 /// <summary>
-/// Caja de texto con formato directo (negrita, itálica, subrayado, tamaños y listas). El texto se
-/// guarda con las marcas de <see cref="RichText"/>, así archivos, informes, PDF y Excel no cambian.
+/// Caja de texto de las descripciones, sobre el editor de AvaloniaEdit. Lo que se escribe es el texto con las marcas de
+/// <see cref="RichText"/> (<c>**negrita**</c>, <c>*itálica*</c>, <c>__subrayado__</c>, tamaños y listas), que es lo que se
+/// guarda: el editor lo muestra con su formato y deja las marcas en gris tenue. La barra pone y quita las marcas.
 /// </summary>
 public partial class FormattedTextEditor : UserControl
 {
+    public const double SmallSize = 12;
+    public const double NormalSize = 14;
+    public const double LargeSize = 18;
+
     public static readonly StyledProperty<string?> TextProperty =
         AvaloniaProperty.Register<FormattedTextEditor, string?>(nameof(Text), defaultBindingMode: BindingMode.TwoWay);
 
@@ -29,202 +29,30 @@ public partial class FormattedTextEditor : UserControl
         AvaloniaProperty.Register<FormattedTextEditor, double>(nameof(EditorHeight), 80);
 
     private bool _syncing;
-    private bool _loaded;
-    private Rectangle? _caret;
 
     public FormattedTextEditor()
     {
         InitializeComponent();
         Editor.Height = EditorHeight;
+        Editor.Options.EnableHyperlinks = false;
+        Editor.Options.EnableEmailHyperlinks = false;
+        Editor.Options.HighlightCurrentLine = false;
+        Editor.Options.AllowScrollBelowDocument = false;
+        Editor.TextArea.TextView.LineTransformers.Add(new MarkupColorizer());
+        Editor.TextArea.TextView.ElementGenerators.Add(new BulletGenerator());
 
-        // En la biblioteca, la lista de párrafos por omisión es una sola colección compartida por todos los
-        // documentos: cada editor tiene la suya desde el comienzo (si no, la descripción corta y la larga mostrarían
-        // el mismo texto, y dos editores vacíos a la vez hacían fallar la carga). Arranca con un párrafo vacío,
-        // que la biblioteca necesita para iniciarse; el contenido real se carga al mostrarse.
-        // El párrafo se agrega después de asignar la lista: la biblioteca actualiza su índice interno de párrafos
-        // solo cuando la lista cambia, y sin él falla al iniciarse.
-        var document = new FlowDocument();
-        document.SetValue(FlowDocument.BlocksProperty, new ObservableCollection<Block>());
-        var empty = new AvRichTextBox.Paragraph();
-        empty.Inlines.Add(new EditableRun(""));
-        document.Blocks.Add(empty);
-        Editor.FlowDocument = document;
+        // Cada cambio del texto pasa a Text (teclado, pegar, deshacer, la barra).
+        Editor.Document.TextChanged += (_, _) => Publish();
 
-        // El contenido se carga cuando el editor ya está en pantalla (la carga necesita su árbol visual).
-        Editor.Loaded += (_, _) =>
-        {
-            Reload();
-            HookCaret();
-        };
+        // Las marcas no se ven: el cursor no se detiene entre sus caracteres, y borrar las salta.
+        Editor.TextArea.Caret.PositionChanged += (_, _) => SnapCaret();
+        Editor.Document.Changed += OnDocumentChanged;
 
-        // Pegar lo hace esta clase: el de la biblioteca falla con lo copiado de otras aplicaciones (formato RTF o HTML).
-        Editor.AddHandler(KeyDownEvent, OnPasteKey, RoutingStrategies.Tunnel, handledEventsToo: true);
-
-        // Enter también: el de la biblioteca a veces falla al partir el párrafo (error inesperado al escribir).
+        // Enter (listas), Retroceso y Suprimir (saltan las marcas).
         Editor.AddHandler(KeyDownEvent, OnEnterKey, RoutingStrategies.Tunnel);
+        Editor.AddHandler(KeyDownEvent, OnDeleteKey, RoutingStrategies.Tunnel);
 
-        // Cada cambio del usuario se pasa a Text (teclado, mouse, pegar).
-        Editor.AddHandler(KeyUpEvent, OnKeyUp, RoutingStrategies.Bubble, handledEventsToo: true);
-        Editor.AddHandler(TextInputEvent, (_, _) => Publish(), RoutingStrategies.Bubble, handledEventsToo: true);
-        Editor.AddHandler(PointerReleasedEvent, (_, _) => Publish(), RoutingStrategies.Bubble, handledEventsToo: true);
-        Editor.LostFocus += (_, _) => Publish();
-
-        // La biblioteca toma el foco por su cuenta (al cargar un documento, cuando uno de sus párrafos lo pierde, al
-        // actualizar el texto): lo que se escribía en el título terminaba en una descripción, o un clic en una descripción
-        // no hacía nada porque la otra recuperaba el foco. Solo se acepta el foco que pide el usuario (clic o Tab) o esta
-        // clase; el que toma la biblioteca vuelve al control que eligió el usuario.
-        // El clic da el foco al editor: la biblioteca marca el clic como atendido y solo a veces toma el foco (más tarde).
-        Editor.AddHandler(PointerPressedEvent, (_, e) =>
-        {
-            _userFocus = true;
-            if (!Editor.IsKeyboardFocusWithin)
-            {
-                Editor.Focus(NavigationMethod.Pointer);
-            }
-
-            // Un clic fuera del texto (en el margen de una línea o en el espacio libre de abajo) ubica el cursor en esa
-            // línea o al final, como en un procesador de textos. La biblioteca solo ubica el cursor si el clic cae sobre
-            // un párrafo; si no, lo deja donde estaba (al principio).
-            if (!OverText(e.Source) && !e.KeyModifiers.HasFlag(KeyModifiers.Shift))
-            {
-                var point = e.GetPosition(Editor);
-                Dispatcher.UIThread.Post(() => CaretAt(point));
-            }
-        }, RoutingStrategies.Tunnel, handledEventsToo: true);
-        AddHandler(GotFocusEvent, OnGotFocus, RoutingStrategies.Bubble, handledEventsToo: true);
-
-        // Los párrafos internos de la biblioteca no toman el foco: lo tiene siempre el editor, que recibe el teclado.
-        // Si un párrafo tuviera el foco, la biblioteca lo reclamaría para su editor en cualquier momento (al cargarse,
-        // al perderlo), aunque el usuario esté escribiendo en otro lado.
-        Editor.LayoutUpdated += (_, _) => KeepFocusOnEditor();
-    }
-
-    private static bool OverText(object? source) =>
-        source is Visual v && v.GetSelfAndVisualAncestors().Any(a => a.GetType().Name == "EditableParagraph");
-
-    /// <summary>Ubica el cursor en la línea a la altura del punto (del editor), o al final si está debajo del texto.</summary>
-    private void CaretAt(Point point)
-    {
-        foreach (var block in Editor.GetVisualDescendants().OfType<TextBlock>())
-        {
-            if (block.GetType().Name != "EditableParagraph" || block.DataContext is not AvRichTextBox.Paragraph paragraph ||
-                block.TranslatePoint(new Point(0, 0), Editor) is not { } origin ||
-                point.Y < origin.Y || point.Y >= origin.Y + block.Bounds.Height)
-            {
-                continue;
-            }
-
-            var x = Math.Clamp(point.X - origin.X, 0, Math.Max(0, block.Bounds.Width - 1));
-            var hit = block.TextLayout.HitTestPoint(new Point(x, point.Y - origin.Y));
-            var start = Editor.FlowDocument.Blocks.TakeWhile(b => !ReferenceEquals(b, paragraph)).Sum(b => b.BlockLength);
-            Editor.FlowDocument.Select(start + hit.TextPosition, 0);
-            return;
-        }
-
-        CaretToEnd();
-    }
-
-    /// <summary>Lleva el cursor al final del texto.</summary>
-    private void CaretToEnd()
-    {
-        var paragraphs = Editor.FlowDocument?.Blocks.OfType<AvRichTextBox.Paragraph>().ToList();
-        if (paragraphs is not { Count: > 0 })
-        {
-            return;
-        }
-
-        var start = paragraphs.Take(paragraphs.Count - 1).Sum(p => p.BlockLength);
-        Editor.FlowDocument!.Select(start + paragraphs[^1].TextLength, 0);
-    }
-
-    private void KeepFocusOnEditor()
-    {
-        foreach (var element in Editor.GetVisualDescendants().OfType<InputElement>())
-        {
-            if (element.Focusable && element.GetType().Name == "EditableParagraph")
-            {
-                element.Focusable = false;
-            }
-        }
-    }
-
-    /// <summary>El usuario acaba de pedir el foco para este editor (clic, o esta clase por él).</summary>
-    private bool _userFocus;
-
-    /// <summary>
-    /// Control que eligió el usuario (con un clic, Tab o esta clase): es el único editor que puede tener el foco, y a él
-    /// vuelve el foco que toma la biblioteca.
-    /// </summary>
-    private static WeakReference<IInputElement>? s_owner;
-
-    /// <summary>El control elegido por el usuario está en este editor.</summary>
-    private bool Owns => s_owner?.TryGetTarget(out var owner) == true && owner is Visual v &&
-                         v.FindAncestorOfType<FormattedTextEditor>(includeSelf: true) == this;
-
-    private static bool ByUser(NavigationMethod method) =>
-        method is NavigationMethod.Tab or NavigationMethod.Directional or NavigationMethod.Pointer;
-
-    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
-    {
-        base.OnAttachedToVisualTree(e);
-        TopLevel.GetTopLevel(this)?.AddHandler(GotFocusEvent, TrackFocus, RoutingStrategies.Bubble, handledEventsToo: true);
-    }
-
-    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
-    {
-        TopLevel.GetTopLevel(this)?.RemoveHandler(GotFocusEvent, TrackFocus);
-        base.OnDetachedFromVisualTree(e);
-    }
-
-    // Se ejecuta después de OnGotFocus (el evento sube del editor a la ventana). Fuera de los editores, todo foco es del
-    // usuario; dentro de uno, solo el que pidió el usuario o el que se mueve dentro del editor que ya eligió.
-    private static void TrackFocus(object? sender, GotFocusEventArgs e)
-    {
-        if (e.Source is not Visual v || e.Source is not IInputElement input)
-        {
-            return;
-        }
-
-        var editor = v.FindAncestorOfType<FormattedTextEditor>(includeSelf: true);
-        if (editor is null || ByUser(e.NavigationMethod) || editor._userFocus || editor.Owns)
-        {
-            s_owner = new WeakReference<IInputElement>(input);
-            if (editor is not null)
-            {
-                editor._userFocus = false;
-            }
-        }
-    }
-
-    private void OnGotFocus(object? sender, GotFocusEventArgs e)
-    {
-        // Un párrafo interno de la biblioteca tomó el foco (un clic sobre el texto): el foco pasa al editor. Si quedara
-        // en el párrafo, al perderlo la biblioteca se lo devuelve al editor, aunque el usuario haya hecho clic en otro lado.
-        if (e.Source is Visual source && !ReferenceEquals(source, Editor) && source.FindAncestorOfType<RichTextBox>() == Editor)
-        {
-            _userFocus |= ByUser(e.NavigationMethod);
-            Editor.Focus(e.NavigationMethod);
-            return;
-        }
-
-        if (ByUser(e.NavigationMethod) || _userFocus || Owns)
-        {
-            return;
-        }
-
-        // Foco que tomó la biblioteca: vuelve en el acto al control que eligió el usuario.
-        if (s_owner?.TryGetTarget(out var owner) == true && owner is Visual visual && owner.IsEffectivelyEnabled &&
-            TopLevel.GetTopLevel(visual) is { } top && top == TopLevel.GetTopLevel(this))
-        {
-            owner.Focus();
-        }
-    }
-
-    /// <summary>Pone el foco en el texto (como un clic del usuario).</summary>
-    public void FocusText()
-    {
-        _userFocus = true;
-        Editor.Focus();
+        ActualThemeVariantChanged += (_, _) => Editor.TextArea.TextView.Redraw();
     }
 
     public string? Text
@@ -240,7 +68,7 @@ public partial class FormattedTextEditor : UserControl
     }
 
     /// <summary>El editor, para las pruebas.</summary>
-    public RichTextBox Box => Editor;
+    public TextEditor Box => Editor;
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
@@ -249,225 +77,40 @@ public partial class FormattedTextEditor : UserControl
         {
             Editor.Height = EditorHeight;
         }
-        else if (change.Property == IsKeyboardFocusWithinProperty)
+        else if (change.Property == TextProperty && !_syncing && Editor is not null && (Text ?? "") != DocumentText())
         {
-            UpdateCaret();
-        }
-        else if (change.Property == TextProperty && !_syncing && Editor?.FlowDocument is not null &&
-                 (Text ?? "") != RichDocument.Save(Editor.FlowDocument))
-        {
-            Reload();
-        }
-    }
-
-    private void Reload()
-    {
-        if (Editor.FlowDocument is null)
-        {
-            return;
-        }
-
-        RichDocument.Load(Editor, Text);
-        _loaded = true;
-
-        // Al entrar al editor (con Tab o un clic fuera del texto) se sigue escribiendo al final.
-        CaretToEnd();
-    }
-
-    /// <summary>
-    /// La biblioteca hace titilar el cursor aunque el editor no tenga el foco (se veía en las dos descripciones).
-    /// Su visibilidad y su recorte los manejan la biblioteca y la capa donde se dibuja, así que el cursor se vuelve
-    /// transparente (con una máscara de opacidad) mientras no se esté escribiendo acá.
-    /// </summary>
-    private void HookCaret()
-    {
-        _caret ??= typeof(RichTextBox).GetField("_CaretRect", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(Editor) as Rectangle;
-        UpdateCaret();
-    }
-
-    private void UpdateCaret()
-    {
-        if (_caret is not null)
-        {
-            _caret.OpacityMask = IsKeyboardFocusWithin ? null : Brushes.Transparent;
-        }
-    }
-
-    /// <summary>El cursor está oculto (el editor no tiene el foco); para las pruebas.</summary>
-    public bool CaretHidden => _caret?.OpacityMask is not null;
-
-    private void OnKeyUp(object? sender, KeyEventArgs e) => Publish();
-
-    /// <summary>Enter parte el párrafo donde está el cursor (reemplaza lo seleccionado) y sigue la lista si hay una.</summary>
-    private void OnEnterKey(object? sender, KeyEventArgs e)
-    {
-        if (e.Key is not (Key.Enter or Key.Return) || (e.KeyModifiers & ~KeyModifiers.Shift) != 0 || Editor.IsReadOnly ||
-            !_loaded)
-        {
-            return;
-        }
-
-        e.Handled = true;
-        try
-        {
-            NewParagraph();
-        }
-        catch (Exception ex)
-        {
-            Services.Log.Error(ex, "Editor.Enter");
-        }
-    }
-
-    /// <summary>Lo que hace Enter: un párrafo nuevo en el cursor.</summary>
-    public void NewParagraph()
-    {
-        PasteText("\n");
-        ContinueList();
-        Publish();
-    }
-
-    /// <summary>
-    /// Enter dentro de una lista: el párrafo nuevo sigue la lista. Enter sobre un ítem vacío termina la lista.
-    /// </summary>
-    private void ContinueList()
-    {
-        var (index, offset) = CaretSpot();
-        if (index == 0)
-        {
-            return;
-        }
-
-        var lines = Lines();
-        var previous = RichText.Parse(lines[index - 1])[0];
-        if (previous.Kind == RichBlockKind.Paragraph || RichText.Parse(lines[index])[0].Kind != RichBlockKind.Paragraph)
-        {
-            return;
-        }
-
-        if (previous.Runs.All(r => r.Text.Trim().Length == 0))
-        {
-            // Ítem vacío: se quita la viñeta y el párrafo nuevo sobra.
-            lines[index - 1] = "";
-            lines.RemoveAt(index);
-            ApplyLines(lines, index - 1, 0);
-            return;
-        }
-
-        var prefix = previous.Kind == RichBlockKind.Numbered ? $"{previous.Number + 1}. " : RichText.BulletPrefix;
-        lines[index] = prefix + lines[index];
-        ApplyLines(lines, index, offset + prefix.Length);
-    }
-
-    /// <summary>Las líneas con marcas, una por párrafo del editor.</summary>
-    private List<string> Lines()
-    {
-        var lines = RichDocument.Save(Editor.FlowDocument).Split('\n').ToList();
-        var count = Editor.FlowDocument.Blocks.OfType<AvRichTextBox.Paragraph>().Count();
-        while (lines.Count < count)
-        {
-            lines.Add("");
-        }
-
-        return lines;
-    }
-
-    /// <summary>Párrafo y posición dentro de él donde está el cursor.</summary>
-    private (int Paragraph, int Offset) CaretSpot()
-    {
-        var paragraphs = Editor.FlowDocument.Blocks.OfType<AvRichTextBox.Paragraph>().ToList();
-        var position = Editor.FlowDocument.Selection.End;
-        var start = 0;
-        for (var i = 0; i < paragraphs.Count; i++)
-        {
-            if (position < start + paragraphs[i].BlockLength || i == paragraphs.Count - 1)
+            // Texto nuevo desde afuera (al abrir el riesgo, o al repetir el título): se carga con el cursor al final.
+            _syncing = true;
+            try
             {
-                return (i, Math.Max(0, position - start));
+                Editor.Document.Text = (Text ?? "").Replace("\r\n", "\n", StringComparison.Ordinal);
+                Editor.Document.UndoStack.ClearAll();
+                Editor.CaretOffset = Editor.Document.TextLength;
             }
-
-            start += paragraphs[i].BlockLength;
-        }
-
-        return (0, 0);
-    }
-
-    /// <summary>Recarga el editor con las líneas dadas y deja el cursor en el párrafo y la posición indicados.</summary>
-    private void ApplyLines(List<string> lines, int paragraph, int offset)
-    {
-        _syncing = true;
-        try
-        {
-            SetCurrentValue(TextProperty, string.Join('\n', lines));
-            RichDocument.Load(Editor, Text);
-        }
-        finally
-        {
-            _syncing = false;
-        }
-
-        var paragraphs = Editor.FlowDocument.Blocks.OfType<AvRichTextBox.Paragraph>().ToList();
-        if (paragraphs.Count == 0)
-        {
-            return;
-        }
-
-        paragraph = Math.Clamp(paragraph, 0, paragraphs.Count - 1);
-        var start = paragraphs.Take(paragraph).Sum(p => p.BlockLength);
-        Editor.FlowDocument.Select(start + Math.Clamp(offset, 0, paragraphs[paragraph].TextLength), 0);
-    }
-
-    private async void OnPasteKey(object? sender, KeyEventArgs e)
-    {
-        var top = TopLevel.GetTopLevel(this);
-        var gestures = top?.PlatformSettings?.HotkeyConfiguration.Paste;
-        var isPaste = gestures is { Count: > 0 }
-            ? gestures.Any(g => g.Matches(e))
-            : e.Key == Key.V && e.KeyModifiers == KeyModifiers.Control;
-        if (!isPaste || e.Handled || Editor.IsReadOnly)
-        {
-            return;
-        }
-
-        e.Handled = true;
-        try
-        {
-            if (top?.Clipboard is { } clipboard && await clipboard.TryGetTextAsync() is { Length: > 0 } text)
+            finally
             {
-                PasteText(text);
+                _syncing = false;
             }
         }
-        catch (Exception ex)
-        {
-            Services.Log.Error(ex, "Editor.Paste");
-        }
     }
 
-    /// <summary>
-    /// Pega texto sin formato donde está el cursor (reemplaza lo seleccionado). Cada línea del texto es un párrafo.
-    /// </summary>
-    public void PasteText(string text)
-    {
-        if (!_loaded || Editor.FlowDocument is null)
-        {
-            return;
-        }
+    /// <summary>Pone el foco en el texto.</summary>
+    public void FocusText() => Editor.TextArea.Focus();
 
-        var selection = Editor.FlowDocument.Selection;
-        var (markup, paragraph, offset) = RichDocument.Paste(Editor.FlowDocument, selection.Start, selection.End, text);
-        ApplyLines([.. markup.Split('\n')], paragraph, offset);
-        Editor.ScrollToSelection();
-    }
+    /// <summary>El texto del editor como se guarda: saltos de línea "\n" y sin líneas vacías al final.</summary>
+    private string DocumentText() =>
+        Editor.Document.Text.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n').TrimEnd('\n');
 
-    /// <summary>Pasa el contenido del editor a <see cref="Text"/> (con marcas).</summary>
+    /// <summary>Pasa el contenido del editor a <see cref="Text"/>.</summary>
     public void Publish()
     {
-        // Antes de cargarse el contenido el editor está vacío: no debe pisar el texto del riesgo.
-        if (!_loaded || Editor.FlowDocument is null)
+        if (_syncing)
         {
             return;
         }
 
-        var markup = RichDocument.Save(Editor.FlowDocument);
-        if (markup == (Text ?? ""))
+        var text = DocumentText();
+        if (text == (Text ?? ""))
         {
             return;
         }
@@ -475,7 +118,7 @@ public partial class FormattedTextEditor : UserControl
         _syncing = true;
         try
         {
-            SetCurrentValue(TextProperty, markup);
+            SetCurrentValue(TextProperty, text);
         }
         finally
         {
@@ -483,83 +126,462 @@ public partial class FormattedTextEditor : UserControl
         }
     }
 
-    private void OnBold(object? sender, RoutedEventArgs e) =>
-        Toggle(TextElement.FontWeightProperty, v => v is FontWeight w && w >= FontWeight.SemiBold, FontWeight.Bold, FontWeight.Normal);
+    /// <summary>Pega texto sin formato donde está el cursor (reemplaza lo seleccionado), como Ctrl+V.</summary>
+    public void PasteText(string text) =>
+        Replace(Editor.SelectionStart, Editor.SelectionLength, text.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n'));
 
-    private void OnItalic(object? sender, RoutedEventArgs e) =>
-        Toggle(TextElement.FontStyleProperty, v => v is FontStyle.Italic, FontStyle.Italic, FontStyle.Normal);
+    private void Replace(int start, int length, string text)
+    {
+        Editor.Document.Replace(start, length, text);
+        Editor.Select(start + text.Length, 0);
+        Editor.TextArea.Caret.BringCaretToView();
+    }
 
-    private void OnUnderline(object? sender, RoutedEventArgs e) =>
-        Toggle(Inline.TextDecorationsProperty, v => v is TextDecorationCollection { Count: > 0 }, TextDecorations.Underline, null);
+    // ---- Marcas ocultas ------------------------------------------------------------------------------
 
-    private void OnSmall(object? sender, RoutedEventArgs e) => Format(TextElement.FontSizeProperty, RichDocument.SmallSize);
+    private int _lastCaret;
+    private bool _cleaning;
 
-    private void OnNormal(object? sender, RoutedEventArgs e) => Format(TextElement.FontSizeProperty, RichDocument.NormalSize);
+    private static readonly string[] PairedMarks =
+        [RichText.Bold, RichText.Underline, RichText.LargeOpen, RichText.LargeClose, RichText.SmallOpen, RichText.SmallClose];
 
-    private void OnLarge(object? sender, RoutedEventArgs e) => Format(TextElement.FontSizeProperty, RichDocument.LargeSize);
+    /// <summary>Las marcas de una línea (inicio y fin en el documento).</summary>
+    private List<(int Start, int End)> MarksOf(DocumentLine line)
+    {
+        var text = Editor.Document.GetText(line);
+        var prefix = RichText.PrefixLength(text);
+        return [.. RichText.Tokens(text[prefix..]).Where(t => t.IsMark)
+            .Select(t => (line.Offset + prefix + t.Start, line.Offset + prefix + t.Start + t.Length))];
+    }
+
+    /// <summary>El cursor no queda entre los caracteres de una marca: pasa al borde, en el sentido en que se movía.</summary>
+    private void SnapCaret()
+    {
+        var offset = Editor.CaretOffset;
+        if (Editor.SelectionLength == 0)
+        {
+            foreach (var (start, end) in MarksOf(Editor.Document.GetLineByOffset(offset)))
+            {
+                if (start < offset && offset < end)
+                {
+                    Editor.CaretOffset = offset >= _lastCaret ? end : start;
+                    return;
+                }
+            }
+        }
+
+        _lastCaret = offset;
+    }
+
+    /// <summary>Retroceso y Suprimir borran el carácter visible de al lado, no una marca oculta.</summary>
+    private void OnDeleteKey(object? sender, KeyEventArgs e)
+    {
+        if (e.Key is not (Key.Back or Key.Delete) || e.KeyModifiers != KeyModifiers.None || Editor.SelectionLength > 0 ||
+            Editor.IsReadOnly)
+        {
+            return;
+        }
+
+        var back = e.Key == Key.Back;
+        var offset = Editor.CaretOffset;
+        var marks = MarksOf(Editor.Document.GetLineByOffset(offset));
+        var moved = true;
+        while (moved)
+        {
+            moved = false;
+            foreach (var (start, end) in marks)
+            {
+                if (back ? start < offset && offset <= end : start <= offset && offset < end)
+                {
+                    offset = back ? start : end;
+                    moved = true;
+                }
+            }
+        }
+
+        _lastCaret = offset;
+        Editor.CaretOffset = offset;
+    }
+
+    private void OnDocumentChanged(object? sender, DocumentChangeEventArgs e)
+    {
+        // Al borrar puede quedar una marca sin su pareja (y se vería como texto): se quita después del cambio.
+        if (!_syncing && !_cleaning && e.RemovalLength > 0)
+        {
+            var offset = e.Offset;
+            Avalonia.Threading.Dispatcher.UIThread.Post(() => CleanOrphans(offset));
+        }
+    }
+
+    /// <summary>Quita de la línea las marcas que quedaron sin pareja (no las "*" sueltas, que pueden ser texto: 2*3).</summary>
+    public void CleanOrphans(int offset)
+    {
+        var doc = Editor.Document;
+        if (offset > doc.TextLength)
+        {
+            return;
+        }
+
+        var line = doc.GetLineByOffset(offset);
+        var text = doc.GetText(line);
+        var prefix = RichText.PrefixLength(text);
+        var body = text[prefix..];
+        var marks = RichText.Tokens(body).Where(t => t.IsMark).ToList();
+        var orphans = new List<(int Start, int Length)>();
+        foreach (var mark in PairedMarks)
+        {
+            for (var i = body.IndexOf(mark, StringComparison.Ordinal); i >= 0; i = body.IndexOf(mark, i + mark.Length, StringComparison.Ordinal))
+            {
+                var at = i;
+                if (!marks.Any(t => t.Start <= at && at + mark.Length <= t.Start + t.Length) &&
+                    !orphans.Any(o => o.Start < at + mark.Length && at < o.Start + o.Length))
+                {
+                    orphans.Add((at, mark.Length));
+                }
+            }
+        }
+
+        if (orphans.Count == 0)
+        {
+            return;
+        }
+
+        _cleaning = true;
+        try
+        {
+            var caret = Editor.CaretOffset;
+            doc.BeginUpdate();
+            foreach (var (start, length) in orphans.OrderByDescending(o => o.Start))
+            {
+                var at = line.Offset + prefix + start;
+                doc.Remove(at, length);
+                if (caret > at)
+                {
+                    caret -= Math.Min(length, caret - at);
+                }
+            }
+
+            doc.EndUpdate();
+            Editor.CaretOffset = Math.Min(caret, doc.TextLength);
+        }
+        finally
+        {
+            _cleaning = false;
+        }
+    }
+
+    // ---- Enter y listas ------------------------------------------------------------------------------
+
+    private void OnEnterKey(object? sender, KeyEventArgs e)
+    {
+        if (e.Key is not (Key.Enter or Key.Return) || (e.KeyModifiers & ~KeyModifiers.Shift) != 0 || Editor.IsReadOnly)
+        {
+            return;
+        }
+
+        e.Handled = true;
+        NewParagraph();
+    }
+
+    /// <summary>
+    /// Lo que hace Enter: un salto de línea en el cursor. En una lista, la línea nueva sigue la lista; sobre un ítem
+    /// vacío, la lista termina (se quita la viñeta).
+    /// </summary>
+    public void NewParagraph()
+    {
+        var doc = Editor.Document;
+        var line = doc.GetLineByOffset(Editor.SelectionStart);
+        var text = doc.GetText(line);
+        var block = RichText.Parse(text)[0];
+        var prefix = RichText.PrefixLength(text);
+        if (block.Kind != RichBlockKind.Paragraph && Editor.SelectionLength == 0 && text[prefix..].Trim().Length == 0)
+        {
+            Replace(line.Offset, line.Length, "");
+            return;
+        }
+
+        var next = block.Kind switch
+        {
+            RichBlockKind.Bullet => RichText.BulletPrefix,
+            RichBlockKind.Numbered => $"{block.Number + 1}. ",
+            _ => "",
+        };
+
+        // Antes de la viñeta, el salto deja la línea entera abajo (sin agregar otra viñeta).
+        if (Editor.SelectionStart - line.Offset < prefix)
+        {
+            next = "";
+        }
+
+        // Un formato abierto en el cursor (p. ej., en medio de una negrita) se cierra antes del salto y se abre de nuevo
+        // en la línea nueva: una marca vale solo dentro de su línea.
+        var (close, open) = OpenMarks(text, prefix, Editor.SelectionStart - line.Offset);
+        Replace(Editor.SelectionStart, Editor.SelectionLength, close + "\n" + next + open);
+    }
+
+    /// <summary>Las marcas para cerrar y para volver a abrir el formato que está abierto en una posición de la línea.</summary>
+    private static (string Close, string Open) OpenMarks(string line, int prefix, int column)
+    {
+        if (column <= prefix)
+        {
+            return ("", "");
+        }
+
+        // Solo si el cursor está dentro de un tramo con formato (no en su borde).
+        var position = column - prefix;
+        var current = RichText.Tokens(line[prefix..])
+            .FirstOrDefault(t => !t.IsMark && t.Start < position && position < t.Start + t.Length)?.Format;
+        if (current is null)
+        {
+            return ("", "");
+        }
+
+        var open = new System.Text.StringBuilder();
+        var close = new System.Text.StringBuilder();
+        void Add(bool on, string o, string c)
+        {
+            if (on)
+            {
+                open.Append(o);
+                close.Insert(0, c);
+            }
+        }
+
+        Add(current.Size == RichSize.Large, RichText.LargeOpen, RichText.LargeClose);
+        Add(current.Size == RichSize.Small, RichText.SmallOpen, RichText.SmallClose);
+        Add(current.Underline, RichText.Underline, RichText.Underline);
+        Add(current.Bold, RichText.Bold, RichText.Bold);
+        Add(current.Italic, RichText.Italic, RichText.Italic);
+        return (close.ToString(), open.ToString());
+    }
 
     private void OnBullets(object? sender, RoutedEventArgs e) => ToggleList(numbered: false);
 
     private void OnNumbers(object? sender, RoutedEventArgs e) => ToggleList(numbered: true);
 
-    /// <summary>Activa o desactiva un formato en la selección, según cómo esté su comienzo.</summary>
-    private void Toggle(AvaloniaProperty property, Func<object?, bool> isOn, object? on, object? off)
+    /// <summary>Convierte las líneas seleccionadas en lista (o las devuelve a párrafo si ya lo eran).</summary>
+    private void ToggleList(bool numbered)
     {
-        var selection = Editor.FlowDocument.Selection;
-        if (selection.Length == 0)
+        var doc = Editor.Document;
+        var first = doc.GetLineByOffset(Editor.SelectionStart).LineNumber;
+        var last = doc.GetLineByOffset(Editor.SelectionStart + Editor.SelectionLength).LineNumber;
+        var lines = Enumerable.Range(first, last - first + 1).Select(doc.GetLineByNumber).ToList();
+        var target = numbered ? RichBlockKind.Numbered : RichBlockKind.Bullet;
+        var remove = lines.All(l => RichText.Parse(doc.GetText(l))[0].Kind == target);
+        var caretLine = doc.GetLineByOffset(Editor.CaretOffset).LineNumber;
+        var caretColumn = Editor.CaretOffset - doc.GetLineByNumber(caretLine).Offset;
+
+        doc.BeginUpdate();
+        try
         {
-            return;
+            var n = 0;
+            foreach (var line in lines)
+            {
+                var text = doc.GetText(line);
+                var oldPrefix = RichText.PrefixLength(text);
+                n++;
+                var newPrefix = remove ? "" : numbered ? $"{n}. " : RichText.BulletPrefix;
+                doc.Replace(line.Offset, oldPrefix, newPrefix);
+                if (line.LineNumber == caretLine)
+                {
+                    // El cursor queda en el mismo lugar del texto, después de la viñeta (no antes).
+                    caretColumn = Math.Max(newPrefix.Length, caretColumn - oldPrefix + newPrefix.Length);
+                }
+            }
+        }
+        finally
+        {
+            doc.EndUpdate();
         }
 
-        Format(property, isOn(selection.GetFormatting(property)) ? off : on);
-    }
-
-    private void Format(AvaloniaProperty property, object? value)
-    {
-        var selection = Editor.FlowDocument.Selection;
-        if (selection.Length == 0)
-        {
-            return;
-        }
-
-        // La biblioteca declara el valor como no nulo, pero null es lo que quita el subrayado.
-        selection.ApplyFormatting(property, value!);
-        Publish();
+        var caret = doc.GetLineByNumber(caretLine);
+        Editor.Select(caret.Offset + Math.Min(caretColumn, caret.Length), 0);
         FocusText();
     }
 
-    /// <summary>Convierte los párrafos seleccionados en lista (o los devuelve a párrafo si ya lo eran).</summary>
-    private void ToggleList(bool numbered)
+    // ---- Formato -------------------------------------------------------------------------------------
+
+    private void OnBold(object? sender, RoutedEventArgs e) => ToggleMarks(RichText.Bold, RichText.Bold);
+
+    private void OnItalic(object? sender, RoutedEventArgs e) => ToggleMarks(RichText.Italic, RichText.Italic);
+
+    private void OnUnderline(object? sender, RoutedEventArgs e) => ToggleMarks(RichText.Underline, RichText.Underline);
+
+    private void OnSmall(object? sender, RoutedEventArgs e) => SetSize(RichSize.Small);
+
+    private void OnNormal(object? sender, RoutedEventArgs e) => SetSize(RichSize.Normal);
+
+    private void OnLarge(object? sender, RoutedEventArgs e) => SetSize(RichSize.Large);
+
+    /// <summary>
+    /// Pone las marcas alrededor de lo seleccionado, o las quita si ya estaban. Sin selección, pone las dos marcas y deja
+    /// el cursor entre ellas para escribir con ese formato.
+    /// </summary>
+    public void ToggleMarks(string open, string close)
     {
-        var doc = Editor.FlowDocument;
-        var paragraphs = doc.Blocks.OfType<AvRichTextBox.Paragraph>().ToList();
-        var selected = doc.GetSelectedParagraphs.Select(p => paragraphs.IndexOf(p)).Where(i => i >= 0).ToHashSet();
-        if (selected.Count == 0)
+        var doc = Editor.Document;
+        var start = Editor.SelectionStart;
+        var length = Editor.SelectionLength;
+        var selected = doc.GetText(start, length);
+
+        if (Surrounded(start, length, open, close))
         {
-            return;
+            doc.BeginUpdate();
+            doc.Remove(start + length, close.Length);
+            doc.Remove(start - open.Length, open.Length);
+            doc.EndUpdate();
+            Editor.Select(start - open.Length, length);
+        }
+        else if (length > open.Length + close.Length && selected.StartsWith(open, StringComparison.Ordinal) &&
+                 selected.EndsWith(close, StringComparison.Ordinal) && !(open == RichText.Italic && selected.StartsWith(RichText.Bold, StringComparison.Ordinal)))
+        {
+            var inner = selected[open.Length..^close.Length];
+            doc.Replace(start, length, inner);
+            Editor.Select(start, inner.Length);
+        }
+        else if (length == 0)
+        {
+            doc.Insert(start, open + close);
+            Editor.Select(start + open.Length, 0);
+        }
+        else
+        {
+            var wrapped = Wrap(selected, open, close);
+            doc.Replace(start, length, wrapped);
+            Editor.Select(start, wrapped.Length);
         }
 
-        var (caretParagraph, caretOffset) = CaretSpot();
-        var lines = Lines();
-        var target = numbered ? RichBlockKind.Numbered : RichBlockKind.Bullet;
-        var blocks = lines.Select(l => RichText.Parse(l)[0]).ToList();
-        var remove = selected.All(i => blocks[i].Kind == target);
-        var n = 0;
-        foreach (var i in selected.Order())
+        FocusText();
+    }
+
+    /// <summary>Cambia el tamaño de lo seleccionado: quita las marcas de tamaño que tenga y pone las nuevas.</summary>
+    private void SetSize(RichSize size)
+    {
+        var doc = Editor.Document;
+        var start = Editor.SelectionStart;
+        var length = Editor.SelectionLength;
+        foreach (var (open, close) in new[] { (RichText.LargeOpen, RichText.LargeClose), (RichText.SmallOpen, RichText.SmallClose) })
         {
-            var oldPrefix = RichText.Prefix(blocks[i]).Length;
-            var body = lines[i][oldPrefix..];
-            n++;
-            lines[i] = remove ? body : (numbered ? $"{n}. " : RichText.BulletPrefix) + body;
-            if (i == caretParagraph)
+            if (Surrounded(start, length, open, close))
             {
-                // El cursor queda en el mismo lugar del texto, después de la viñeta (no antes).
-                var newPrefix = lines[i].Length - body.Length;
-                caretOffset = Math.Max(newPrefix, caretOffset - oldPrefix + newPrefix);
+                doc.BeginUpdate();
+                doc.Remove(start + length, close.Length);
+                doc.Remove(start - open.Length, open.Length);
+                doc.EndUpdate();
+                start -= open.Length;
             }
         }
 
-        ApplyLines(lines, caretParagraph, caretOffset);
+        var text = doc.GetText(start, length);
+        foreach (var mark in new[] { RichText.LargeOpen, RichText.LargeClose, RichText.SmallOpen, RichText.SmallClose })
+        {
+            text = text.Replace(mark, "", StringComparison.Ordinal);
+        }
+
+        if (size != RichSize.Normal && text.Length > 0)
+        {
+            text = size == RichSize.Large ? Wrap(text, RichText.LargeOpen, RichText.LargeClose) : Wrap(text, RichText.SmallOpen, RichText.SmallClose);
+        }
+
+        doc.Replace(start, length, text);
+        Editor.Select(start, text.Length);
         FocusText();
+    }
+
+    /// <summary>Las marcas están justo antes y justo después de lo seleccionado.</summary>
+    private bool Surrounded(int start, int length, string open, string close)
+    {
+        var doc = Editor.Document;
+        if (start < open.Length || start + length + close.Length > doc.TextLength ||
+            doc.GetText(start - open.Length, open.Length) != open || doc.GetText(start + length, close.Length) != close)
+        {
+            return false;
+        }
+
+        // Un "*" pegado a otro "*" es parte de una negrita, no una itálica.
+        return open != RichText.Italic ||
+               ((start - 2 < 0 || doc.GetCharAt(start - 2) != '*') && (start + length + 1 >= doc.TextLength || doc.GetCharAt(start + length + 1) != '*'));
+    }
+
+    /// <summary>Pone las marcas en cada línea de lo seleccionado (una marca se cierra en su línea), pegadas al texto.</summary>
+    private static string Wrap(string text, string open, string close) =>
+        string.Join('\n', text.Split('\n').Select(line =>
+        {
+            var prefix = RichText.PrefixLength(line);
+            var body = line[prefix..];
+            var core = body.Trim();
+            if (core.Length == 0)
+            {
+                return line;
+            }
+
+            var lead = body[..body.IndexOf(core, StringComparison.Ordinal)];
+            var trail = body[(lead.Length + core.Length)..];
+            return line[..prefix] + lead + open + core + close + trail;
+        }));
+
+    /// <summary>Tamaño de las marcas ocultas: casi nada, para que no ocupen lugar.</summary>
+    private const double HiddenSize = 0.01;
+
+    /// <summary>Muestra el formato de cada tramo y oculta las marcas (sin ancho ni color).</summary>
+    private sealed class MarkupColorizer : DocumentColorizingTransformer
+    {
+        protected override void ColorizeLine(DocumentLine line)
+        {
+            var text = CurrentContext.Document.GetText(line);
+            var prefix = RichText.PrefixLength(text);
+            foreach (var token in RichText.Tokens(text[prefix..]))
+            {
+                var start = line.Offset + prefix + token.Start;
+                var end = start + token.Length;
+                var format = token.Format;
+                if (token.IsMark)
+                {
+                    ChangeLinePart(start, end, e =>
+                    {
+                        e.TextRunProperties.SetForegroundBrush(Brushes.Transparent);
+                        e.TextRunProperties.SetFontRenderingEmSize(HiddenSize);
+                    });
+                    continue;
+                }
+
+                if (!format.Bold && !format.Italic && !format.Underline && format.Size == RichSize.Normal)
+                {
+                    continue;
+                }
+
+                ChangeLinePart(start, end, e =>
+                {
+                    var face = e.TextRunProperties.Typeface;
+                    e.TextRunProperties.SetTypeface(new Typeface(face.FontFamily,
+                        format.Italic ? FontStyle.Italic : face.Style,
+                        format.Bold ? FontWeight.Bold : face.Weight));
+                    if (format.Underline)
+                    {
+                        e.TextRunProperties.SetTextDecorations(TextDecorations.Underline);
+                    }
+
+                    if (format.Size != RichSize.Normal)
+                    {
+                        e.TextRunProperties.SetFontRenderingEmSize(format.Size == RichSize.Small ? SmallSize : LargeSize);
+                    }
+                });
+            }
+        }
+    }
+
+    /// <summary>La viñeta "- " del comienzo de una línea se ve como "• ".</summary>
+    private sealed class BulletGenerator : VisualLineElementGenerator
+    {
+        public override int GetFirstInterestedOffset(int startOffset)
+        {
+            var line = CurrentContext.Document.GetLineByOffset(startOffset);
+            return startOffset == line.Offset && line.Length >= 2 &&
+                   CurrentContext.Document.GetText(line.Offset, 2) == RichText.BulletPrefix
+                ? startOffset
+                : -1;
+        }
+
+        public override VisualLineElement ConstructElement(int offset) => new FormattedTextElement("\u2022 ", 2);
     }
 }

@@ -20,6 +20,9 @@ public enum RichBlockKind
 /// <summary>Un tramo de texto con el mismo formato.</summary>
 public sealed record RichRun(string Text, bool Bold, bool Italic, bool Underline, RichSize Size);
 
+/// <summary>Una parte de una línea: una marca de formato o un tramo de texto (Format dice el formato del tramo).</summary>
+public sealed record RichToken(int Start, int Length, bool IsMark, RichRun Format);
+
 /// <summary>Una línea: párrafo, ítem con viñeta o ítem numerado (con su número).</summary>
 public sealed record RichBlock(RichBlockKind Kind, int Number, IReadOnlyList<RichRun> Runs);
 
@@ -103,38 +106,51 @@ public static class RichText
         return (RichBlockKind.Paragraph, 0, line);
     }
 
-    private static List<RichRun> ParseInline(string line)
+    // Cada tramo de texto entre marcas es un tramo con su formato.
+    private static List<RichRun> ParseInline(string line) =>
+        [.. Tokens(line).Where(t => !t.IsMark).Select(t => t.Format with { Text = line.Substring(t.Start, t.Length) })];
+
+    /// <summary>
+    /// Las partes de una línea (sin la viñeta o el número del comienzo): marcas y tramos de texto, con su posición
+    /// en la línea y el formato que tiene cada tramo. Es lo que usa el editor para mostrar el formato mientras se escribe.
+    /// </summary>
+    public static IReadOnlyList<RichToken> Tokens(string line)
     {
-        var runs = new List<RichRun>();
-        var sb = new StringBuilder();
+        var tokens = new List<RichToken>();
         bool bold = false, italic = false, underline = false;
         var size = RichSize.Normal;
+        var textStart = 0;
 
-        void Flush()
+        void Flush(int end)
         {
-            if (sb.Length > 0)
+            if (end > textStart)
             {
-                runs.Add(new RichRun(sb.ToString(), bold, italic, underline, size));
-                sb.Clear();
+                tokens.Add(new RichToken(textStart, end - textStart, false, new RichRun("", bold, italic, underline, size)));
             }
+        }
+
+        void Mark(int at, int length)
+        {
+            Flush(at);
+            tokens.Add(new RichToken(at, length, true, new RichRun("", bold, italic, underline, size)));
+            textStart = at + length;
         }
 
         var i = 0;
         while (i < line.Length)
         {
             // El orden importa: "**" antes que "*".
-            if (Toggle(Bold, ref bold) || Toggle(Underline, ref underline) || Toggle(Italic, ref italic) ||
+            if (Toggle(RichText.Bold, ref bold) || Toggle(RichText.Underline, ref underline) || Toggle(RichText.Italic, ref italic) ||
                 Size(LargeOpen, LargeClose, RichSize.Large) || Size(SmallOpen, SmallClose, RichSize.Small))
             {
                 continue;
             }
 
-            sb.Append(line[i]);
             i++;
         }
 
-        Flush();
-        return runs;
+        Flush(line.Length);
+        return tokens;
 
         // Abre solo si hay un cierre más adelante en la línea; cierra siempre que esté abierta.
         bool Toggle(string mark, ref bool state)
@@ -145,7 +161,7 @@ public static class RichText
             }
 
             // Un "*" pegado a otro es parte de un "**" sin cerrar: queda como texto.
-            if (mark == Italic && i + 1 < line.Length && line[i + 1] == '*')
+            if (mark == RichText.Italic && i + 1 < line.Length && line[i + 1] == '*')
             {
                 return false;
             }
@@ -155,9 +171,11 @@ public static class RichText
                 return false;
             }
 
-            Flush();
+            Flush(i);
             state = !state;
+            tokens.Add(new RichToken(i, mark.Length, true, new RichRun("", bold, italic, underline, size)));
             i += mark.Length;
+            textStart = i;
             return true;
         }
 
@@ -165,7 +183,7 @@ public static class RichText
         {
             if (string.CompareOrdinal(line, i, open, 0, open.Length) == 0 && line.IndexOf(close, i + open.Length, StringComparison.Ordinal) >= 0)
             {
-                Flush();
+                Mark(i, open.Length);
                 size = target;
                 i += open.Length;
                 return true;
@@ -173,7 +191,7 @@ public static class RichText
 
             if (size == target && string.CompareOrdinal(line, i, close, 0, close.Length) == 0)
             {
-                Flush();
+                Mark(i, close.Length);
                 size = RichSize.Normal;
                 i += close.Length;
                 return true;
@@ -181,5 +199,12 @@ public static class RichText
 
             return false;
         }
+    }
+
+    /// <summary>Largo de la viñeta o el número del comienzo de una línea ("- ", "1. "), o 0 si es un párrafo.</summary>
+    public static int PrefixLength(string line)
+    {
+        var (kind, _, body) = LineKind(line);
+        return kind == RichBlockKind.Paragraph ? 0 : line.Length - body.Length;
     }
 }

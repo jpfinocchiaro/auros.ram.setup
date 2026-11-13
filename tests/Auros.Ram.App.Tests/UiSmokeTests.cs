@@ -79,8 +79,7 @@ public class UiSmokeTests
         Assert.All(editors, e =>
         {
             Assert.False(e.IsEnabled);
-            var box = e.FindControl<AvRichTextBox.RichTextBox>("Editor")!;
-            Assert.Equal("Fraude en compras", RichDocument.Save(box.FlowDocument));
+            Assert.Equal("Fraude en compras", e.Box.Text);
         });
 
         // Sin el tilde, las descripciones conservan el texto y se pueden editar.
@@ -500,21 +499,27 @@ public class UiSmokeTests
         Avalonia.Threading.Dispatcher.UIThread.RunJobs();
 
         // Ida y vuelta sin cambios: lo que se carga en el editor es lo que se guarda.
-        Assert.Equal(5, editor.Box.FlowDocument.Blocks.Count);
+        Assert.Equal(5, editor.Box.Document.LineCount);
         editor.Publish();
         Assert.Equal(markup, editor.Text);
 
-        // Negrita aplicada directamente sobre el texto seleccionado ("Texto").
-        editor.Box.FlowDocument.Select(0, 5);
-        editor.Box.FlowDocument.Selection.ApplyFormatting(Avalonia.Controls.Documents.TextElement.FontWeightProperty, Avalonia.Media.FontWeight.Bold);
-        editor.Publish();
+        // Negrita sobre el texto seleccionado ("Texto"), y de nuevo para quitarla.
+        editor.Box.Select(0, 5);
+        editor.ToggleMarks(Auros.Ram.Core.Text.RichText.Bold, Auros.Ram.Core.Text.RichText.Bold);
         Assert.StartsWith("**Texto** con **negrita**", editor.Text, StringComparison.Ordinal);
+        editor.ToggleMarks(Auros.Ram.Core.Text.RichText.Bold, Auros.Ram.Core.Text.RichText.Bold);
+        Assert.Equal(markup, editor.Text);
+
+        // Itálica dentro de una negrita: se agrega sin confundir las marcas.
+        editor.Box.Select(12, 7); // "negrita"
+        editor.ToggleMarks(Auros.Ram.Core.Text.RichText.Italic, Auros.Ram.Core.Text.RichText.Italic);
+        Assert.StartsWith("Texto con ***negrita***", editor.Text, StringComparison.Ordinal);
 
         // Cambiar el texto desde afuera (otro riesgo) recarga el editor.
         editor.Text = "Otro *riesgo*";
         Avalonia.Threading.Dispatcher.UIThread.RunJobs();
-        Assert.Single(editor.Box.FlowDocument.Blocks);
-        Assert.Equal("Otro *riesgo*", Auros.Ram.App.Views.RichDocument.Save(editor.Box.FlowDocument));
+        Assert.Equal(1, editor.Box.Document.LineCount);
+        Assert.Equal("Otro *riesgo*", editor.Box.Text);
         window.Close();
     }
 
@@ -537,7 +542,6 @@ public class UiSmokeTests
             window.MouseUp(point, Avalonia.Input.MouseButton.Left);
             Avalonia.Threading.Dispatcher.UIThread.RunJobs();
             Assert.True(editor.IsKeyboardFocusWithin, $"el clic no llevó el foco al editor «{editor.Text}»");
-            Assert.False(editor.CaretHidden);
             window.KeyTextInput(text);
             Avalonia.Threading.Dispatcher.UIThread.RunJobs();
             editor.Publish();
@@ -547,9 +551,7 @@ public class UiSmokeTests
         for (var round = 0; round < 3; round++)
         {
             ClickAndType(first, $"a{round}");
-            Assert.True(second.CaretHidden);
             ClickAndType(second, $"b{round}");
-            Assert.True(first.CaretHidden);
             title.Focus();
             Avalonia.Threading.Dispatcher.UIThread.RunJobs();
         }
@@ -571,19 +573,19 @@ public class UiSmokeTests
         }
 
         const int end = 26; // "Uno dos tres" (12) + salto + "segunda línea" (13)
-        Assert.Equal(end, editor.Box.FlowDocument.Selection.Start);
+        Assert.Equal(end, editor.Box.CaretOffset);
 
         int ClickAt(double x, double y)
         {
             title.Focus();
             Avalonia.Threading.Dispatcher.UIThread.RunJobs();
-            var point = editor.Box.TranslatePoint(new Point(x, y), window)!.Value;
+            var point = editor.Box.TextArea.TranslatePoint(new Point(x, y), window)!.Value;
             window.MouseMove(point);
             window.MouseDown(point, Avalonia.Input.MouseButton.Left);
             window.MouseUp(point, Avalonia.Input.MouseButton.Left);
             Avalonia.Threading.Dispatcher.UIThread.RunJobs();
             Assert.True(editor.IsKeyboardFocusWithin);
-            return editor.Box.FlowDocument.Selection.Start;
+            return editor.Box.CaretOffset;
         }
 
         Assert.Equal(end, ClickAt(200, 100));   // espacio libre debajo del texto: al final
@@ -610,7 +612,7 @@ public class UiSmokeTests
         }
 
         // En medio de un tramo con formato: el formato sigue en las dos partes.
-        editor.Box.FlowDocument.Select(5, 0);
+        editor.Box.Select(7, 0); // "Uno **d|os** tres"
         Enter();
         window.KeyTextInput("x");
         Avalonia.Threading.Dispatcher.UIThread.RunJobs();
@@ -618,7 +620,7 @@ public class UiSmokeTests
         Assert.Equal("Uno **d**\n**xos** tres", editor.Text);
 
         // Al final del texto: el cursor pasa a la línea nueva.
-        editor.Box.FlowDocument.Select(editor.Box.FlowDocument.Blocks.Sum(b => b.BlockLength) - 1, 0);
+        editor.Box.Select(editor.Box.Document.TextLength, 0);
         Enter();
         window.KeyTextInput("fin");
         Avalonia.Threading.Dispatcher.UIThread.RunJobs();
@@ -626,10 +628,50 @@ public class UiSmokeTests
         Assert.Equal("Uno **d**\n**xos** tres\nfin", editor.Text);
 
         // Con texto seleccionado: lo reemplaza.
-        editor.Box.FlowDocument.Select(0, 4);
+        editor.Box.Select(0, 4);
         Enter();
         editor.Publish();
         Assert.Equal("\n**d**\n**xos** tres\nfin", editor.Text);
+        window.Close();
+    }
+
+    [AvaloniaFact]
+    public void Formatted_editor_moves_and_deletes_over_hidden_marks()
+    {
+        var editor = new FormattedTextEditor { Text = "Uno **dos** tres", EditorHeight = 120 };
+        var window = new Window { Content = editor, Width = 600, Height = 300 };
+        window.Show();
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        editor.FocusText();
+
+        void Press(Avalonia.Input.Key key, Avalonia.Input.PhysicalKey physical)
+        {
+            window.KeyPress(key, Avalonia.Input.RawInputModifiers.None, physical, null);
+            window.KeyRelease(key, Avalonia.Input.RawInputModifiers.None, physical, null);
+            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        }
+
+        // El cursor no se detiene entre los dos "*" de la marca (que no se ven).
+        editor.Box.Select(4, 0);
+        Press(Avalonia.Input.Key.Right, Avalonia.Input.PhysicalKey.ArrowRight);
+        Assert.Equal(6, editor.Box.CaretOffset);
+        Press(Avalonia.Input.Key.Left, Avalonia.Input.PhysicalKey.ArrowLeft);
+        Assert.Equal(4, editor.Box.CaretOffset);
+
+        // Retroceso justo después de la marca borra el espacio de antes, no la marca.
+        editor.Box.Select(6, 0);
+        Press(Avalonia.Input.Key.Back, Avalonia.Input.PhysicalKey.Backspace);
+        Assert.Equal("Uno**dos** tres", editor.Text);
+
+        // Suprimir antes de la marca de cierre borra el espacio de después.
+        editor.Box.Select(8, 0); // "Uno**dos|** tres"
+        Press(Avalonia.Input.Key.Delete, Avalonia.Input.PhysicalKey.Delete);
+        Assert.Equal("Uno**dos**tres", editor.Text);
+
+        // Borrar una selección que se lleva una sola marca no deja la otra suelta (se vería como texto).
+        editor.Box.Select(0, 5); // "Uno**d"... sin la "d": "Uno**"
+        Press(Avalonia.Input.Key.Back, Avalonia.Input.PhysicalKey.Backspace);
+        Assert.Equal("dostres", editor.Text);
         window.Close();
     }
 
@@ -643,19 +685,19 @@ public class UiSmokeTests
         editor.FocusText();
 
         // Varias líneas en medio de un texto con formato: cada línea es un párrafo y el formato de alrededor se mantiene.
-        editor.Box.FlowDocument.Select(5, 0);
+        editor.Box.Select(5, 0);
         editor.PasteText("A\r\nB ");
         Assert.Equal("Hola A\nB **mundo**\n- uno", editor.Text);
-        Assert.Equal(1, editor.Box.FlowDocument.Blocks.IndexOf(editor.Box.FlowDocument.Selection.GetStartPar()!));
+        Assert.Equal(2, editor.Box.Document.GetLineByOffset(editor.Box.CaretOffset).LineNumber);
 
         // Lo seleccionado se reemplaza, también entre párrafos.
-        editor.Box.FlowDocument.Select(0, 7);
+        editor.Box.Select(0, 7);
         editor.PasteText("Chau ");
         Assert.Equal("Chau B **mundo**\n- uno", editor.Text);
 
         // Con el teclado (Ctrl+V), desde el portapapeles.
         window.Clipboard!.SetTextAsync("fin").GetAwaiter().GetResult();
-        editor.Box.FlowDocument.Select(0, 0);
+        editor.Box.Select(0, 0);
         window.KeyPress(Avalonia.Input.Key.V, Avalonia.Input.RawInputModifiers.Control, Avalonia.Input.PhysicalKey.V, "v");
         Avalonia.Threading.Dispatcher.UIThread.RunJobs();
         Assert.Equal("finChau B **mundo**\n- uno", editor.Text);
@@ -672,36 +714,12 @@ public class UiSmokeTests
         window.Show();
         Avalonia.Threading.Dispatcher.UIThread.RunJobs();
 
-        Assert.NotSame(shortEditor.Box.FlowDocument, longEditor.Box.FlowDocument);
+        Assert.NotSame(shortEditor.Box.Document, longEditor.Box.Document);
         shortEditor.Publish();
         longEditor.Publish();
         Assert.Equal("Resumen **corto**", shortEditor.Text);
         Assert.Equal("Detalle *largo*\n- con lista", longEditor.Text);
 
-        // Solo titila el cursor del editor donde se está escribiendo. Antes se deja terminar la inicialización
-        // diferida de la biblioteca, que al cargar mueve el foco por su cuenta.
-        for (var i = 0; i < 10; i++)
-        {
-            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
-            Thread.Sleep(20);
-        }
-
-        longEditor.FocusText();
-        for (var i = 0; i < 10; i++)
-        {
-            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
-            Thread.Sleep(20);
-        }
-
-        // Las ventanas que dejan abiertas otras pruebas comparten el teclado y pueden quedarse con el foco:
-        // se verifica la regla (cursor visible solo con foco), no dónde terminó el foco.
-        Assert.Equal(!shortEditor.IsKeyboardFocusWithin, shortEditor.CaretHidden);
-        Assert.Equal(!longEditor.IsKeyboardFocusWithin, longEditor.CaretHidden);
-
-        // Y sigue oculto después de reacomodarse la ventana (la capa del cursor rehace su recorte).
-        window.Width = 700;
-        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
-        Assert.Equal(!shortEditor.IsKeyboardFocusWithin, shortEditor.CaretHidden);
         window.Close();
     }
 
@@ -870,7 +888,7 @@ public class UiSmokeTests
                 Thread.Sleep(20);
             }
 
-            // Terminada la carga de los editores (que toman el foco por su cuenta), el foco queda en el título.
+            // Al abrir la ventana, el foco queda en el título.
             Assert.Equal("TitleBox", (dialog.FocusManager!.GetFocusedElement() as Control)?.Name);
             var editors = dialog.GetVisualDescendants<FormattedTextEditor>().ToList();
             Assert.Equal(2, editors.Count);
@@ -911,7 +929,7 @@ public class UiSmokeTests
         window.Show();
         Avalonia.Threading.Dispatcher.UIThread.RunJobs();
         editor.FocusText();
-        editor.Box.FlowDocument.Select(4, 0);
+        editor.Box.Select(4, 0);
 
         // Viñeta con el cursor al final: lo que se escribe sigue al texto, no queda antes de la viñeta.
         editor.FindControl<Button>("BulletsButton")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
