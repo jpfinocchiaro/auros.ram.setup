@@ -1,7 +1,7 @@
 // auros.ram — landing.
 // COMPLETAR antes de publicar: precio, link de pago y email de ventas.
 const CONFIG = {
-  version: "2.4.2",
+  version: "2.5.0",
   repo: "jpfinocchiaro/auros.ram.setup",
   precio: "USD 100",     // por ejemplo: "USD 120" (se muestra igual en todos los idiomas)
   pagoUrl: "",      // link de pago generado en Mercado Pago o Stripe
