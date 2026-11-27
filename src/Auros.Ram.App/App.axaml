@@ -255,7 +255,7 @@
     </Style>
     <Style Selector="TabControl.sub > TabItem /template/ Border#PART_LayoutRoot">
       <Setter Property="Background" Value="{DynamicResource RailBrush}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrush}" />
       <Setter Property="BorderThickness" Value="1,1,1,1" />
       <Setter Property="CornerRadius" Value="6,6,0,0" />
     </Style>
@@ -292,7 +292,7 @@
       <Setter Property="ZIndex" Value="1" />
     </Style>
     <Style Selector="TabControl.sub /template/ ContentPresenter#PART_SelectedContentHost">
-      <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrush}" />
       <Setter Property="BorderThickness" Value="0,1,0,0" />
     </Style>
 
