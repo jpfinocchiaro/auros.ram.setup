@@ -115,6 +115,7 @@ const I18N = {
     "dl.soon": "Próximamente",
     "dl.yours": "Tu sistema",
     "dl.which": "¿No sabes qué Mac tienes? Abre el menú Apple → Acerca de esta Mac. Si dice «Chip», es Apple Silicon; si dice «Procesador», es Intel.",
+    "dl.smartscreen_html": "Windows puede mostrar el aviso «Windows protegió su PC», porque el instalador todavía es nuevo para SmartScreen. Para instalar, haz clic en <strong>Más información</strong> y luego en <strong>Ejecutar de todas formas</strong>.",
 
     "faq.title": "Preguntas frecuentes",
     "faq": [
@@ -248,6 +249,7 @@ const I18N = {
     "dl.soon": "Coming soon",
     "dl.yours": "Your system",
     "dl.which": "Not sure which Mac you have? Open the Apple menu → About This Mac. If it says “Chip”, it's Apple silicon; if it says “Processor”, it's Intel.",
+    "dl.smartscreen_html": "Windows may show a “Windows protected your PC” warning, because the installer is still new to SmartScreen. To install, click <strong>More info</strong> and then <strong>Run anyway</strong>.",
 
     "faq.title": "Frequently asked questions",
     "faq": [
@@ -381,6 +383,7 @@ const I18N = {
     "dl.soon": "Em breve",
     "dl.yours": "Seu sistema",
     "dl.which": "Não sabe qual Mac você tem? Abra o menu Apple → Sobre Este Mac. Se aparecer “Chip”, é Apple Silicon; se aparecer “Processador”, é Intel.",
+    "dl.smartscreen_html": "O Windows pode mostrar o aviso «O Windows protegeu o computador», porque o instalador ainda é novo para o SmartScreen. Para instalar, clique em <strong>Mais informações</strong> e depois em <strong>Executar assim mesmo</strong>.",
 
     "faq.title": "Perguntas frequentes",
     "faq": [
@@ -514,6 +517,7 @@ const I18N = {
     "dl.soon": "Bientôt disponible",
     "dl.yours": "Votre système",
     "dl.which": "Vous ne savez pas quel Mac vous avez ? Ouvrez le menu Pomme → À propos de ce Mac. S'il indique « Puce », c'est une puce Apple ; s'il indique « Processeur », c'est Intel.",
+    "dl.smartscreen_html": "Windows peut afficher l’avertissement « Windows a protégé votre ordinateur », car le programme d’installation est encore nouveau pour SmartScreen. Pour l’installer, cliquez sur <strong>Informations complémentaires</strong>, puis sur <strong>Exécuter quand même</strong>.",
 
     "faq.title": "Questions fréquentes",
     "faq": [
