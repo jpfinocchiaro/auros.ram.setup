@@ -29,7 +29,7 @@
     </Style>
   </UserControl.Styles>
 
-  <TabControl Classes="sub" Margin="24,8,24,0" Padding="0,8,0,0">
+  <TabControl Classes="sub" Margin="24,8,24,0" Padding="0,12,0,0">
     <!-- RF-16: Ficha resumen de oportunidades de mejora -->
     <TabItem Header="{x:Static r:Strings.Reports_Summary}">
       <DockPanel>

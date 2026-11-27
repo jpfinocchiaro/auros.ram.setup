@@ -242,14 +242,58 @@
       <Setter Property="Foreground" Value="White" />
     </Style>
 
-    <!-- Pestañas internas de una sección (informes): del tamaño del texto, no de un título. -->
+    <!--
+      Pestañas internas de una sección (informes), con forma de pestaña: cada una es una solapa con borde y fondo gris;
+      la elegida toma el color de la página, lleva una franja de petróleo arriba y se apoya sobre la línea del contenido.
+    -->
     <Style Selector="TabControl.sub > TabItem">
-      <Setter Property="FontSize" Value="15" />
-      <Setter Property="MinHeight" Value="40" />
-      <Setter Property="Padding" Value="0,0,24,0" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="MinHeight" Value="38" />
+      <Setter Property="Padding" Value="16,0" />
+      <Setter Property="Margin" Value="0,0,4,-1" />
+      <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+    </Style>
+    <Style Selector="TabControl.sub > TabItem /template/ Border#PART_LayoutRoot">
+      <Setter Property="Background" Value="{DynamicResource RailBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}" />
+      <Setter Property="BorderThickness" Value="1,1,1,1" />
+      <Setter Property="CornerRadius" Value="6,6,0,0" />
+    </Style>
+    <Style Selector="TabControl.sub > TabItem:pointerover /template/ Border#PART_LayoutRoot">
+      <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+    </Style>
+    <Style Selector="TabControl.sub > TabItem:pointerover /template/ Border#PART_LayoutRoot > ContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource InkBrush}" />
     </Style>
     <Style Selector="TabControl.sub > TabItem:selected">
       <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="{DynamicResource InkBrush}" />
+    </Style>
+    <!-- La elegida: del color de la página y sin borde de abajo, así se une con el contenido. -->
+    <Style Selector="TabControl.sub > TabItem:selected /template/ Border#PART_LayoutRoot">
+      <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}" />
+      <Setter Property="BorderThickness" Value="1,1,1,0" />
+    </Style>
+    <Style Selector="TabControl.sub > TabItem:selected:pointerover /template/ Border#PART_LayoutRoot">
+      <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}" />
+    </Style>
+    <!-- La franja de la elegida va arriba, en petróleo. -->
+    <Style Selector="TabControl.sub > TabItem /template/ Border#PART_SelectedPipe">
+      <Setter Property="VerticalAlignment" Value="Top" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="Height" Value="3" />
+      <Setter Property="Margin" Value="-16,-1,-16,0" />
+      <Setter Property="Width" Value="NaN" />
+      <Setter Property="CornerRadius" Value="6,6,0,0" />
+      <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+    </Style>
+    <!-- Línea bajo las pestañas: separa la fila de solapas del contenido. -->
+    <Style Selector="TabControl.sub /template/ ItemsPresenter#PART_ItemsPresenter">
+      <Setter Property="ZIndex" Value="1" />
+    </Style>
+    <Style Selector="TabControl.sub /template/ ContentPresenter#PART_SelectedContentHost">
+      <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}" />
+      <Setter Property="BorderThickness" Value="0,1,0,0" />
     </Style>
 
     <!-- Riel de secciones a la izquierda. La selección es una barra de petróleo y texto en tinta. -->
